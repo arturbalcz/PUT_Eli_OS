@@ -8,5 +8,6 @@ class System {
      */
     void run() {
         Utils.log("system started");
+        Shell.run("jedynka");
     }
 }
