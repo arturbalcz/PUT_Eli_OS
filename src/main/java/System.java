@@ -7,7 +7,9 @@ class System {
      * starting the system
      */
     void run() {
+
         Utils.log("system started");
-        Shell.run("jedynka");
+
+        Shell shell = new Shell();
     }
 }

@@ -1,15 +1,15 @@
-import java.util.Map;
+import java.util.*;
 import java.lang.System;
 
 public class Shell {
 
-    private static Map<String, Integer> command_table;
+    private HashMap<String, Integer> command_table = new HashMap<String, Integer>();
 
     public Shell() {
-        command_table.put("jedynka", new Integer(1));
-    }
+        Utils.log("shell started");
+        //command_table = new HashMap<String, Integer>();
+        Integer size = command_table.size();
 
-    public static void run(String command) {
-        System.out.println(command_table.get(command));
+        Utils.log(size.toString());
     }
 }

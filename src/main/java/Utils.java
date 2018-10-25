@@ -46,5 +46,11 @@ public class Utils {
             System.out.println(time + " - " + msg);
         }
     }
+    /**
+     * TODO
+     * Praca krokowa
+     * metoda step(msg) która wyświrtla msg i czeka na ENTER
+     * @param msg the message to log
+     */
 
 }
