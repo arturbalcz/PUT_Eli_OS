@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.lang.System;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,11 +47,19 @@ public class Utils {
             System.out.println(time + " - " + msg);
         }
     }
+
     /**
-     * TODO
-     * Praca krokowa
-     * metoda step(msg) która wyświrtla msg i czeka na ENTER
+     * If loggingOn is set to true, logs message to the console and
+     * wait for user to click ENTER
      * @param msg the message to log
      */
-
+    static void step(String msg) {
+        Utils.log(msg, false);
+        try {
+            Utils.log("Click ENTER to continue..." , false);
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
