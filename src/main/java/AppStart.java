@@ -6,5 +6,6 @@ public class AppStart {
         os.run();
 
         Utils.log("quitting...");
+        return;
     }
 }
