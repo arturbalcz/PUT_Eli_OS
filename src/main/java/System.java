@@ -1,3 +1,6 @@
+import shell.Shell;
+import utils.Utils;
+
 class System {
 
     System() {
@@ -7,6 +10,10 @@ class System {
      * starting the system
      */
     void run() {
-        Utils.log("system started");
+        Shell shell = new Shell();
+        Utils.step("system started");
+
+
+
     }
 }

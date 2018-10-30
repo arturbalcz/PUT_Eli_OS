@@ -1,3 +1,5 @@
+import utils.Utils;
+
 public class AppStart {
     public static void main(String[] args) {
         Utils.log("OS starting...");
@@ -6,5 +8,6 @@ public class AppStart {
         os.run();
 
         Utils.log("quitting...");
+        Utils.closeLogs();
     }
 }
