@@ -1,9 +1,13 @@
+package shell;
+
+import utils.Utils;
+
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.lang.System;
 
 /**
- * Shell share methods  to communicate with user
+ * shell.Shell share methods  to communicate with user
  */
 public class Shell {
 

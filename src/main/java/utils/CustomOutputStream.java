@@ -1,3 +1,5 @@
+package utils;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.swing.JTextArea;
@@ -8,10 +10,10 @@ import javax.swing.JTextArea;
  * @author www.codejava.net
  *
  */
-public class CustomOutputStream extends OutputStream {
+class CustomOutputStream extends OutputStream {
     private JTextArea textArea;
 
-    public CustomOutputStream(JTextArea textArea) {
+    CustomOutputStream(JTextArea textArea) {
         this.textArea = textArea;
     }
 

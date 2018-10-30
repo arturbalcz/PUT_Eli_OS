@@ -1,4 +1,6 @@
-import java.lang.System;
+package utils;
+
+import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -15,15 +17,16 @@ public class Utils {
      */
     static private boolean loggingOn = true;
 
-    static private JTextArea textArea = new JTextArea(50, 10);
-    static private JButton enterButton = new JButton("ENTER");
-    static private PrintStream standardOut = System.out;
-    static private PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
-    private static final String key = "ENTER";
-    static private Semaphore semaphore = new Semaphore(0);
+    private static final JFrame frame = new JFrame();
+    private static final JTextArea textArea = new JTextArea(50, 10);
+    private static final String KEY = "ENTER";
+    private static final JButton enterButton = new JButton(KEY);
+    private static final PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
+    private static final Semaphore semaphore = new Semaphore(0);
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
 
     /**
-     * Action wrapper for mapping key with JButton
+     * Action wrapper for mapping KEY with JButton
      */
     static private Action wrapper = new AbstractAction() {
         @Override
@@ -33,47 +36,43 @@ public class Utils {
     };
 
     static {
-        JFrame frame = new JFrame();
         frame.add( new JScrollPane( textArea )  );
         frame.pack();
         frame.setVisible( true );
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        textArea.setFont(new Font("Courier", Font.PLAIN,20));
         textArea.setEditable( false );
         frame.setSize(800,600);
 
-
-        KeyStroke keyStroke = KeyStroke.getKeyStroke(key);
+        KeyStroke keyStroke = KeyStroke.getKeyStroke(KEY);
         Object actionKey = textArea.getInputMap(
                 JComponent.WHEN_FOCUSED).get(keyStroke);
         textArea.getActionMap().put(actionKey, wrapper);
 
 
-        enterButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                semaphore.release();
-            }
-        });
+        enterButton.addActionListener(ae -> semaphore.release());
     }
 
+    public static void closeLogs() {
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+    }
 
     /**
      * Turns logging on
      */
-    static void logginOn() { Utils.loggingOn = true; }
+    public static void logginOn() { Utils.loggingOn = true; }
 
     /**
      * Turns logging on
      */
-    static void logginOff() { Utils.loggingOn = false; }
-
-    static private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
+    public static void logginOff() { Utils.loggingOn = false; }
 
     /**
      * If {@link Utils#loggingOn} is set to true, logs message to the console
      *
      * @param  msg  the message to log
      */
-    static void log(String msg) {
+    public static void log(String msg) {
         Utils.log(msg, false);
     }
 
@@ -84,7 +83,7 @@ public class Utils {
      * @param  msg  the message to log
      * @param  error  if true the message is printed as an error
      */
-    static void log(String msg, boolean error) {
+    public static void log(String msg, boolean error) {
         if(loggingOn) {
             if(error) msg = "ERR: " + msg;
             String time = formatter.format(LocalDateTime.now());
@@ -97,7 +96,7 @@ public class Utils {
      * wait for user to click ENTER
      * @param msg the message to log
      */
-    static void step(String msg) {
+    public static void step(String msg) {
         Utils.log(msg, false);
         Utils.log("Click ENTER to continue..." , false);
         try {
