@@ -2,14 +2,13 @@ package shell;
 
 import utils.Utils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.lang.System;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Supplier;
 
 
 /**
@@ -18,47 +17,35 @@ import java.time.format.DateTimeFormatter;
 public class Shell {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
-
-    //private HashMap<String, Integer> CommandTable;
     private static final PrintStream standardOut = System.out;
+    private static HashMap<String, Supplier<Boolean>> CommandTable = new HashMap<>();
 
-    public Shell() {
-        HashMap<String, Integer> CommandTable = new HashMap<String, Integer>();
-        Integer size = CommandTable.size();
-        standardOut.println("CommandTable created");
-        Utils.log("created shell");
+    static {
+        CommandTable.put("time", Shell::time );
     }
+    private static Integer size = CommandTable.size();
 
     public static void print(String msg) {
         standardOut.println(msg);
     }
 
-    private void populateCommandTable() {
-        File commandsFile = new File("komendy.ini");
-        try {
-            Scanner commands = new Scanner(commandsFile);
-            String text = commands.nextLine();
-            standardOut.println(text);
-        } catch (FileNotFoundException e) {
-            standardOut.println("pliku nie znaleziono :(");
-            //e.printStackTrace();
-        }
+    public static boolean time() {
+        String times = formatter.format(LocalDateTime.now());
+        Utils.step("Printing time for user.");
+        print(times);
+        return true;
     }
 
-    public void time() {
-        String time = formatter.format(LocalDateTime.now());
-        Utils.step("Printing time for user.", time);
-    }
-
-    public boolean userInput( ) {
+    public static boolean interpret( ) {
         Scanner standardIn = new Scanner(System.in);
         String input = standardIn.nextLine();
-        if(input.equals("pc")) {
-            populateCommandTable();
-            return false;
+        if (CommandTable.get(input) == null) {
+            standardOut.println("\""+input+"\" can't resolve command");
         }
-        else if(input.equals("time")) {
-            time();
+
+
+        if(input.equals("time")) {
+            CommandTable.get("time").get();
             return false;
         }
         else if(input.equals("exit")) {

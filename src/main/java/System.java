@@ -10,11 +10,10 @@ class System {
      * starting the system
      */
     void run() {
-        Shell shell = new Shell();
         Utils.log("system started");
-        boolean breake = new Boolean( false );
-        while(!breake) {
-            breake = shell.userInput();
+        boolean closing = false;
+        while(!closing) {
+            closing = Shell.interpret();
         }
 
 
