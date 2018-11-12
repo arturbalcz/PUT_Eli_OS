@@ -1,5 +1,7 @@
 package utils;
 
+import shell.Shell;
+
 import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
@@ -94,16 +96,20 @@ public class Utils {
     /**
      * If loggingOn is set to true, logs message to the console and
      * wait for user to click ENTER
-     * @param msg the message to log
+     * @param msgForLog the message to log
+     * @param msgForUser the message to shell
      */
-    public static void step(String msg) {
-        Utils.log(msg, false);
-        Utils.log("Click ENTER to continue..." , false);
-        try {
-            semaphore.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public static void step(String msgForLog, String msgForUser) {
+        if (loggingOn) {
+            Utils.log(msgForLog, false);
+            Utils.log("Click ENTER to continue..." , false);
+            try {
+                semaphore.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Utils.log("Continued", false);
         }
-
+        Shell.print(msgForUser);
     }
 }
