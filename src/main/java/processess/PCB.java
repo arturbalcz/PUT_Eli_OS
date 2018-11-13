@@ -1,8 +1,10 @@
 package processess;
 
+import assembler.Assembler;
+
 public class PCB {
     final private int PID;
-    final String name;
+    public final String name;
     private ProcessState state;
     private byte PC;
     //@Max(15)
@@ -10,15 +12,19 @@ public class PCB {
     //@Max(15)
     private int dynamicPriority;
 
+    // temporary ram, see constructor
+    private final byte[] code;
 
-
-    public PCB(int PID, String name, int priority) {
+    public PCB(int PID, String name, int priority, byte[] exec) {
         this.PID = PID;
         this.name = name;
         this.basePriority = priority;
         this.dynamicPriority = priority;
+        this.state = ProcessState.READY;
+
         //TODO: ram
-        state = ProcessState.READY;
+        // temporary ram solution for testing assembler
+        this.code = exec;
     }
 
 
@@ -60,10 +66,12 @@ public class PCB {
 
     //Assembler------------------------------------------------------
 
-    /*
-    public boolean execute(){
+    public boolean execute() {
         Assembler.execute(PC, this);
-        return PC != code.length;   TODO sprawdzanie czy program się nie skończył
+        return PC < code.length;
     }
-    */
+
+    public byte getByteAt(final byte address) {
+        return this.code[address];
+    }
 }
