@@ -2,6 +2,11 @@ package assembler;
 
 import utils.Utils;
 
+/**
+ * Representation of processor used by assembler programs
+ *
+ * @see Assembler
+ */
 public class CPU {
     // registers
     private final Registry A = new Registry();
@@ -22,25 +27,15 @@ public class CPU {
     private static final byte DH_ID = 11;
     private static final byte DX_ID = 12;
 
-    // flags
-    private boolean CF = false; // carry flag
+    /**
+     * Carry flag. Set if last operation exceeded 8bit range
+     */
+    private boolean CF = false;
+
+    /**
+     * Zero flag. Set if last operation resulted in 0
+     */
     private boolean ZF = false; // zero flag
-
-    public Registry getA() {
-        return A;
-    }
-
-    public Registry getB() {
-        return B;
-    }
-
-    public Registry getC() {
-        return C;
-    }
-
-    public Registry getD() {
-        return D;
-    }
 
     public boolean getCF() {
         return this.CF;
@@ -86,16 +81,16 @@ public class CPU {
 
         switch (str.charAt(0)) {
             case 'A':
-                registry = this.getA();
+                registry = this.A;
                 break;
             case 'B':
-                registry = this.getB();
+                registry = this.B;
                 break;
             case 'C':
-                registry = this.getC();
+                registry = this.C;
                 break;
             case 'D':
-                registry = this.getD();
+                registry = this.D;
                 break;
         }
 
@@ -199,10 +194,20 @@ public class CPU {
         this.ZF = ZF;
     }
 
+    /**
+     * Logs current CPU state to the debug console
+     *
+     * @see Utils#log(String)
+     */
     void print() {
         print(false);
     }
 
+    /**
+     * Logs current CPU state to the debug console and if {@code step} is set performs a step
+     *
+     * @see Utils#step(String)
+     */
     void print(final boolean step) {
         String msg = "CPU:\n";
         StringBuilder value = new StringBuilder();

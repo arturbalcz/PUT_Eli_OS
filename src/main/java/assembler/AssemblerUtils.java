@@ -1,5 +1,10 @@
 package assembler;
 
+/**
+ * Internal utility functions for assembler module
+ *
+ * @see Assembler
+ */
 interface AssemblerUtils {
     static boolean isZero(final boolean[] arg) {
         for (final boolean anArg : arg) if (anArg) return false;

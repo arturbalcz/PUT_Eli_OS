@@ -10,15 +10,32 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Stores assembler instructions representation and metadata
+ *
+ * @see Assembler
+ */
 abstract class Instruction {
 
+    /**
+     * Byte codes of all assembler instructions used in the system
+     */
     private static final HashMap<String, Byte> codes = new HashMap<>();
+
+    /**
+     * All assembler instructions used in the system with metadata and implementation
+     */
     private static final HashMap<Byte, Instruction> instructions = createInstructions();
 
+    /**
+     * Creates map of all assembler instructions used in the system
+     *
+     * @return map of all assembler instructions used in the system
+     */
     private static HashMap<Byte, Instruction> createInstructions() {
         Utils.log("creating instructions");
         
-        HashMap<Byte, Instruction> c = new HashMap<>();
+        HashMap<Byte, Instruction> instructionsMap = new HashMap<>();
         byte code = 11;
 
         Instruction instruction = new Instruction(
@@ -31,7 +48,7 @@ abstract class Instruction {
                 Assembler.nop();
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -45,7 +62,7 @@ abstract class Instruction {
                 Assembler.add(args[0], args[1], args[2], args[3], false);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -59,7 +76,7 @@ abstract class Instruction {
                 Assembler.add(args[0], args[1], args[2], args[3], true);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -72,7 +89,7 @@ abstract class Instruction {
                 Assembler.inc(args[0],args[1]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -86,7 +103,7 @@ abstract class Instruction {
                 Assembler.sub(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -99,7 +116,7 @@ abstract class Instruction {
                 Assembler.dec(args[0], args[1]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -113,7 +130,7 @@ abstract class Instruction {
                 Assembler.mul(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -127,7 +144,7 @@ abstract class Instruction {
                 Assembler.div(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -141,7 +158,7 @@ abstract class Instruction {
                 Assembler.mov(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -155,7 +172,7 @@ abstract class Instruction {
                 Assembler.and(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -169,7 +186,7 @@ abstract class Instruction {
                 Assembler.nand(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -183,7 +200,7 @@ abstract class Instruction {
                 Assembler.or(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -197,7 +214,7 @@ abstract class Instruction {
                 Assembler.nor(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -211,7 +228,7 @@ abstract class Instruction {
                 Assembler.xor(args[0], args[1], args[2], args[3]);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -224,7 +241,7 @@ abstract class Instruction {
                 Assembler.jmp(args[1], pcb);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -237,7 +254,7 @@ abstract class Instruction {
                 Assembler.jnz(args[1], pcb);
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
@@ -250,16 +267,23 @@ abstract class Instruction {
                 Assembler.prt(args[0], Arrays.copyOfRange(args, 1, args.length));
             }
         };
-        c.put(code, instruction);
+        instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
-        return c;
+        return instructionsMap;
     }
 
     static Instruction getByCode(final byte code) {
         return Instruction.instructions.get(code);
     }
 
+    /**
+     * Validates if given line of assembler code is a valid instruction with arguments
+     *
+     * @param line instruction to validate
+     * @param assembler assembler witch compiles given instruction
+     * @throws Exception when validation error occurs
+     */
     static void validate(final String line, Assembler assembler) throws Exception {
         List<String> pieces = Instruction.getPieces(line);
 
@@ -289,6 +313,14 @@ abstract class Instruction {
         }
     }
 
+    /**
+     * Parses given line of assembler code to executable
+     *
+     * @param line instruction to parse
+     * @param assembler assembler witch compiles given instruction
+     * @param address address of given line in executable
+     * @return executable of given line
+     */
     static List<Byte> getExecutable(final String line, Assembler assembler, final byte address) {
         List<String> pieces = Instruction.getPieces(line);
 
@@ -319,6 +351,12 @@ abstract class Instruction {
         return executable;
     }
 
+    /**
+     * Splits given line of assembler code into pieces of one instruction or argument
+     *
+     * @param line line to split
+     * @return pieces of one instruction or argument
+     */
     private static List<String> getPieces(final String line) {
         final String[] piecesPre = line.split(" ");
         List<String> pieces = new ArrayList<>();
@@ -341,6 +379,15 @@ abstract class Instruction {
         return pieces;
     }
 
+    /**
+     * Parses given argument to executable
+     *
+     * @param type type of argument to parse
+     * @param pieces pieces of line of code with argument
+     * @param begin index of first piece with argument
+     * @param assembler assembler witch compiles given argument
+     * @return executable of argument
+     */
     private static List<Byte> getArgumentExecutable(final ArgumentTypes type, final List<String> pieces, int begin, Assembler assembler) {
         List<Byte> executable = new ArrayList<>();
         switch (type) {
@@ -369,8 +416,19 @@ abstract class Instruction {
         return executable;
     }
 
+    /**
+     * Mnemonic name of instruction
+     */
     final String name;
+
+    /**
+     * Number of arguments it consumes
+     */
     final int argsNumber;
+
+    /**
+     * Array of {@link ArgumentTypes} possible for each argument
+     */
     private final ArgumentTypes[][] argTypes;
 
     Instruction(final String name, final int argsNumber, ArgumentTypes[]... argsTypes) {
@@ -379,6 +437,12 @@ abstract class Instruction {
         this.argTypes = argsTypes;
     }
 
+    /**
+     * Executes instruction with given arguments
+     *
+     * @param pcb {@link PCB} of current process
+     * @param args arguments to use
+     */
     void execute(PCB pcb, byte... args) {
         Utils.log("before " + name + ":");
         Assembler.cpu.print();
@@ -389,9 +453,15 @@ abstract class Instruction {
         Assembler.cpu.print(true);
     }
 
+    /**
+     * Implementation of the instruction
+     *
+     * @param pcb {@link PCB} of current process
+     * @param args arguments to use
+     */
     abstract void command(PCB pcb, byte... args);
 
-    ArgumentTypes[][] getArgTypes() {
+    private ArgumentTypes[][] getArgTypes() {
         return argTypes;
     }
 

@@ -67,7 +67,7 @@ public class PCB {
     //Assembler------------------------------------------------------
 
     public boolean execute() {
-        Assembler.execute(PC, this);
+        Assembler.execute(this);
         return PC < code.length;
     }
 

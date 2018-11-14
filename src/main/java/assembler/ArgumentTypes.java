@@ -1,5 +1,8 @@
 package assembler;
 
+/**
+ * Types of arguments used by programs and utility methods for them
+ */
 public enum ArgumentTypes {
     REGISTRY,
     FULL_REGISTRY,
