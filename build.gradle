@@ -17,5 +17,7 @@ repositories {
 
 dependencies {
     testCompile group: 'org.spockframework', name: 'spock-core', version: '1.2-groovy-2.5'
+    testCompile group: 'net.bytebuddy', name: 'byte-buddy-dep', version: '1.9.3'
+    testCompile group: 'org.objenesis', name: 'objenesis', version: '3.0.1'
 }
 

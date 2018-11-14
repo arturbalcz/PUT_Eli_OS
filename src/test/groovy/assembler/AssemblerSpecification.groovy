@@ -371,36 +371,32 @@ class AssemblerSpecification extends Specification {
     def "JMP - should perform unconditional jump to selected memory address"() {
         given:
         def address = 10 as byte
-        def pcb = createPCB()
+        def pcb = Mock(PCB)
 
         when:
         Assembler.jmp(address, pcb)
 
         then:
-        pcb.PC == address
+        1 * pcb.setPC(address)
     }
 
     @Unroll
     def "JNZ - should perform jump to selected memory address if ZF is set"() {
         given:
         def address = 10 as byte
-        def pcb = createPCB()
+        def pcb = Mock(PCB)
 
         when:
         Assembler.cpu.setZF(zf)
         Assembler.jnz(address, pcb)
 
         then:
-        pcb.PC == result
+        changedPC * pcb.setPC(address)
 
         where:
-        zf   || result
-        true || 0
-        false|| 10
-    }
-
-    private static def createPCB() {
-        return new PCB(1, "p1", 10, null)
+        zf    || changedPC
+        true  || 0
+        false || 1
     }
 
     @Unroll
