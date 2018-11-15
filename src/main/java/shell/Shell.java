@@ -3,59 +3,97 @@ package shell;
 import utils.Utils;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Scanner;
 import java.lang.System;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 
 /**
- * shell.Shell share methods  to communicate with user
+ *  Shares methods to communicate with user.
+ *  Stores all commends and connected methods in map.
+ *  All methods need to have one parameter - list of parameters from user.
  */
 public class Shell {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
     private static final PrintStream standardOut = System.out;
-    private static HashMap<String, Supplier<Boolean>> CommandTable = new HashMap<>();
 
+    /**
+     * Main map that stores all of connected commends and methods references
+     * Method need to have ArrayList<String> as array of parameters from user
+     */
+    private static HashMap<String, Consumer<ArrayList<String>>> CommandTable = new HashMap<>();
     static {
         CommandTable.put("time", Shell::time );
+        CommandTable.put("help", Shell::help );
+        CommandTable.put("exit", Shell::exit );
+        CommandTable.put("log", Utils::loggin );
     }
     private static Integer size = CommandTable.size();
 
+    /**
+     * Prints parameter to the console
+     * @param msg message to print for user
+     */
     public static void print(String msg) {
         standardOut.println(msg);
     }
 
-    public static boolean time() {
+    /**
+     * Gets from console whole line inserted by user
+     * @return input from user
+     */
+    public static String read() {
+        Scanner standardIn = new Scanner(System.in);
+        return standardIn.nextLine();
+    }
+
+    private static void time(ArrayList<String> argv) {
         String times = formatter.format(LocalDateTime.now());
         Utils.step("Printing time for user.");
         print(times);
-        return true;
     }
 
+    private static void help(ArrayList<String> argv) {
+        Set<String> keys = CommandTable.keySet();
+        Utils.step("Printing help for user.");
+        for (String command : keys) {
+            print(command.toUpperCase());
+        }
+    }
+
+    private static void exit(ArrayList<String> argv) {
+        Utils.log("Exiting by user");
+    }
+
+    /**
+     * Interprets user input and run method found in {@link #CommandTable}
+     * @return condition to close system
+     */
     public static boolean interpret( ) {
-        Scanner standardIn = new Scanner(System.in);
-        String input = standardIn.nextLine();
-        if (CommandTable.get(input) == null) {
-            standardOut.println("\""+input+"\" can't resolve command");
+        ArrayList<String> arguments = new ArrayList<>();
+        arguments.add("ex");
+        String input = read();
+        arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
+        for (String x : arguments) {
+            Utils.log(x);
         }
+        String command = arguments.get(0);
 
-
-        if(input.equals("time")) {
-            CommandTable.get("time").get();
-            return false;
-        }
-        else if(input.equals("exit")) {
-            return true;
+        if (CommandTable.get(command) == null) {
+            standardOut.println("\"" + input + "\" can't resolve command");
         }
         else {
-            standardOut.println("\""+input+"\" cant resolve command");
-            return false;
+            CommandTable.get(command).accept(arguments);
+            return command.equals("exit");
         }
-
+        return false;
 
     }
 

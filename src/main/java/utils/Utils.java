@@ -6,6 +6,7 @@ import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,6 +56,9 @@ public class Utils {
         enterButton.addActionListener(ae -> semaphore.release());
     }
 
+    /**
+     * Closes second window
+     */
     public static void closeLogs() {
         frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     }
@@ -62,12 +66,37 @@ public class Utils {
     /**
      * Turns logging on
      */
-    public static void logginOn() { Utils.loggingOn = true; }
+    private static void logginOn() { Utils.loggingOn = true; }
 
     /**
      * Turns logging on
      */
-    public static void logginOff() { Utils.loggingOn = false; }
+    private static void logginOff() { Utils.loggingOn = false; }
+
+    /**
+     * Turns logging on or off
+     * @param args
+     */
+    public static void loggin(ArrayList<String> args) {
+        String help = "LOG - turns loggin on or off\nLOG ON/OFF";
+        if(args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.print(help);
+        }
+        else {
+            String param = args.get(1);
+            if (param.toUpperCase().equals("ON")) {
+                logginOn();
+            }
+            else if (param.toUpperCase().equals("OFF")) {
+                logginOff();
+            }
+            else {
+                Utils.log("Wrong argument");
+                Shell.print(help);
+            }
+        }
+    }
 
     /**
      * If {@link Utils#loggingOn} is set to true, logs message to the console
@@ -79,7 +108,7 @@ public class Utils {
     }
 
     /**
-     * If loggingOn is set to true, logs message to the console.
+     * If {@link Utils#loggingOn} is set to true, logs message to the console.
      * Optionally adds error tah to the message
      *
      * @param  msg  the message to log
