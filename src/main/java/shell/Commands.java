@@ -2,7 +2,9 @@ package shell;
 
 import utils.Utils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Stores implementation of every shell command with dependencies on external modules
@@ -19,7 +21,7 @@ public interface Commands {
     static void logging(ArrayList<String> args) {
         String help = "LOG - turns logging on or off\nLOG ON/OFF";
         if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
+            Utils.log("Wrong numbers of arguments", true);
             Shell.print(help);
         }
         else {
@@ -32,11 +34,46 @@ public interface Commands {
                     Utils.loggingOff();
                     break;
                 default:
-                    Utils.log("Wrong argument");
+                    Utils.log("Wrong argument", true);
                     Shell.print(help);
                     break;
             }
         }
+    }
+
+    /**
+     * Prints time to user console
+     * @param args no effect
+     */
+    static void time(ArrayList<String> args) {
+        String times = Shell.formatter.format(LocalDateTime.now());
+        Utils.step("Printing time for user.");
+        Shell.print(times);
+    }
+
+    /*
+    TODO
+    Create help for all commends
+     */
+    /**
+     * Prints all available commends
+     * @param args no effect
+     */
+    static void help(ArrayList<String> args) {
+        Set<String> keys = Shell.CommandTable.keySet();
+        Utils.step("Printing help for user.");
+        for (String command : keys) {
+            Shell.print(command.toUpperCase());
+        }
+    }
+
+    /**
+     * Exits from system
+     * @param args no effect
+     */
+    static void exit(ArrayList<String> args) {
+        Utils.log("Exiting by user");
+        Shell.exiting = true;
     }
 
     /**

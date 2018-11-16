@@ -1,12 +1,9 @@
 package utils;
 
-import shell.Shell;
-
 import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
