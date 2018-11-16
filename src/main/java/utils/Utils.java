@@ -66,37 +66,12 @@ public class Utils {
     /**
      * Turns logging on
      */
-    private static void logginOn() { Utils.loggingOn = true; }
+    public static void loggingOn() { Utils.loggingOn = true; }
 
     /**
      * Turns logging on
      */
-    private static void logginOff() { Utils.loggingOn = false; }
-
-    /**
-     * Turns logging on or off
-     * @param args
-     */
-    public static void loggin(ArrayList<String> args) {
-        String help = "LOG - turns loggin on or off\nLOG ON/OFF";
-        if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
-            Shell.print(help);
-        }
-        else {
-            String param = args.get(1);
-            if (param.toUpperCase().equals("ON")) {
-                logginOn();
-            }
-            else if (param.toUpperCase().equals("OFF")) {
-                logginOff();
-            }
-            else {
-                Utils.log("Wrong argument");
-                Shell.print(help);
-            }
-        }
-    }
+    public static void loggingOff() { Utils.loggingOn = false; }
 
     /**
      * If {@link Utils#loggingOn} is set to true, logs message to the console
