@@ -35,7 +35,7 @@ public class CPU {
     /**
      * Zero flag. Set if last operation resulted in 0
      */
-    private boolean ZF = false; // zero flag
+    private boolean ZF = false;
 
     public boolean getCF() {
         return this.CF;
@@ -226,5 +226,29 @@ public class CPU {
 
         if (step) Utils.step(msg);
         else  Utils.log(msg);
+    }
+
+    public Registry getA() {
+        return A;
+    }
+
+    public Registry getB() {
+        return B;
+    }
+
+    public Registry getC() {
+        return C;
+    }
+
+    public Registry getD() {
+        return D;
+    }
+
+    public boolean isCF() {
+        return CF;
+    }
+
+    public boolean isZF() {
+        return ZF;
     }
 }

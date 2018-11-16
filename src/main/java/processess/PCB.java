@@ -1,6 +1,7 @@
 package processess;
 
 import assembler.Assembler;
+import assembler.CPUState;
 
 public class PCB {
     final private int PID;
@@ -11,6 +12,7 @@ public class PCB {
     private final int basePriority;
     //@Max(15)
     private int dynamicPriority;
+    private CPUState cpuState;
 
     // temporary ram, see constructor
     private final byte[] code;
@@ -66,6 +68,16 @@ public class PCB {
 
     //Assembler------------------------------------------------------
 
+    /**
+     * Executes one command from PCB's program starting from current {@link PCB#PC}
+     * <p>Before execution of program the state of {@link Assembler#cpu} should be updated with value from {@link PCB#cpuState}.</p>
+     * <p>After execution of program the state of {@link Assembler#cpu} should be saved to {@link PCB#cpuState}.</p>
+     *
+     * @return {@code false} if it was the last command
+     *
+     * @see Assembler#setCPUState(CPUState)
+     * @see Assembler#getCPUState()
+     */
     public boolean execute() {
         Assembler.execute(this);
         return PC < code.length;
@@ -73,5 +85,13 @@ public class PCB {
 
     public byte getByteAt(final byte address) {
         return this.code[address];
+    }
+
+    public CPUState getCpuState() {
+        return cpuState;
+    }
+
+    public void setCPUState(CPUState cpuState) {
+        this.cpuState = cpuState;
     }
 }

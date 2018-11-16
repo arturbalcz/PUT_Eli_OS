@@ -17,6 +17,40 @@ public class Assembler {
     public static final CPU cpu = new CPU();
 
     /**
+     *  Returns current state od processor to save in {@link PCB}
+     *
+     * @see CPU
+     * @see processess.PCB
+     * @see PCB#execute()
+     * @return current state od processor
+     */
+    public static CPUState getCPUState() {
+        return new CPUState(
+                cpu.getA(),
+                cpu.getB(),
+                cpu.getC(),
+                cpu.getD(),
+                cpu.getCF(),
+                cpu.getZF()
+        );
+    }
+
+    /**
+     * Sets {@link Assembler#cpu} to given state
+     * @param cpuState new state of cpu
+     *
+     * @see PCB#execute()
+     */
+    public static void setCPUState(CPUState cpuState) {
+        cpu.getA().set(cpu.getA().get());
+        cpu.getB().set(cpu.getB().get());
+        cpu.getC().set(cpu.getC().get());
+        cpu.getD().set(cpu.getD().get());
+        cpu.setCF(cpuState.getCF());
+        cpu.setZF(cpuState.getZF());
+    }
+
+    /**
      * Compiles given program to executable
      *
      * @param program code to compile
