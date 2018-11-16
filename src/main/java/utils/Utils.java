@@ -1,9 +1,12 @@
 package utils;
 
+import shell.Shell;
+
 import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,6 +56,9 @@ public class Utils {
         enterButton.addActionListener(ae -> semaphore.release());
     }
 
+    /**
+     * Closes second window
+     */
     public static void closeLogs() {
         frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     }
@@ -60,12 +66,12 @@ public class Utils {
     /**
      * Turns logging on
      */
-    public static void logginOn() { Utils.loggingOn = true; }
+    public static void loggingOn() { Utils.loggingOn = true; }
 
     /**
      * Turns logging on
      */
-    public static void logginOff() { Utils.loggingOn = false; }
+    public static void loggingOff() { Utils.loggingOn = false; }
 
     /**
      * If {@link Utils#loggingOn} is set to true, logs message to the console
@@ -77,7 +83,7 @@ public class Utils {
     }
 
     /**
-     * If loggingOn is set to true, logs message to the console.
+     * If {@link Utils#loggingOn} is set to true, logs message to the console.
      * Optionally adds error tah to the message
      *
      * @param  msg  the message to log
@@ -97,13 +103,15 @@ public class Utils {
      * @param msg the message to log
      */
     public static void step(String msg) {
-        Utils.log(msg, false);
-        Utils.log("Click ENTER to continue..." , false);
-        try {
-            semaphore.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (loggingOn) {
+            Utils.log(msg, false);
+            Utils.log("Click ENTER to continue..." , false);
+            try {
+                semaphore.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Utils.log("Continued", false);
         }
-
     }
 }

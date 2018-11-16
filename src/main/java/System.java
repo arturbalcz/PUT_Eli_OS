@@ -1,6 +1,9 @@
 import shell.Shell;
 import utils.Utils;
 
+/**
+ * Collects together all modules and run system
+ */
 class System {
 
     System() {
@@ -10,11 +13,11 @@ class System {
      * starting the system
      */
     void run() {
-        Shell shell = new Shell();
-        Utils.step("system started");
-
-
-
+        Utils.log("system started");
+        boolean closing = false;
+        while(!closing) {
+            closing = Shell.interpret();
+        }
     }
 
 }

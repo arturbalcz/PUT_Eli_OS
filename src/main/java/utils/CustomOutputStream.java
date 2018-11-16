@@ -6,7 +6,7 @@ import javax.swing.JTextArea;
 
 
 /**
- * This class extends from OutputStream to redirect output to a JTextArrea
+ * This class extends from OutputStream to redirect output to a JTextArea
  * @author www.codejava.net
  *
  */
