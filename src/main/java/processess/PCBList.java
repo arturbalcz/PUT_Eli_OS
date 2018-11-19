@@ -18,8 +18,8 @@ public class PCBList {
         return pid;
     }
     public void newProcess(String name, int priority){
-        data.add(new PCB(pidGen(), name, priority));
-        //dać znać aby przenieść z pamięci do ram
+        data.add(new PCB(pidGen(), name, priority, null));
+        //dać znać aby przenieść z pamięci do ram TODO usunac exec z construktora
     }
 
     public void terminateProcess(String name){
