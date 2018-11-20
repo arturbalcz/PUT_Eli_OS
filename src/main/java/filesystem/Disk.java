@@ -13,45 +13,78 @@ public class Disk {
     static byte physicalDisk[] = new byte[1024];
     static int blockSize = 32;
     static boolean blockTaken[] = new boolean[physicalDisk.length/blockSize];
+    static int blockAmount = blockTaken.length;
     static int currentBlock = 0;
 
     public Disk(){
-        System.out.println("Hello world!");
         Arrays.fill(physicalDisk, (byte)0);
-
     }
 
+    /**
+     * Gets the value of specified block
+     *
+     * @param index block to be returned
+     * @return byte[] corresponding to specified block
+     */
     public static byte[] getBlock(int index){
-        byte[] temp = Arrays.copyOfRange(physicalDisk, index*blockSize, index*blockSize + blockSize);
-        return temp;
+        return Arrays.copyOfRange(physicalDisk, index*blockSize, index*blockSize + blockSize);
     }
 
-    public static void setBlock(int index, byte[] content){
+    /**
+     * Inserts data into a block. Does not divide data, does not check for empty block.
+     *
+     * @param index     which block to insert into
+     * @param content   content ot be inserted, no longer than {@value blockSize}
+     */
+    static void setBlock(int index, byte[] content){
         int max = content.length < blockSize ? blockSize : content.length;
-        int currentIndex = index;
-        for (int j = 0; j < content.length; j+=blockSize) {
-            while(blockTaken[currentIndex + j/blockSize]){
-                currentIndex++;
-                if(currentIndex > blockTaken.length){
-                    break;
-                }
-            }
-            Utils.log(currentIndex + " ");
-            blockTaken[currentIndex + j/blockSize] = true;
-            for (int i = 0; i < max; i++) {
-                if(i + j >= content.length) {
-                    physicalDisk[currentIndex*blockSize + j + i] = 0;
+        blockTaken[index] = true;
+        for (int i = 0; i < max; i++) {
+                if(i >= content.length) {
+                    physicalDisk[index*blockSize + i] = 0;
                 }
                 else {
-//                    while(blockTaken[currentIndex + (j+1)/blockSize]){
-//                        currentIndex++;
-//                    }
-
-                    physicalDisk[currentIndex*blockSize + j + i] = content[i + j];
+                    physicalDisk[index * blockSize + i] = content[i];
                 }
-            }
-
         }
+    }
+
+
+   static boolean isTaken(int index){
+       return blockTaken[index];
+   }
+
+
+    static int findNextFree(int index){
+        for (int i = index; i < blockAmount; i++) {
+            if (!isTaken(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    static byte[] divideContent(byte content[]){
+        if( content.length < 32){ return content; }
+        return Arrays.copyOfRange(content, 0, blockSize);
+    }
+
+     /**
+     * Writes data onto disk searching for free space, dividing as needed.
+     *
+     * @param content   content to be written
+     * @param index     from which index to start searching
+     */
+    public static void addContent(byte[] content, int index){
+        int currentIndex = findNextFree(index);
+        int x = 0;
+        byte currentContent[] = content;
+        do{
+            currentIndex = findNextFree(currentIndex);
+            currentContent = Arrays.copyOfRange(content, blockSize*x, content.length);
+            setBlock(currentIndex, divideContent(currentContent));
+            x++;
+        }while(currentContent.length > blockSize);
     }
 
     private static void show(){
@@ -60,9 +93,7 @@ public class Disk {
             System.out.print(i + "                   ");
         }
         System.out.println();
-        System.out.print("    ");
-        for (int i = 0; i < blockSize; i++) {
-            System.out.print(i%10 + " ");
+        System.out.print("    "); for (int i = 0; i < blockSize; i++) { System.out.print(i%10 + " ");
         }
         System.out.print("  taken");
         System.out.println();
@@ -80,7 +111,7 @@ public class Disk {
         Scanner scan = new Scanner(System.in);
         System.out.print(">");
         String input = scan.nextLine();
-        setBlock(currentBlock, input.getBytes());
+        addContent(input.getBytes(), currentBlock);
         show();
 
         return true;
