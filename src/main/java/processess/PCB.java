@@ -23,6 +23,7 @@ public class PCB {
         this.basePriority = priority;
         this.dynamicPriority = priority;
         this.state = ProcessState.READY;
+        this.cpuState = Assembler.getFreshCPU();
 
         //TODO: ram
         // temporary ram solution for testing assembler

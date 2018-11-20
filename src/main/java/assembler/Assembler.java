@@ -17,6 +17,18 @@ public class Assembler {
     public static final CPU cpu = new CPU();
 
     /**
+     * Gets initial state of the CPU
+     *
+     * @see CPU
+     * @see processess.PCB
+     * @see PCB#execute()
+     * @return initial state of the CPU
+     */
+    public static CPUState getFreshCPU() {
+        return new CPUState();
+    }
+
+    /**
      *  Returns current state od processor to save in {@link PCB}
      *
      * @see CPU
