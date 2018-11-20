@@ -1,0 +1,7 @@
+LET 05H
+MOV AL [01]
+MOV BX AX
+DEC AL
+loop: MUL BX AL
+DEC AL
+JNZ loop

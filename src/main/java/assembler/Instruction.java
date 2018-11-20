@@ -59,7 +59,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.add(args[0], args[1], args[2], args[3], false);
+                Assembler.add(args[0], args[1], args[2], args[3], false, pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -73,7 +73,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.add(args[0], args[1], args[2], args[3], true);
+                Assembler.add(args[0], args[1], args[2], args[3], true, pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -86,7 +86,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.inc(args[0],args[1]);
+                Assembler.inc(args[0],args[1], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -100,7 +100,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.sub(args[0], args[1], args[2], args[3]);
+                Assembler.sub(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -113,7 +113,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.dec(args[0], args[1]);
+                Assembler.dec(args[0], args[1], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -127,7 +127,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.mul(args[0], args[1], args[2], args[3]);
+                Assembler.mul(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -141,7 +141,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.div(args[0], args[1], args[2], args[3]);
+                Assembler.div(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -155,7 +155,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.mov(args[0], args[1], args[2], args[3]);
+                Assembler.mov(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -169,7 +169,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.and(args[0], args[1], args[2], args[3]);
+                Assembler.and(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -183,7 +183,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.nand(args[0], args[1], args[2], args[3]);
+                Assembler.nand(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -197,7 +197,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.or(args[0], args[1], args[2], args[3]);
+                Assembler.or(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -211,7 +211,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.nor(args[0], args[1], args[2], args[3]);
+                Assembler.nor(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -225,7 +225,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.xor(args[0], args[1], args[2], args[3]);
+                Assembler.xor(args[0], args[1], args[2], args[3], pcb);
             }
         };
         instructionsMap.put(code, instruction);
@@ -264,7 +264,7 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.prt(args[0], Arrays.copyOfRange(args, 1, args.length));
+                Assembler.prt(args[0], pcb , Arrays.copyOfRange(args, 1, args.length));
             }
         };
         instructionsMap.put(code, instruction);
@@ -323,7 +323,6 @@ abstract class Instruction {
      */
     static List<Byte> getExecutable(final String line, Assembler assembler, final byte address) {
         List<String> pieces = Instruction.getPieces(line);
-
         List<Byte> executable = new LinkedList<>();
 
         final boolean hasLabel = pieces.get(0).endsWith(":");
@@ -384,7 +383,7 @@ abstract class Instruction {
      *
      * @param type type of argument to parse
      * @param pieces pieces of line of code with argument
-     * @param begin index of first piece with argument
+     * @param begin index of first piece after argument
      * @param assembler assembler witch compiles given argument
      * @return executable of argument
      */
@@ -396,7 +395,7 @@ abstract class Instruction {
                 executable.add(CPU.getRegistryId(pieces.get(begin)));
                 break;
             case MEMORY:
-                System.out.println("MEMORY EXEC NOT IMPLEMENTED");
+                executable.add(AssemblerUtils.memoryAddressToByte(pieces.get(begin)));
                 break;
             case VALUE:
                 executable.add(AssemblerUtils.hexToByte(pieces.get(begin).substring(0, pieces.get(begin).length()-1)));
