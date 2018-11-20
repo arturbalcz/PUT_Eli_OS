@@ -62,6 +62,8 @@ public class Assembler {
         cpu.setZF(cpuState.getZF());
     }
 
+    private static final String MEMORY_ALLOCATOR = "LET";
+
     /**
      * Compiles given program to executable
      *
@@ -85,7 +87,7 @@ public class Assembler {
 
         int i = 0;
         try{
-            for (; commands[i].startsWith("LET"); i++) {
+            for (; commands[i].startsWith(Assembler.MEMORY_ALLOCATOR); i++) {
                 String[] line = commands[i].split(" ");
                 if(line.length != 2) throw new Exception("invalid static storage allocation");
                 if(!ArgumentTypes.isValue(line[1])) throw new Exception("static storage must be allocated with hex value");
@@ -117,7 +119,7 @@ public class Assembler {
 
         int i = 0;
         List<Byte> lets = new LinkedList<>();
-        for (; commands[i].startsWith("LET"); i++) lets.add(AssemblerUtils.hexToByte(commands[i].split(" ")[1]));
+        for (; commands[i].startsWith(Assembler.MEMORY_ALLOCATOR); i++) lets.add(AssemblerUtils.hexToByte(commands[i].split(" ")[1]));
         bytes.add((byte) i);
         bytes.addAll(lets);
         for (; i < commands.length; i++) bytes.addAll(Instruction.getExecutable(commands[i], this, (byte) bytes.size()));
