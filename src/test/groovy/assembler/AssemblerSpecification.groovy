@@ -1,6 +1,7 @@
 package assembler
 
 import processess.PCB
+import shell.Shell
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -417,23 +418,6 @@ class AssemblerSpecification extends Specification {
         zf    || changedPC
         true  || 0
         false || 1
-    }
-
-    @Unroll
-    def "PRT - should print given text to console"() {
-        when:
-        def buffer = new ByteArrayOutputStream()
-        System.out = new PrintStream(buffer)
-        Assembler.prt((byte) type, pcb, (byte[]) value)
-
-        then:
-        buffer.toString().startsWith(new String(value))
-
-        where:
-        type                                | value
-        ArgumentTypes.CHARACTER.ordinal()   | ['a'] as char[]
-        ArgumentTypes.TEXT.ordinal()        | ['a', 'b', 'c', 'd'] as char[]
-        ArgumentTypes.VALUE.ordinal()       | [65] as byte[] // 'A'
     }
 
     @Unroll

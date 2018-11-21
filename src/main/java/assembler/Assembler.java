@@ -1,6 +1,7 @@
 package assembler;
 
 import processess.PCB;
+import shell.Shell;
 import utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -603,7 +604,7 @@ public class Assembler {
         else
             output.append(AssemblerUtils.binToChar(Assembler.getData(type, arg[0], pcb)));
 
-        System.out.println(output);
+        Shell.print(output.toString());
 
         Utils.log("PRT " + Arrays.toString(arg));
     }
