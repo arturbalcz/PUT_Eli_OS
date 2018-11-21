@@ -76,6 +76,11 @@ interface AssemblerUtils {
         return result;
     }
 
+    /**
+     * Converts assembler program stored as single {@code String} to array of code lines
+     * @param code program in assembler
+     * @return array of lines of code
+     */
     static String[] toCommandsArray(byte[] code) {
         String commands = new String(code);
         return commands.split("\n");
@@ -89,5 +94,10 @@ interface AssemblerUtils {
 
     static char binToChar(final boolean[] bin) {
         return (char) AssemblerUtils.binToByte(bin);
+    }
+
+    static byte memoryAddressToByte(final String address) {
+        String value = address.substring(1, address.length()-1);
+        return Byte.parseByte(value, 16);
     }
 }

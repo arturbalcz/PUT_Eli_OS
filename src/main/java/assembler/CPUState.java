@@ -15,7 +15,16 @@ public class CPUState {
     private final boolean CF;
     private final boolean ZF;
 
-    public CPUState(Registry a, Registry b, Registry c, Registry d, boolean CF, boolean ZF) {
+    CPUState() {
+        A = new Registry();
+        B = new Registry();
+        C = new Registry();
+        D = new Registry();
+        CF = false;
+        ZF = false;
+    }
+
+    CPUState(Registry a, Registry b, Registry c, Registry d, boolean CF, boolean ZF) {
         A = a;
         B = b;
         C = c;

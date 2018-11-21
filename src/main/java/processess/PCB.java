@@ -23,10 +23,12 @@ public class PCB {
         this.basePriority = priority;
         this.dynamicPriority = priority;
         this.state = ProcessState.READY;
+        this.cpuState = Assembler.getFreshCPU();
 
-        //TODO: ram
+        // TODO: ram
         // temporary ram solution for testing assembler
         this.code = exec;
+        this.PC = (byte) (exec[0] + 1); // sets PC after allocated values ('LETs')
     }
 
 
@@ -85,6 +87,9 @@ public class PCB {
 
     public byte getByteAt(final byte address) {
         return this.code[address];
+    }
+    public void writeByteAt(final byte address, final byte value) {
+        this.code[address] = value;
     }
 
     public CPUState getCpuState() {
