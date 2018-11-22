@@ -2,24 +2,64 @@ package processess;
 
 import assembler.Assembler;
 import assembler.CPUState;
+import utils.Utils;
 
+/**
+ * Process Control Block, represents process
+ */
 public class PCB {
+
+    /**
+     * Unique process id
+     */
     final private int PID;
+
     public final String name;
+
+    /**
+     * Process state (READY, RUNNING, WAITING, TERMINATED)
+     *
+     * @see ProcessState
+     */
     private ProcessState state;
+
+    /**
+     * Program counter
+     */
     private byte PC;
-    //@Max(15)
+
+    /**
+     * Unchangeable base priority, set in constructor, min value 0, max value 15
+     */
     private final int basePriority;
-    //@Max(15)
+
+    /**
+     * Dynamically changed priority, min value 0, max value 15
+     */
     private int dynamicPriority;
+
     private CPUState cpuState;
 
     // temporary ram, see constructor
     private final byte[] code;
 
+    /**
+     * Creates Porcess Contol Block
+     *
+     * @param PID unique process id
+     * @param name name of the process
+     * @param priority process base priority
+     * @param exec temporary ram
+     */
     public PCB(int PID, String name, int priority, byte[] exec) {
         this.PID = PID;
         this.name = name;
+        //TODO unique name
+        //TODO prority <= 0 pogadac: dummy process, czy mam się tym jakoś przejmować, czy udostepnić jakieś możliwości zmainy
+        if (priority > 15) {
+            Utils.log("Priority is too high, changed to priority max size - 15", true);
+            priority = 15;
+        }
         this.basePriority = priority;
         this.dynamicPriority = priority;
         this.state = ProcessState.READY;
@@ -60,9 +100,35 @@ public class PCB {
         return dynamicPriority;
     }
 
+    /**
+     * Adds given parameter to dynamic priority, if sum is bigger than 15,
+     * sum is set with value 15 and gives error log
+     *
+     * @param dynamicPriority value to add for dynamic priority
+     */
     public void setDynamicPriority(int dynamicPriority) {
-        this.dynamicPriority = dynamicPriority;
 
+        if (this.dynamicPriority + dynamicPriority > 15){
+            Utils.log("Priority is too high, changed priority of process " + this.PID +
+                    " from " + this.dynamicPriority + " to priority max size: 15", true);
+            this.dynamicPriority = 15;
+
+        } else {
+            int sum = this.dynamicPriority + dynamicPriority;
+            Utils.log("Changed priority of process " + this.PID + " from "
+                    + this.dynamicPriority + " to " + (sum));
+            this.dynamicPriority = sum;
+        }
+
+    }
+
+    /**
+     * Sets dynamic priority with it's base value
+     */
+    public void setBasePriority(){
+        this.dynamicPriority = this.basePriority;
+        Utils.log("Changed priority of process " + this.PID + " from " + this.dynamicPriority +
+                " to it's base value - " + this.basePriority);
     }
 
 
@@ -80,6 +146,7 @@ public class PCB {
      */
     public boolean execute() {
         Assembler.execute(this);
+        //TODO terminated
         return PC < code.length;
     }
 
