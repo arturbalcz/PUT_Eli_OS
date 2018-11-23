@@ -50,14 +50,24 @@ public class Disk {
     }
 
 
-   static boolean isTaken(int index){
+    static boolean isTaken(int index){
        return blockTaken[index];
    }
 
-
+    /**
+     * Finds free block on disk, checking whole disk
+     *
+     * @param index from which index to start looking
+     * @return next free index
+     */
     static int findNextFree(int index){
         for (int i = index; i < blockAmount; i++) {
             if (!isTaken(i)) {
+                return i;
+            }
+        }
+        for (int i = 0; i < index; i++) {
+            if(!isTaken(i)){
                 return i;
             }
         }
@@ -79,12 +89,17 @@ public class Disk {
         int currentIndex = findNextFree(index);
         int x = 0;
         byte currentContent[] = content;
+        byte indexBlock[] = new byte[blockSize];
+        indexBlock[0] = -2;
         do{
             currentIndex = findNextFree(currentIndex);
             currentContent = Arrays.copyOfRange(content, blockSize*x, content.length);
             setBlock(currentIndex, divideContent(currentContent));
             x++;
+            indexBlock[x] = Byte.parseByte(Integer.toString(currentIndex));
         }while(currentContent.length > blockSize);
+        System.out.println(Arrays.toString(indexBlock));
+        setBlock(findNextFree(0), indexBlock);
     }
 
     private static void show(){
@@ -99,8 +114,21 @@ public class Disk {
         System.out.println();
         for (int i = 0; i < physicalDisk.length / blockSize; i++) {
             System.out.print((i<10 ? " " + i: i) + "  ");
+            boolean iBlock = false;
             for(byte y : getBlock(i)) {
-                System.out.print((y == 0 ? "_" : (char)y) + " ");
+                char temp = (char)y;
+                if (iBlock) {
+                    System.out.print(y + " ");
+                    continue;
+                }
+                if(Character.isSpaceChar(temp)){ temp = ' '; }
+                else if (temp == '\n'){ temp = '⏎'; }
+                else if (temp == '\t'){ temp = '⇥';}
+                else if (y == -2){
+                    temp = '!';
+                    iBlock = true;
+                }
+                System.out.print((y == 0 ? "_" : temp) + " ");
             }
             System.out.println("  " + blockTaken[i]);
         }
@@ -145,6 +173,9 @@ public class Disk {
                         break;
                     case "INSERT":
                         currentBlock = parseInt(args.get(2));
+                        break;
+                    case "NEWLINE":
+                        addContent("Testowy string\n w nowej lini :)\n z\ttabem".getBytes(),10);
                         break;
                     default:
                         Utils.log("Wrong argument");
