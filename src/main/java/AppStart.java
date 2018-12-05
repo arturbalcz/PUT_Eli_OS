@@ -1,3 +1,8 @@
+import utils.Utils;
+
+/**
+ * Entry point of system
+ */
 public class AppStart {
     public static void main(String[] args) {
         Utils.log("OS starting...");
@@ -6,5 +11,6 @@ public class AppStart {
         os.run();
 
         Utils.log("quitting...");
+        Utils.closeLogs();
     }
 }
