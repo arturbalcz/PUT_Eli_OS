@@ -1,5 +1,6 @@
 package shell;
 
+import filesystem.Disk;
 import utils.Utils;
 
 import java.io.PrintStream;
@@ -35,6 +36,7 @@ public class Shell {
         CommandTable.put("exit", Shell::exit );
         CommandTable.put("log", Commands::logging);
         CommandTable.put("test", Commands::test);
+        CommandTable.put("disk", Disk::test);
     }
     private static Integer size = CommandTable.size();
 
