@@ -4,13 +4,14 @@ import processess.PCB;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import processess.ProcessState;
 
 public class Lock_function {
     //initilize lock which is open
     private Boolean lock;
-    PCB pcb = new PCB();
-    private List<PCB> kolejka = new LinkedList<String>();
+   // PCB pcb = new PCB();
+    private List<processess.PCB> kolejka = new LinkedList<processess.PCB>();
     //initialize queue FIFO;
 
     String name;
@@ -36,7 +37,7 @@ public class Lock_function {
         }
     }
 
-    void unlock() {
+    void unlock(boolean lockers) {
         System.out.println(name + " Zakonczyl swoje zadanie");
         this.lock = false;
         if (kolejka.size() != 0) {
@@ -51,9 +52,22 @@ public class Lock_function {
     }
 
 
-    
 
 
+     void signal()
+     {
+         if(!kolejka.isEmpty())
+         {
+            PCB pcb=kolejka.get(0);
+            pcb.setState(ProcessState.READY);
+            kolejka.remove(0);
+         }
+        else
+         {
+            lock=true;
+         }
+
+     }
 
 }
 
