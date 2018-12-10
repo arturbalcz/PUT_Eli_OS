@@ -16,6 +16,7 @@ public class PCB {
     private int dynamicPriority;
     private int readyTime;
     private int executedOrders;
+
     private CPUState cpuState;
 
     // temporary ram, see constructor
@@ -29,11 +30,13 @@ public class PCB {
         this.state = ProcessState.READY;
         this.cpuState = Assembler.getFreshCPU();
         this.readyTime=0;
+
         // TODO: ram
         // temporary ram solution for testing assembler
         this.code = exec;
         this.PC = (byte) (exec[0] + 1); // sets PC after allocated values ('LETs')
     }
+
 
 
     public int getReadyTime() { return  readyTime; }
