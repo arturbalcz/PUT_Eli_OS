@@ -12,9 +12,10 @@ public class PCB {
     private final int basePriority;
     //@Max(17)
     //real-time priority: 16, 17 [Artur]
-    //user priority 1-15 [Artur]
+    //dynamic priority 1-15 [Artur]
     private int dynamicPriority;
     private int readyTime;
+    private int executedOrders;
     private CPUState cpuState;
 
     // temporary ram, see constructor
@@ -41,6 +42,10 @@ public class PCB {
     {
         this.readyTime=readyTime;
     }
+
+    public int getExecutedOrders() {return executedOrders; }
+
+    public void setExetucedOrders(int executedOrders) {this.executedOrders = executedOrders; }
 
     public int getPID() {
         return PID;
