@@ -1,8 +1,10 @@
 package shell;
 
+import filesystem.Files;
 import utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * Stores implementation of every shell command with dependencies on external modules
@@ -47,4 +49,47 @@ public interface Commands {
         Shell.print("command working " + argv.get(1));
     }
 
+   static void file(ArrayList<String> args){
+
+        String help = "FILE - create and modify files \n" +
+                "   Options: \n" +
+                "       CREATE - \n" +
+                "       SHOW - \n" +
+                "       DELETE - \n";
+        if(args.size() != 2 && args.size() != 3 && args.size() != 4) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.print(help);
+        }
+        else {
+            String param = args.get(1);
+            switch (param.toUpperCase()) {
+                case "CREATE":
+                    Scanner scan = new Scanner(System.in);
+                    System.out.print(">");
+                    String input = scan.nextLine();
+                    Files.createFile(args.get(2), input.getBytes());
+                    break;
+                case "GET":
+                    try{
+                    byte[] temp= Files.getFile(args.get(2));
+                    if(temp[0] != -1){
+                        String result = "";
+                        for(byte e: temp){
+                            result += (char)e + " ";
+                        }
+                        Shell.print(result);
+                    }
+                    }
+                    catch(IndexOutOfBoundsException e){
+                        Shell.print("Invalid index");
+                    }
+                    break;
+                default:
+                    Utils.log("Wrong argument");
+                    Shell.print(help);
+                    break;
+            }
+
+        }
+    }
 }

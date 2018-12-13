@@ -34,9 +34,10 @@ public class Shell {
         CommandTable.put("time", Shell::time );
         CommandTable.put("help", Shell::help );
         CommandTable.put("exit", Shell::exit );
-        CommandTable.put("log", Commands::logging);
+        CommandTable.put("log",  Commands::logging);
         CommandTable.put("test", Commands::test);
         CommandTable.put("disk", Disk::test);
+        CommandTable.put("file", Commands::file);
     }
     private static Integer size = CommandTable.size();
 
@@ -97,7 +98,8 @@ public class Shell {
                 CommandTable.get(command).accept(arguments);
             }
             catch (IndexOutOfBoundsException e) {
-                Utils.step("Invalid number of arguments for " + command);
+                //Utils.step("Invalid number of arguments for " + command); // quite annoying
+                Utils.log("Invalid number of arguments for " + command);
                 print("invalid number of arguments");
             }
             return command.equals("exit");
