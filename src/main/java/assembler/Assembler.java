@@ -588,6 +588,7 @@ public class Assembler {
      */
     static void jnz(final byte address, PCB pcb) {
         if(!Assembler.cpu.getZF()) Assembler.jmp(address, pcb);
+        else Utils.log("jump not performed");
     }
 
     /**

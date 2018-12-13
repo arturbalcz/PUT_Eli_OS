@@ -33,8 +33,6 @@ abstract class Instruction {
      * @return map of all assembler instructions used in the system
      */
     private static HashMap<Byte, Instruction> createInstructions() {
-        Utils.log("creating instructions");
-        
         HashMap<Byte, Instruction> instructionsMap = new HashMap<>();
         byte code = 11;
 
