@@ -6,6 +6,7 @@ import utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Vector;
 
 import static java.lang.Integer.parseInt;
 
@@ -20,6 +21,20 @@ public class Disk {
         Arrays.fill(physicalDisk, (byte)0);
     }
 
+
+    public static byte[] empty() {
+        return new byte[]{0};
+    }
+
+    public static byte[] invalid() {
+        return new byte[]{-1};
+    }
+
+    public static byte[] index() {
+        return new byte[]{-2};
+    }
+
+
     /**
      * Gets the value of specified block
      *
@@ -29,6 +44,33 @@ public class Disk {
     public static byte[] getBlock(int index){
         return Arrays.copyOfRange(physicalDisk, index*blockSize, index*blockSize + blockSize);
     }
+
+    /***
+     * Gets all blocks assigned to an index block
+     *
+     * @param index     which index block to get content from
+     * @return          byte[] of all data blocks
+     */
+   public static byte[] getBlockByIndex(int index){
+       byte[] indexBlock = getBlock(index);
+       int blockAmount = 0;
+       Vector<Byte> temp = new Vector<>();
+       for(int i = 1; i < indexBlock.length; i++) {
+           if (indexBlock[i] == 0) break;
+           blockAmount++;
+       }
+       for (int i = 1; i <= blockAmount; i++) {
+            for(byte e: getBlock((char)indexBlock[i])) {
+                temp.add(e);
+            }
+       }
+       byte[] result = new byte[blockAmount*blockSize];
+       for (int i = 0; i < blockAmount * blockSize; i++) {
+           result[i] = temp.get(i);
+       }
+       return result;
+   }
+
 
     /**
      * Inserts data into a block. Does not divide data, does not check for empty block.
@@ -84,8 +126,9 @@ public class Disk {
      *
      * @param content   content to be written
      * @param index     from which index to start searching
+     * @return          number of the assigned index block`
      */
-    public static void addContent(byte[] content, int index){
+    public static int addContent(byte[] content, int index){
         int currentIndex = findNextFree(index);
         int x = 0;
         byte currentContent[] = content;
@@ -99,16 +142,23 @@ public class Disk {
             indexBlock[x] = Byte.parseByte(Integer.toString(currentIndex));
         }while(currentContent.length > blockSize);
         System.out.println(Arrays.toString(indexBlock));
-        setBlock(findNextFree(0), indexBlock);
+        int freeIndex = findNextFree(0);
+        setBlock(freeIndex, indexBlock);
+        return freeIndex;
     }
 
+    /***
+     * Shows disk content in a formatted table
+     */
     private static void show(){
         System.out.print("    ");
         for (int i = 0; i <= blockSize/10; i++) {
             System.out.print(i + "                   ");
         }
         System.out.println();
-        System.out.print("    "); for (int i = 0; i < blockSize; i++) { System.out.print(i%10 + " ");
+        System.out.print("    ");
+        for (int i = 0; i < blockSize; i++) {
+            System.out.print(i%10 + " ");
         }
         System.out.print("  taken");
         System.out.println();
@@ -118,7 +168,7 @@ public class Disk {
             for(byte y : getBlock(i)) {
                 char temp = (char)y;
                 if (iBlock) {
-                    System.out.print(y + " ");
+                    System.out.print((int)temp + " ");
                     continue;
                 }
                 if(Character.isSpaceChar(temp)){ temp = ' '; }
@@ -176,6 +226,13 @@ public class Disk {
                         break;
                     case "NEWLINE":
                         addContent("Testowy string\n w nowej lini :)\n z\ttabem".getBytes(),10);
+                        break;
+                    case "GET":
+                        byte[] temp;
+                        temp = getBlockByIndex(Integer.parseInt(args.get(2)));
+                        for(byte e:temp){
+                            System.out.print((char)e);
+                        }
                         break;
                     default:
                         Utils.log("Wrong argument");
