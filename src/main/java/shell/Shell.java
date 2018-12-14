@@ -77,11 +77,14 @@ public class Shell {
             return exiting;
         }
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
+
+        // printing arguments for debug
         Utils.log("Printing all arguments");
         String args = "";
         StringBuilder sB = new StringBuilder(args);
         for (String x : arguments) {
             sB.append(x);
+            sB.append(", ");
         }
         Utils.log(sB.toString());
         String command = arguments.get(0);

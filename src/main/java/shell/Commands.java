@@ -24,7 +24,9 @@ public interface Commands {
      * @param args "on" or "off"
      */
     static void logging(ArrayList<String> args) {
-        String help = "LOG - turns logging on or off\nLOG ON/OFF";
+        String help = "Turns logging on or off\n" +
+                "\n" +
+                "LOG [/ON][/OFF]\n";
         if(args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -32,10 +34,10 @@ public interface Commands {
         else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
-                case "ON":
+                case "/ON":
                     Utils.loggingOn();
                     break;
-                case "OFF":
+                case "/OFF":
                     Utils.loggingOff();
                     break;
                 default:
@@ -53,7 +55,7 @@ public interface Commands {
     static void time(ArrayList<String> args) {
         String times = Shell.formatter.format(LocalDateTime.now());
         Utils.step("Printing time for user.");
-        Shell.print(times);
+        Shell.println(times);
     }
 
     /*
@@ -68,7 +70,7 @@ public interface Commands {
         Set<String> keys = Shell.CommandTable.keySet();
         Utils.step("Printing help for user.");
         for (String command : keys) {
-            Shell.print(command.toUpperCase());
+            Shell.println(command.toUpperCase());
         }
     }
 
@@ -91,11 +93,13 @@ public interface Commands {
 
     static void file(ArrayList<String> args){
 
-        String help = "FILE - create and modify files \n" +
-                "   Options: \n" +
-                "       CREATE - \n" +
-                "       SHOW - \n" +
-                "       DELETE - \n";
+        String help = "Creates and modifies text files.\n" +
+                "\n" +
+                "FILE [/C] [/S] [/D] filename" +
+                "\n" +
+                "\t/C - Create empty file.\n" +
+                "\t/S - Display the content of a text file.\n" +
+                "\t/D - Delete specified file.\n";
         if(args.size() != 2 && args.size() != 3 && args.size() != 4) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -103,13 +107,13 @@ public interface Commands {
         else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
-                case "CREATE":
+                case "/C":
                     Scanner scan = new Scanner(System.in);
                     System.out.print(">");
                     String input = scan.nextLine();
                     Files.createFile(args.get(2), input.getBytes());
                     break;
-                case "GET":
+                case "/S":
                     try{
                     byte[] temp= Files.getFile(args.get(2));
                     if(temp[0] != -1){
@@ -123,6 +127,12 @@ public interface Commands {
                     catch(IndexOutOfBoundsException e){
                         Shell.println("Invalid index");
                     }
+                    break;
+                case "/?":
+                    Shell.println(help);
+                    break;
+                case "-?":
+                    Shell.println(help);
                     break;
                 default:
                     Utils.log("Wrong argument");
@@ -138,7 +148,13 @@ public interface Commands {
      * @param args asm program to compile
      */
     static void com(ArrayList<String> args) {
+
+        String help = "Compiles given program\n" +
+                "\n" +
+                "COM filename\n";
+
         if (args.size() == 1) Shell.println("no program file specified");
+        if (args.get(1).equals("/?")) Shell.println(help);
         else {
             final String fileName = args.get(1);
             final byte[] code = Files.getCleanFile(fileName);
