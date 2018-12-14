@@ -31,11 +31,12 @@ public class Files {
             return;
         }
         String temp = name;
-        if (name == "") {
+        if (name.equals("")) {
             temp = "test.txt";
         }
         File newF = new File(temp);
         newF.setIndexBlock(Disk.addContent(content, 10));
+        newF.setSize(content.length);
         allFiles.add(newF);
 
     }
@@ -55,5 +56,16 @@ public class Files {
         Shell.print("No such file");
         return Disk.invalid();
     }
+
+    /***
+     *
+     *
+     */
+    public static void showFiles(){
+        for(File e: allFiles){
+            Shell.print(e.getSize() + "\t" + e.getName() );
+        }
+    }
+
 
 }
