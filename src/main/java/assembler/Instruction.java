@@ -33,8 +33,6 @@ abstract class Instruction {
      * @return map of all assembler instructions used in the system
      */
     private static HashMap<Byte, Instruction> createInstructions() {
-        Utils.log("creating instructions");
-        
         HashMap<Byte, Instruction> instructionsMap = new HashMap<>();
         byte code = 11;
 
@@ -264,7 +262,40 @@ abstract class Instruction {
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                Assembler.prt(args[0], pcb , Arrays.copyOfRange(args, 1, args.length));
+                Assembler.prt(args[0], pcb , Arrays.copyOfRange(args, 1, args.length-1));
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
+        instruction = new Instruction(
+                "FLC",
+                2,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT),
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                int firstArgEnd = 0;
+                while (args[firstArgEnd] != -1) firstArgEnd++;
+
+                Assembler.flc(
+                        Arrays.copyOfRange(args, 1, firstArgEnd),
+                        Arrays.copyOfRange(args, firstArgEnd+2, args.length-1)
+                );
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
+        instruction = new Instruction(
+                "FLG",
+                1,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                Assembler.flg(Arrays.copyOfRange(args, 1, args.length-1));
             }
         };
         instructionsMap.put(code, instruction);
@@ -407,8 +438,8 @@ abstract class Instruction {
                 executable.add((byte) pieces.get(begin).charAt(1));
                 break;
             case TEXT:
-                for(int i = begin; i < pieces.size(); i++)
-                    for(int j = 1; j < pieces.get(i).length()-1; j++) executable.add((byte) pieces.get(i).charAt(j));
+                String piece = pieces.get(begin);
+                for(int i = 1; i < piece.length()-1; i++) executable.add((byte) piece.charAt(i));
                 executable.add((byte) -1);
                 break;
         }

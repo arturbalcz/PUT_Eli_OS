@@ -1,5 +1,6 @@
 package shell;
 
+import filesystem.Disk;
 import utils.Utils;
 
 import java.io.PrintStream;
@@ -34,14 +35,26 @@ public class Shell {
         CommandTable.put("exit", Commands::exit );
         CommandTable.put("log", Commands::logging);
         CommandTable.put("test", Commands::test);
+        CommandTable.put("disk", Disk::test);
+        CommandTable.put("file", Commands::file);
+        CommandTable.put("com", Commands::com);
+        CommandTable.put("cp", Commands::cp);
     }
 
     /**
-     * Prints parameter to the console
+     * Prints parameter to the console with new line
+     * @param msg message to print for user
+     */
+    public static void println(String msg) {
+        standardOut.println(msg);
+    }
+
+    /**
+     * Prints parameter to the console without new line
      * @param msg message to print for user
      */
     public static void print(String msg) {
-        standardOut.println(msg);
+        standardOut.print(msg);
     }
 
     /**
@@ -74,8 +87,7 @@ public class Shell {
         String command = arguments.get(0);
 
         if (CommandTable.get(command) == null) {
-            Utils.log("Can't find "+command+"in CommandTable", true);
-            print("\"" + input + "\" can't resolve command");
+            standardOut.println("\"" + input + "\" can't resolve command");
         }
         else {
             try {
@@ -83,7 +95,7 @@ public class Shell {
             }
             catch (IndexOutOfBoundsException e) {
                 Utils.log("Invalid number of arguments for " + command, true);
-                print("invalid number of arguments");
+                println("invalid number of arguments");
             }
         }
         return exiting;

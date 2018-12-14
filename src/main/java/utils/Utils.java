@@ -43,6 +43,7 @@ public class Utils {
         textArea.setFont(new Font("Courier", Font.PLAIN,20));
         textArea.setEditable( false );
         frame.setSize(800,600);
+        frame.setAlwaysOnTop(true  );
 
         KeyStroke keyStroke = KeyStroke.getKeyStroke(KEY);
         Object actionKey = textArea.getInputMap(

@@ -1,5 +1,6 @@
 package assembler;
 
+import filesystem.Files;
 import processess.PCB;
 import shell.Shell;
 import utils.Utils;
@@ -128,6 +129,7 @@ public class Assembler {
         final byte[] result = new byte[bytes.size()];
         for(i = 0; i < bytes.size(); i++) result[i] = bytes.get(i);
 
+        Utils.log("executable: " + Arrays.toString(result));
         return result;
     }
 
@@ -141,35 +143,42 @@ public class Assembler {
         Utils.log("executing instruction at " + address + " from " + pcb.name);
 
         Instruction instruction = Instruction.getByCode(pcb.getByteAt(address++));
-        byte[] args = null;
+
+        List<Byte> argsList = new ArrayList<>();
         if(instruction.argsNumber > 0) {
             byte argTypesBin = pcb.getByteAt(address++);
             String argTypes = AssemblerUtils.byteToString(argTypesBin);
             byte arg1Type = AssemblerUtils.hexToByte(argTypes.charAt(0));
+            argsList.add(arg1Type);
+            address = getArgument(pcb, address, argsList, arg1Type);
+
             if(argTypes.charAt(1) != 'F'){
                 byte arg2Type = AssemblerUtils.hexToByte(argTypes.charAt(1));
-                args = new byte[] {arg1Type, pcb.getByteAt(address++), arg2Type, pcb.getByteAt(address++)};
-            }
-            else {
-                if(ArgumentTypes.getType(arg1Type) == ArgumentTypes.TEXT) {
-                    List<Byte> temp = new ArrayList<>();
-                    temp.add(arg1Type);
-                    byte letter = pcb.getByteAt(address++);
-                    while (letter != -1) {
-                        temp.add(letter);
-                        letter = pcb.getByteAt(address++);
-                    }
-                    args = new byte[temp.size()];
-                    for (int i = 0; i < temp.size(); i++) {
-                        args[i] = temp.get(i);
-                    }
-                }
-                else args = new byte[] {arg1Type, pcb.getByteAt(address++)};
+                argsList.add(arg2Type);
+                address = getArgument(pcb, address, argsList, arg2Type);
             }
         }
 
+        byte[] args = new byte[argsList.size()];
+        int i = 0;
+        for (byte a : argsList) args[i++] = a;
         pcb.setPC(address);
         instruction.execute(pcb, args);
+    }
+
+    private static byte getArgument(PCB pcb, byte address, List<Byte> argsList, byte argType) {
+        if(ArgumentTypes.getType(argType) == ArgumentTypes.TEXT) {
+            List<Byte> temp = new ArrayList<>();
+            byte letter = pcb.getByteAt(address++);
+            while (letter != -1) {
+                temp.add(letter);
+                letter = pcb.getByteAt(address++);
+            }
+            argsList.addAll(temp);
+            argsList.add((byte) -1);
+        }
+        else argsList.add(pcb.getByteAt(address++));
+        return address;
     }
 
     /**
@@ -588,6 +597,7 @@ public class Assembler {
      */
     static void jnz(final byte address, PCB pcb) {
         if(!Assembler.cpu.getZF()) Assembler.jmp(address, pcb);
+        else Utils.log("jump not performed");
     }
 
     /**
@@ -604,9 +614,31 @@ public class Assembler {
         else
             output.append(AssemblerUtils.binToChar(Assembler.getData(type, arg[0], pcb)));
 
-        Shell.print(output.toString());
+        Shell.println(output.toString());
 
         Utils.log("PRT " + Arrays.toString(arg));
+    }
+
+    /**
+     * Creates new file with given name and content
+     *
+     * @param name name of new file
+     * @param content content to write in new file
+     */
+    static void flc(final byte[] name, final byte[] content) {
+        StringBuilder nameBuilder = new StringBuilder();
+        for(final byte c : name) nameBuilder.append((char) c);
+        Files.createFile(nameBuilder.toString(), content);
+    }
+
+    /**
+     *  Gets content of selected file and does nothing. Used to test and demonstrate synchronization methods
+     * @param name name of file to get
+     */
+    static void flg(final byte[] name) {
+        StringBuilder nameBuilder = new StringBuilder();
+        for(final byte c : name) nameBuilder.append((char) c);
+        Files.getFile(nameBuilder.toString());
     }
 
     /**
