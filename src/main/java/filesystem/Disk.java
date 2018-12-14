@@ -10,20 +10,21 @@ import java.util.Vector;
 
 import static java.lang.Integer.parseInt;
 
-public class Disk {
-    static byte physicalDisk[] = new byte[1024];
-    static int blockSize = 32;
-    static boolean blockTaken[] = new boolean[physicalDisk.length/blockSize];
-    static int blockAmount = blockTaken.length;
-    static int currentBlock = 0;
+public abstract class Disk {
+    private static final int BLOCK_SIZE = 32;
+    static final byte EMPTY_CELL = -3;
 
-    public Disk(){
-        Arrays.fill(physicalDisk, (byte)0);
+    private static byte physicalDisk[] = new byte[1024];
+    private static boolean blockTaken[] = new boolean[physicalDisk.length/ BLOCK_SIZE];
+    private static int blockAmount = blockTaken.length;
+    private static int currentBlock = 0;
+
+    static {
+        Arrays.fill(physicalDisk, EMPTY_CELL);
     }
 
-
     public static byte[] empty() {
-        return new byte[]{0};
+        return new byte[] { EMPTY_CELL };
     }
 
     public static byte[] invalid() {
@@ -42,7 +43,7 @@ public class Disk {
      * @return byte[] corresponding to specified block
      */
     public static byte[] getBlock(int index){
-        return Arrays.copyOfRange(physicalDisk, index*blockSize, index*blockSize + blockSize);
+        return Arrays.copyOfRange(physicalDisk, index* BLOCK_SIZE, index* BLOCK_SIZE + BLOCK_SIZE);
     }
 
     /***
@@ -64,8 +65,8 @@ public class Disk {
                 temp.add(e);
             }
        }
-       byte[] result = new byte[blockAmount*blockSize];
-       for (int i = 0; i < blockAmount * blockSize; i++) {
+       byte[] result = new byte[blockAmount* BLOCK_SIZE];
+       for (int i = 0; i < blockAmount * BLOCK_SIZE; i++) {
            result[i] = temp.get(i);
        }
        return result;
@@ -76,17 +77,17 @@ public class Disk {
      * Inserts data into a block. Does not divide data, does not check for empty block.
      *
      * @param index     which block to insert into
-     * @param content   content ot be inserted, no longer than {@value blockSize}
+     * @param content   content ot be inserted, no longer than {@value BLOCK_SIZE}
      */
     static void setBlock(int index, byte[] content){
-        int max = content.length < blockSize ? blockSize : content.length;
+        int max = content.length < BLOCK_SIZE ? BLOCK_SIZE : content.length;
         blockTaken[index] = true;
         for (int i = 0; i < max; i++) {
                 if(i >= content.length) {
-                    physicalDisk[index*blockSize + i] = 0;
+                    physicalDisk[index* BLOCK_SIZE + i] = EMPTY_CELL;
                 }
                 else {
-                    physicalDisk[index * blockSize + i] = content[i];
+                    physicalDisk[index * BLOCK_SIZE + i] = content[i];
                 }
         }
     }
@@ -117,8 +118,8 @@ public class Disk {
     }
 
     static byte[] divideContent(byte content[]){
-        if( content.length < 32){ return content; }
-        return Arrays.copyOfRange(content, 0, blockSize);
+        if( content.length < BLOCK_SIZE){ return content; }
+        return Arrays.copyOfRange(content, 0, BLOCK_SIZE);
     }
 
      /**
@@ -132,16 +133,16 @@ public class Disk {
         int currentIndex = findNextFree(index);
         int x = 0;
         byte currentContent[] = content;
-        byte indexBlock[] = new byte[blockSize];
+        byte indexBlock[] = new byte[BLOCK_SIZE];
         indexBlock[0] = -2;
         do{
             currentIndex = findNextFree(currentIndex);
-            currentContent = Arrays.copyOfRange(content, blockSize*x, content.length);
+            currentContent = Arrays.copyOfRange(content, BLOCK_SIZE *x, content.length);
             setBlock(currentIndex, divideContent(currentContent));
             x++;
             indexBlock[x] = Byte.parseByte(Integer.toString(currentIndex));
-        }while(currentContent.length > blockSize);
-        System.out.println(Arrays.toString(indexBlock));
+        }while(currentContent.length > BLOCK_SIZE);
+//        System.out.println(Arrays.toString(indexBlock));
         int freeIndex = findNextFree(0);
         setBlock(freeIndex, indexBlock);
         return freeIndex;
@@ -152,17 +153,17 @@ public class Disk {
      */
     private static void show(){
         System.out.print("    ");
-        for (int i = 0; i <= blockSize/10; i++) {
+        for (int i = 0; i <= BLOCK_SIZE /10; i++) {
             System.out.print(i + "                   ");
         }
         System.out.println();
         System.out.print("    ");
-        for (int i = 0; i < blockSize; i++) {
+        for (int i = 0; i < BLOCK_SIZE; i++) {
             System.out.print(i%10 + " ");
         }
         System.out.print("  taken");
         System.out.println();
-        for (int i = 0; i < physicalDisk.length / blockSize; i++) {
+        for (int i = 0; i < physicalDisk.length / BLOCK_SIZE; i++) {
             System.out.print((i<10 ? " " + i: i) + "  ");
             boolean iBlock = false;
             for(byte y : getBlock(i)) {
@@ -178,7 +179,7 @@ public class Disk {
                     temp = '!';
                     iBlock = true;
                 }
-                System.out.print((y == 0 ? "_" : temp) + " ");
+                System.out.print((y == EMPTY_CELL ? "_" : temp) + " ");
             }
             System.out.println("  " + blockTaken[i]);
         }
@@ -200,7 +201,7 @@ public class Disk {
         String help = "DISK - tests if disk is working";
         if(args.size() != 1 && args.size() != 2 && args.size() != 3) {
             Utils.log("Wrong numbers of arguments");
-            Shell.print(help);
+            Shell.println(help);
         }
         else {
             if(args.size() == 1){
@@ -216,7 +217,7 @@ public class Disk {
                 switch (param.toUpperCase()) {
                     case "CLEAR":
                         physicalDisk = new byte[1024];
-                        blockTaken = new boolean[physicalDisk.length/blockSize];
+                        blockTaken = new boolean[physicalDisk.length/ BLOCK_SIZE];
                         break;
                     case "SHOW":
                         show();
@@ -236,7 +237,7 @@ public class Disk {
                         break;
                     default:
                         Utils.log("Wrong argument");
-                        Shell.print(help);
+                        Shell.println(help);
                         break;
                 }
             }
