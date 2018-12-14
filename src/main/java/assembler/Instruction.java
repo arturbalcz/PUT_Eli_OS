@@ -439,7 +439,7 @@ abstract class Instruction {
                 break;
             case TEXT:
                 String piece = pieces.get(begin);
-                for(int i = 1; i < piece.length(); i++) executable.add((byte) piece.charAt(i));
+                for(int i = 1; i < piece.length()-1; i++) executable.add((byte) piece.charAt(i));
                 executable.add((byte) -1);
                 break;
         }
