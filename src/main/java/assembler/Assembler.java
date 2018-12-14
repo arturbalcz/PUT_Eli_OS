@@ -129,6 +129,7 @@ public class Assembler {
         final byte[] result = new byte[bytes.size()];
         for(i = 0; i < bytes.size(); i++) result[i] = bytes.get(i);
 
+        Utils.log("executable: " + Arrays.toString(result));
         return result;
     }
 
@@ -613,7 +614,7 @@ public class Assembler {
         else
             output.append(AssemblerUtils.binToChar(Assembler.getData(type, arg[0], pcb)));
 
-        Shell.print(output.toString());
+        Shell.println(output.toString());
 
         Utils.log("PRT " + Arrays.toString(arg));
     }

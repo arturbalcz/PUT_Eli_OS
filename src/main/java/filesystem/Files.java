@@ -2,6 +2,7 @@ package filesystem;
 
 import shell.Shell;
 
+import java.util.Arrays;
 import java.util.Vector;
 
 public class Files {
@@ -11,7 +12,7 @@ public class Files {
     private static boolean fileExists(String name) {
         for (File e : allFiles) {
             if (e.getName().equals(name)) {
-                Shell.print("Name taken");
+                Shell.println("Name taken");
                 return true;
             }
         }
@@ -27,7 +28,7 @@ public class Files {
      */
     public static void createFile(String name, byte[] content) {
         if (fileExists(name)) {
-            Shell.print("File already exists");
+            Shell.println("File already exists");
             return;
         }
         String temp = name;
@@ -52,8 +53,15 @@ public class Files {
                 return Disk.getBlockByIndex(e.getIndexBlock());
             }
         }
-        Shell.print("No such file");
+        Shell.println("No such file");
         return Disk.invalid();
+    }
+
+    public static byte[] getCleanFile(final String name) {
+        final byte[] rawExecFile = Files.getFile(name);
+        int last =  rawExecFile.length - 1;
+        while (rawExecFile[last] == Disk.EMPTY_CELL) last--;
+        return Arrays.copyOfRange(rawExecFile, 0, last+1);
     }
 
 }
