@@ -4,9 +4,9 @@ import utils.Utils;
 /**
  * Collects together all modules and run system
  */
-class System {
+class OS {
 
-    System() {
+    OS() {
     }
 
     /**
