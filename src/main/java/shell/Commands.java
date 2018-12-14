@@ -124,6 +124,10 @@ public interface Commands {
         else {
             Utils.log("running program in dev environment");
             final byte[] exec = Files.getCleanFile(args.get(1));
+            if(exec[0] == -1) {
+                Shell.println("Program does not exist");
+                return;
+            }
             Utils.log(Arrays.toString(exec));
             PCB process = new PCB(1,"p1", 10, exec);
             //noinspection StatementWithEmptyBody
