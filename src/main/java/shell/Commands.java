@@ -1,9 +1,12 @@
 package shell;
 
+import assembler.Assembler;
 import filesystem.Files;
+import processess.PCB;
 import utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -24,8 +27,9 @@ public interface Commands {
         String help = "LOG - turns logging on or off\nLOG ON/OFF";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
-            Shell.print(help);
-        } else {
+            Shell.println(help);
+        }
+        else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
                 case "ON":
@@ -36,7 +40,7 @@ public interface Commands {
                     break;
                 default:
                     Utils.log("Wrong argument");
-                    Shell.print(help);
+                    Shell.println(help);
                     break;
             }
         }
@@ -48,7 +52,7 @@ public interface Commands {
      * @param argv anything but {@code null}
      */
     static void test(ArrayList<String> argv) {
-        Shell.print("command working " + argv.get(1));
+        Shell.println("command working " + argv.get(1));
     }
 
     static void file(ArrayList<String> args) {
@@ -60,8 +64,9 @@ public interface Commands {
                 "       DELETE - \n";
         if (args.size() != 2 && args.size() != 3 && args.size() != 4) {
             Utils.log("Wrong numbers of arguments");
-            Shell.print(help);
-        } else {
+            Shell.println(help);
+        }
+        else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
                 case "CREATE":
@@ -71,17 +76,18 @@ public interface Commands {
                     Files.createFile(args.get(2), input.getBytes());
                     break;
                 case "GET":
-                    try {
-                        byte[] temp = Files.getFile(args.get(2));
-                        if (temp[0] != -1) {
-                            String result = "";
-                            for (byte e : temp) {
-                                result += (char) e + " ";
-                            }
-                            Shell.print(result);
+                    try{
+                    byte[] temp= Files.getFile(args.get(2));
+                    if(temp[0] != -1){
+                        String result = "";
+                        for(byte e: temp){
+                            result += (char)e + " ";
                         }
-                    } catch (IndexOutOfBoundsException e) {
-                        Shell.print("Invalid index");
+                        Shell.println(result);
+                    }
+                    }
+                    catch(IndexOutOfBoundsException e){
+                        Shell.println("Invalid index");
                     }
                     break;
                 case "LIST":
@@ -89,7 +95,7 @@ public interface Commands {
                     break;
                 default:
                     Utils.log("Wrong argument");
-                    Shell.print(help);
+                    Shell.println(help);
                     break;
             }
 
@@ -138,4 +144,44 @@ public interface Commands {
             Shell.print("Cant copy file");
         }
     }
+
+    /**
+     * Compiles given program
+     * @param args asm program to compile
+     */
+    static void com(ArrayList<String> args) {
+        if (args.size() == 1) Shell.println("no program file specified");
+        else {
+            final String fileName = args.get(1);
+            final byte[] code = Files.getCleanFile(fileName);
+
+            Assembler assembler = new Assembler();
+            final byte[] exec = assembler.compile(code);
+            if (exec == null) Shell.println("compilation failed");
+            else Files.createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec);
+        }
+    }
+
+    /**
+     * Creates process with given program, name and priority
+     * <p>IN DEVELOPMENT</p>
+     * @param args name of .exe file
+     */
+    static void cp(ArrayList<String> args) {
+        // TODO: implement proper process creation
+        if (args.size() == 1) Shell.println("no exe file specified");
+        else {
+            Utils.log("running program in dev environment");
+            final byte[] exec = Files.getCleanFile(args.get(1));
+            if(exec[0] == -1) {
+                Shell.println("Program does not exist");
+                return;
+            }
+            Utils.log(Arrays.toString(exec));
+            PCB process = new PCB(1,"p1", 10, exec);
+            //noinspection StatementWithEmptyBody
+            while(process.execute());
+        }
+    }
+
 }
