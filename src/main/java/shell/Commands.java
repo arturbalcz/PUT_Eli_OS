@@ -71,7 +71,7 @@ public interface Commands {
             switch (param.toUpperCase()) {
                 case "CREATE":
                     Scanner scan = new Scanner(System.in);
-                    System.out.print(">");
+                    System.out.print(": ");
                     String input = scan.nextLine();
                     Files.createFile(args.get(2), input.getBytes());
                     break;
@@ -106,18 +106,18 @@ public interface Commands {
         String help = "MORE - print file content \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
-            Shell.print(help);
+            Shell.println(help);
         } else try {
-            byte[] temp = Files.getFile(args.get(1));
+            byte[] temp = Files.getFileClean(args.get(1));
             if (temp[0] != -1) {
                 String result = "";
                 for (byte e : temp) {
-                    result += e != 0 ? (char) e : "";
+                    result += (char)e;
                 }
-                Shell.print(result);
+                Shell.println(result);
             }
         } catch (IndexOutOfBoundsException e) {
-            Shell.print("Invalid index");
+            Shell.println("Invalid index");
         }
     }
 
@@ -125,7 +125,7 @@ public interface Commands {
         String help = "DIR - print directory content \n";
         if (args.size() != 1) {
             Utils.log("Wrong numbers of arguments");
-            Shell.print(help);
+            Shell.println(help);
         } else {
             Files.showFiles();
         }
@@ -135,13 +135,13 @@ public interface Commands {
                 "   COPY [source] [target]";
         if (args.size() != 3) {
             Utils.log("Wrong numbers of arguments");
-            Shell.print(help);
+            Shell.println(help);
         } else try {
             System.out.println((Files.getFile(args.get(1))));
             Files.createFile(args.get(2), Files.getFile(args.get(1)));
         }
         catch(IndexOutOfBoundsException e){
-            Shell.print("Cant copy file");
+            Shell.println("Cant copy file");
         }
     }
 
@@ -153,7 +153,7 @@ public interface Commands {
         if (args.size() == 1) Shell.println("no program file specified");
         else {
             final String fileName = args.get(1);
-            final byte[] code = Files.getCleanFile(fileName);
+            final byte[] code = Files.getFileClean(fileName);
 
             Assembler assembler = new Assembler();
             final byte[] exec = assembler.compile(code);
@@ -172,7 +172,7 @@ public interface Commands {
         if (args.size() == 1) Shell.println("no exe file specified");
         else {
             Utils.log("running program in dev environment");
-            final byte[] exec = Files.getCleanFile(args.get(1));
+            final byte[] exec = Files.getFileClean(args.get(1));
             if(exec[0] == -1) {
                 Shell.println("Program does not exist");
                 return;
@@ -184,4 +184,15 @@ public interface Commands {
         }
     }
 
+    static void rm(ArrayList<String> args) {
+        String help = "RM - remove file \n";
+        if (args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        } else try {
+            Files.deleteFile(args.get(1));
+        } catch (IndexOutOfBoundsException e) {
+            Shell.println("Invalid index");
+        }
+    }
 }

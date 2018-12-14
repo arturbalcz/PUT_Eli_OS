@@ -31,11 +31,11 @@ public class Files {
             Shell.println("File already exists");
             return;
         }
-        String temp = name;
         if (name.equals("")) {
-            temp = "test.txt";
+            Shell.println("No file name given");
+            return;
         }
-        File newF = new File(temp);
+        File newF = new File(name);
         newF.setIndexBlock(Disk.addContent(content, 10));
         newF.setSize(content.length);
         allFiles.add(newF);
@@ -58,7 +58,7 @@ public class Files {
         return Disk.invalid();
     }
 
-    public static byte[] getCleanFile(final String name) {
+    public static byte[] getFileClean(final String name) {
         final byte[] rawExecFile = Files.getFile(name);
         int last =  rawExecFile.length - 1;
         while (rawExecFile[last] == Disk.EMPTY_CELL) last--;
@@ -71,9 +71,19 @@ public class Files {
      */
     public static void showFiles(){
         for(File e: allFiles){
-            Shell.print(e.getSize() + "\t" + e.getName() );
+            Shell.println(e.getSize() + "\t" + e.getName() );
         }
     }
 
+
+    public static void deleteFile(String name){
+        for (File e : allFiles){
+            if (e.getName().equals(name)){
+                Disk.remove(e.getIndexBlock());
+                allFiles.remove(e);
+                break;
+            }
+        }
+    }
 
 }

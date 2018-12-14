@@ -17,7 +17,9 @@ public class File {
     }
 
     public void setName(String name) {
+        String[] splitName = name.split("[.]");
         this.name = name;
+        this.extension = splitName[1];
     }
 
     public String getExtension() {

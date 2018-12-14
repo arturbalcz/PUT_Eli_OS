@@ -38,6 +38,7 @@ public class Shell {
         CommandTable.put("test", Commands::test);
         CommandTable.put("disk", Disk::test);
         CommandTable.put("file", Commands::file);
+        CommandTable.put("rm", Commands::rm);
         CommandTable.put("more", Commands::more);
         CommandTable.put("dir", Commands::dir);
         CommandTable.put("copy", Commands::copy);
