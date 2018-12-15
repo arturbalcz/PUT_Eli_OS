@@ -1,6 +1,8 @@
 package shell;
 
 import assembler.Assembler;
+import filesystem.Directories;
+import filesystem.Directory;
 import filesystem.Files;
 import processess.PCB;
 import utils.Utils;
@@ -8,6 +10,7 @@ import utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Vector;
 
 /**
  * Stores implementation of every shell command with dependencies on external modules
@@ -127,6 +130,15 @@ public interface Commands {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else {
+            Vector<Directory> dirs = Directories.getCurrentDir().getDirectories();
+            Shell.println(Directories.getCurrentDir().getName() + ">");
+            if(dirs != null) {
+                for (Directory e : dirs) {
+                    if (e != null) {
+                        Shell.println("<dir>\t" + e.getName());
+                    }
+                }
+            }
             Files.showFiles();
         }
     }
@@ -191,6 +203,30 @@ public interface Commands {
             Shell.println(help);
         } else try {
             Files.deleteFile(args.get(1));
+        } catch (IndexOutOfBoundsException e) {
+            Shell.println("Invalid index");
+        }
+    }
+
+    static void mkdir(ArrayList<String> args) {
+        String help = "MKDIR - creates a directory \n";
+        if (args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        } else try {
+            Directories.getCurrentDir().addDirectory(args.get(1));
+        } catch (IndexOutOfBoundsException e) {
+            Shell.println("Invalid index");
+        }
+    }
+
+    static void cd(ArrayList<String> args) {
+        String help = "CD - changes current directory \n";
+        if (args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        } else try {
+            Directories.setCurrentDir(args.get(1));
         } catch (IndexOutOfBoundsException e) {
             Shell.println("Invalid index");
         }

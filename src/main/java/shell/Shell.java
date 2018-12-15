@@ -40,6 +40,8 @@ public class Shell {
         CommandTable.put("file", Commands::file);
         CommandTable.put("rm", Commands::rm);
         CommandTable.put("more", Commands::more);
+        CommandTable.put("cd", Commands::cd);
+        CommandTable.put("mkdir", Commands::mkdir);
         CommandTable.put("dir", Commands::dir);
         CommandTable.put("copy", Commands::copy);
         CommandTable.put("com", Commands::com);
