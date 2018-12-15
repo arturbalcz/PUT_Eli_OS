@@ -76,25 +76,7 @@ public interface Commands {
                     Scanner scan = new Scanner(System.in);
                     System.out.print(": ");
                     String input = scan.nextLine();
-                    Files.createFile(args.get(2), input.getBytes());
-                    break;
-                case "GET":
-                    try{
-                    byte[] temp= Files.getFile(args.get(2));
-                    if(temp[0] != -1){
-                        String result = "";
-                        for(byte e: temp){
-                            result += (char)e + " ";
-                        }
-                        Shell.println(result);
-                    }
-                    }
-                    catch(IndexOutOfBoundsException e){
-                        Shell.println("Invalid index");
-                    }
-                    break;
-                case "LIST":
-                    Files.showFiles();
+                    Directories.getCurrentDir().getFiles().createFile(args.get(2), input.getBytes());
                     break;
                 default:
                     Utils.log("Wrong argument");
@@ -111,7 +93,7 @@ public interface Commands {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else try {
-            byte[] temp = Files.getFileClean(args.get(1));
+            byte[] temp = Directories.getCurrentDir().getFiles().getFileClean(args.get(1));
             if (temp[0] != -1) {
                 String result = "";
                 for (byte e : temp) {
@@ -131,15 +113,14 @@ public interface Commands {
             Shell.println(help);
         } else {
             Vector<Directory> dirs = Directories.getCurrentDir().getDirectories();
-            Shell.println(Directories.getCurrentDir().getName() + ">");
             if(dirs != null) {
                 for (Directory e : dirs) {
                     if (e != null) {
                         Shell.println("<dir>\t" + e.getName());
                     }
                 }
+                Directories.getCurrentDir().getFiles().showFiles();
             }
-            Files.showFiles();
         }
     }
     static void copy(ArrayList<String> args) {
@@ -149,8 +130,8 @@ public interface Commands {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else try {
-            System.out.println((Files.getFile(args.get(1))));
-            Files.createFile(args.get(2), Files.getFile(args.get(1)));
+            System.out.println((Directories.getCurrentDir().getFiles().getFile(args.get(1))));
+            Directories.getCurrentDir().getFiles().createFile(args.get(2), Directories.getCurrentDir().getFiles().getFile(args.get(1)));
         }
         catch(IndexOutOfBoundsException e){
             Shell.println("Cant copy file");
@@ -165,12 +146,12 @@ public interface Commands {
         if (args.size() == 1) Shell.println("no program file specified");
         else {
             final String fileName = args.get(1);
-            final byte[] code = Files.getFileClean(fileName);
+            final byte[] code = Directories.getCurrentDir().getFiles().getFileClean(fileName);
 
             Assembler assembler = new Assembler();
             final byte[] exec = assembler.compile(code);
             if (exec == null) Shell.println("compilation failed");
-            else Files.createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec);
+            else Directories.getCurrentDir().getFiles().createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec);
         }
     }
 
@@ -184,7 +165,7 @@ public interface Commands {
         if (args.size() == 1) Shell.println("no exe file specified");
         else {
             Utils.log("running program in dev environment");
-            final byte[] exec = Files.getFileClean(args.get(1));
+            final byte[] exec = Directories.getCurrentDir().getFiles().getFileClean(args.get(1));
             if(exec[0] == -1) {
                 Shell.println("Program does not exist");
                 return;
@@ -202,7 +183,7 @@ public interface Commands {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else try {
-            Files.deleteFile(args.get(1));
+            Directories.getCurrentDir().getFiles().deleteFile(args.get(1));
         } catch (IndexOutOfBoundsException e) {
             Shell.println("Invalid index");
         }

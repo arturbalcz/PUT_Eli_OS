@@ -1,5 +1,6 @@
 package assembler;
 
+import filesystem.Directories;
 import filesystem.Files;
 import processess.PCB;
 import shell.Shell;
@@ -628,7 +629,7 @@ public class Assembler {
     static void flc(final byte[] name, final byte[] content) {
         StringBuilder nameBuilder = new StringBuilder();
         for(final byte c : name) nameBuilder.append((char) c);
-        Files.createFile(nameBuilder.toString(), content);
+        Directories.getCurrentDir().getFiles().createFile(nameBuilder.toString(), content);
     }
 
     /**
@@ -638,7 +639,7 @@ public class Assembler {
     static void flg(final byte[] name) {
         StringBuilder nameBuilder = new StringBuilder();
         for(final byte c : name) nameBuilder.append((char) c);
-        Files.getFile(nameBuilder.toString());
+        Directories.getCurrentDir().getFiles().getFile(nameBuilder.toString());
     }
 
     /**

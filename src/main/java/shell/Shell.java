@@ -1,5 +1,6 @@
 package shell;
 
+import filesystem.Directories;
 import filesystem.Disk;
 import utils.Utils;
 
@@ -97,7 +98,11 @@ public class Shell {
      * @return condition to close system
      */
     public static boolean interpret( ) {
-        print("> ");
+        String history = "";
+        for (String e: Directories.getHistory()){
+            history += e + "/";
+        }
+        print(history + Directories.getCurrentDir().getName() + "> ");
         ArrayList<String> arguments = new ArrayList<>();
         arguments.add("ex");
         String input = read();

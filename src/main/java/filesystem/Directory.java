@@ -7,7 +7,8 @@ public class Directory {
     private Vector<Directory> dirs = new Vector<>();
     private Files files;
 
-    public Directory(String name) {
+    Directory(String name) {
+        files = new Files();
         this.name = name;
     }
 
