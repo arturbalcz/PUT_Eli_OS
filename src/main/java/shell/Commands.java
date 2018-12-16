@@ -2,12 +2,10 @@ package shell;
 
 import assembler.Assembler;
 import filesystem.Files;
-import processess.PCB;
 import processess.PCBList;
 import utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -120,27 +118,30 @@ public interface Commands {
      * @param args name of .exe file
      */
     static void cp(ArrayList<String> args) {
-        // TODO: implement proper process creation
-        if (args.size() == 1) Shell.println("no exe file specified");
+        if (args.size() != 4) Shell.println("invalid number of arguments");
+
+        final byte[] exec = Files.getCleanFile(args.get(1));
+        if (exec[0] == -1) Shell.println("Program does not exist");
         else {
-            Utils.log("running program in dev environment");
-            final byte[] exec = Files.getCleanFile(args.get(1));
-            if(exec[0] == -1) {
-                Shell.println("Program does not exist");
-                return;
-            }
-            Utils.log(Arrays.toString(exec));
-            PCBList pcbList = new PCBList(); //[Mateusz] TODO: make it as argument
-            //PCB process = new PCB(1,"p1", 10, exec, pcbList);
-            //pcbList.CPU.displayQueue();
-            pcbList.newProcess("silnia", 7, exec);
-            pcbList.CPU.displayQueue(10);
-            pcbList.CPU.run();
-
-
-            //noinspection StatementWithEmptyBody
-            //while(process.execute());
+            PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
+            // noinspection StatementWithEmptyBody
+            while (PCBList.list.processor.run());
         }
     }
+
+    /**
+     * List all processes
+     */
+    static void lp(ArrayList<String> args) {
+        PCBList.list.print();
+    }
+
+    /**
+     * List ready processes
+     */
+    static void lpq(ArrayList<String> args) {
+        PCBList.list.processor.printQueue();
+    }
+
 
 }

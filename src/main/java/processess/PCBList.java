@@ -1,9 +1,13 @@
 package processess;
 
 import processor.Processor;
+import shell.Shell;
 import utils.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Stores Process Control Blocks and manages them
@@ -11,6 +15,9 @@ import java.util.*;
  * @see PCB
  */
 public class PCBList {
+
+    /** Instance of PCBList */
+    public static final PCBList list = new PCBList();
 
     /**
      * Stores process control blocks
@@ -33,7 +40,7 @@ public class PCBList {
     //private virtalmemory vram; TODO: uncomment
 
 
-    public Processor CPU = new Processor();
+    public Processor processor = new Processor(this);
 
 
     /**
@@ -69,18 +76,23 @@ public class PCBList {
         return temp;
     }
 
+    public void addDummy(final byte[] dummyExec) {
+        final PCB newProcess = new PCB(-1, "DUMMY", 0, dummyExec);
+        data.add(newProcess);
+        processor.addReadyProcess(newProcess, false);
+    }
+
     /**
      * Creates a new process and adds it to
      *
      * @param name name of new process
      * @param priority base priority of new process
      */
-    public void newProcess(String name, int priority, byte[] exec){
-        int tempPid = pidGen();
-        data.add(new PCB(tempPid, name, priority, exec, this));
-        //TO>Artur|Jakub< TODO: correct use of this modifier
-        CPU.addReadyProcess(findByPID(tempPid), false);
-
+    public void newProcess(final String name, final int priority, final byte[] exec){
+        final int id = pidGen();
+        final PCB newProcess = new PCB(id, name, priority, exec);
+        data.add(newProcess);
+        processor.addReadyProcess(newProcess, false);
     }
 
     /**
@@ -123,9 +135,7 @@ public class PCBList {
     }
 
     public void print(){
-        for (PCB e: data){
-            System.out.println("Process " + e.getPID() + " (Name: " + e.getName() + ", Priority: " + e.getDynamicPriority() + ")" );
-        }
+        for (final PCB pcb: data) Shell.println(pcb.toString());
     }
 
 }

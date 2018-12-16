@@ -4,8 +4,6 @@ import assembler.Assembler;
 import assembler.CPUState;
 import utils.Utils;
 
-import java.util.Vector;
-
 /**
  * Process Control Block, represents process
  */
@@ -49,7 +47,6 @@ public class PCB {
 
     private CPUState cpuState;
 
-    private PCBList pcbList;
 
     // temporary ram, see constructor
     private final byte[] code;
@@ -63,7 +60,7 @@ public class PCB {
      * @param priority process base priority
      * @param exec temporary ram
      */
-    public PCB(int PID, String name, int priority, byte[] exec, PCBList pcbList) {
+    public PCB(int PID, String name, int priority, byte[] exec) {
         this.PID = PID;
         this.name = name;
 
@@ -79,7 +76,6 @@ public class PCB {
         this.dynamicPriority = priority;
         this.cpuState = Assembler.getFreshCPU();
         this.readyTime=0;
-        this.pcbList = pcbList;
 
         //this.vram = vram; TODO: unncoment
 
@@ -127,9 +123,9 @@ public class PCB {
         this.PC = PC;
     }
 
-    public void deleteProcess(){
-        pcbList.deleteProcess(this.PID);
-    }
+//    public void deleteProcess(){
+//        pcbList.deleteProcess(this.PID);
+//    }
 
     public ProcessState getProcessState(){
         return state;
@@ -237,8 +233,8 @@ public class PCB {
         Assembler.execute(this);
 
 
-        if (PC == code.length){ //TO>Jakub< TODO: or >= ?
-            setState(ProcessState.TERMINATED);
+        if (PC >= code.length) {
+//            setState(ProcessState.TERMINATED);
             return false;
         } else
             return  true/*PC < code.length*/;
@@ -258,5 +254,19 @@ public class PCB {
 
     public void setCPUState(CPUState cpuState) {
         this.cpuState = cpuState;
+    }
+
+    @Override
+    public String toString() {
+        return "PCB{" +
+                "PID=" + PID +
+                ", name='" + name + '\'' +
+                ", state=" + state +
+                ", PC=" + PC +
+                ", basePriority=" + basePriority +
+                ", dynamicPriority=" + dynamicPriority +
+                ", readyTime=" + readyTime +
+                ", executedOrders=" + executedOrders +
+                '}';
     }
 }

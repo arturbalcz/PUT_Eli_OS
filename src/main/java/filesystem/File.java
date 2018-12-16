@@ -1,7 +1,5 @@
 package filesystem;
 
-import static filesystem.Disk.findNextFree;
-
 public class File {
     private String name;
     private String extension;

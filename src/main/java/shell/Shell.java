@@ -4,14 +4,13 @@ import filesystem.Disk;
 import utils.Utils;
 
 import java.io.PrintStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Scanner;
-import java.lang.System;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -40,6 +39,8 @@ public class Shell {
         CommandTable.put("file", Commands::file);
         CommandTable.put("com", Commands::com);
         CommandTable.put("cp", Commands::cp);
+        CommandTable.put("lpq", Commands::lpq);
+        CommandTable.put("lp", Commands::lp);
     }
     private static Integer size = CommandTable.size();
 

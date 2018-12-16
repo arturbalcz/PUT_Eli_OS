@@ -1,15 +1,13 @@
 package utils;
 
-import shell.Shell;
-
-import java.awt.*;
-import java.io.*;
-import java.awt.event.*;
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.concurrent.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Semaphore;
 
 /**
  * Utility methods used across all classes

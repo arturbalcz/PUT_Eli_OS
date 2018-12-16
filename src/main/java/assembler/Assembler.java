@@ -4,6 +4,7 @@ import filesystem.Files;
 import processess.PCB;
 import shell.Shell;
 import utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,6 +63,9 @@ public class Assembler {
         cpu.getD().set(cpu.getD().get());
         cpu.setCF(cpuState.getCF());
         cpu.setZF(cpuState.getZF());
+
+        Utils.log("CPU state updated");
+        cpu.print();
     }
 
     private static final String MEMORY_ALLOCATOR = "LET";

@@ -1,12 +1,17 @@
 import assembler.Assembler;
 import filesystem.Files;
+import processess.PCBList;
 import shell.Shell;
 import utils.Utils;
 
 /**
  * Collects together all modules and run system
  */
-class OS {
+public class OS {
+
+    /** code of DUMMY process */
+    private static final String DUMMY = "loop: MOV AX FFH\n" +
+                                        "JNZ loop";
 
     /**
      * Code of program counting 16bit factorial
@@ -31,7 +36,10 @@ class OS {
                                                     "DEC AL\n" +
                                                     "JNZ loop";
 
-    private static final String FACTORIAL_8_ASM =   "LET 05H\n" +
+    /**
+     * Code of program counting 8bit factorial (for debug)
+     */
+    private static final String FACTORIAL_8_ASM =   "LET 03H\n" +
                                                     "MOV AL [01]\n" +
                                                     "MOV BX AX\n" +
                                                     "DEC AL\n" +
@@ -39,32 +47,18 @@ class OS {
                                                     "DEC AL\n" +
                                                     "JNZ loop";
 
-
-    /**
-     * Creates files with initial program codes and executables
-     */
-    private static void createInitialFiles() {
-        Utils.log("creating initial programs");
-        //createAndCompile(FACTORIAL_16_ASM, "f16");
-        createAndCompile(FACTORIAL_8_ASM, "f8");
-    }
-
-    /**
-     * Creates file with given code and second with its executable
-     * @param codeText assembler code
-     * @param fileName name of file to create
-     */
-    private static void createAndCompile(final String codeText, final String fileName) {
-        final byte[] code = codeText.getBytes();
-        Files.createFile(fileName + ".asm", code);
-
-        Assembler assembler = new Assembler();
-        final byte[] exec = assembler.compile(code);
-        Files.createFile(fileName + ".exe", exec);
-    }
+    private static final String LOGO =  "    ____  __  ________   _________ __           ____  _____\n" +
+                                        "   / __ \\/ / / /_  __/  / ____/ (_) /_____ _   / __ \\/ ___/\n" +
+                                        "  / /_/ / / / / / /    / __/ / / / __/ __ `/  / / / /\\__ \\ \n" +
+                                        " / ____/ /_/ / / /    / /___/ / / /_/ /_/ /  / /_/ /___/ / \n" +
+                                        "/_/    \\____/ /_/    /_____/_/_/\\__/\\__,_/   \\____//____/  \n" +
+                                        "                                                           ";
 
     OS() {
         createInitialFiles();
+
+        final byte[] dummyExec = Files.getFile("dummy.exe");
+        PCBList.list.addDummy(dummyExec);
     }
 
     /**
@@ -72,16 +66,35 @@ class OS {
      */
     void run() {
         Utils.log("system started");
-        Shell.println("    ____  __  ________   _________ __           ____  _____\n" +
-                "   / __ \\/ / / /_  __/  / ____/ (_) /_____ _   / __ \\/ ___/\n" +
-                "  / /_/ / / / / / /    / __/ / / / __/ __ `/  / / / /\\__ \\ \n" +
-                " / ____/ /_/ / / /    / /___/ / / /_/ /_/ /  / /_/ /___/ / \n" +
-                "/_/    \\____/ /_/    /_____/_/_/\\__/\\__,_/   \\____//____/  \n" +
-                "                                                           ");
+        Shell.println(LOGO);
         boolean closing = false;
         while(!closing) {
             closing = Shell.interpret();
         }
+    }
+
+    /**
+     * Creates files with initial program codes and executables
+     */
+    private static void createInitialFiles() {
+        Utils.log("creating initial programs");
+        createAndCompile(DUMMY, "dummy", false);
+        createAndCompile(FACTORIAL_8_ASM, "f8", true);
+        createAndCompile(FACTORIAL_16_ASM, "f16", true);
+    }
+
+    /**
+     * Creates file with given code and second with its executable
+     * @param codeText assembler code
+     * @param fileName name of file to create
+     */
+    private static void createAndCompile(final String codeText, final String fileName, final boolean withSource) {
+        final byte[] code = codeText.getBytes();
+        if (withSource) Files.createFile(fileName + ".asm", code);
+
+        Assembler assembler = new Assembler();
+        final byte[] exec = assembler.compile(code);
+        Files.createFile(fileName + ".exe", exec);
     }
 
 }
