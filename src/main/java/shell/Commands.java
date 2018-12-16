@@ -219,7 +219,11 @@ public interface Commands {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else try {
-            Directories.setCurrentDir(args.get(1));
+            //Directories.setCurrentDir(args.get(1));
+            String[] path = args.get(1).split("[/]");
+            for(String e:path){
+                Directories.setCurrentDir(e);
+            }
         } catch (IndexOutOfBoundsException e) {
             Shell.println("Invalid index");
         }
