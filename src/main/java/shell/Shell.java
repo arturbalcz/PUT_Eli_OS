@@ -4,13 +4,10 @@ import filesystem.Disk;
 import utils.Utils;
 
 import java.io.PrintStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -21,19 +18,20 @@ import java.util.function.Consumer;
  */
 public class Shell {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
     private static final PrintStream standardOut = System.out;
+    static boolean exiting = false;
 
     /**
      * Main map that stores all of connected commends and methods references
      * Method need to have ArrayList<String> as array of parameters from user
      */
-    private static HashMap<String, Consumer<ArrayList<String>>> CommandTable = new HashMap<>();
+    static HashMap<String, Consumer<ArrayList<String>>> CommandTable = new HashMap<>();
     static {
-        CommandTable.put("time", Shell::time );
-        CommandTable.put("help", Shell::help );
-        CommandTable.put("exit", Shell::exit );
-        CommandTable.put("log",  Commands::logging);
+        CommandTable.put("time", Commands::time );
+        CommandTable.put("help", Commands::help );
+        CommandTable.put("exit", Commands::exit );
+        CommandTable.put("log", Commands::logging);
+        CommandTable.put("step", Commands::stepping);
         CommandTable.put("test", Commands::test);
         CommandTable.put("disk", Disk::test);
         CommandTable.put("file", Commands::file);
@@ -42,7 +40,6 @@ public class Shell {
         CommandTable.put("lpq", Commands::lpq);
         CommandTable.put("lp", Commands::lp);
     }
-    private static Integer size = CommandTable.size();
 
     /**
      * Prints parameter to the console with new line
@@ -69,37 +66,28 @@ public class Shell {
         return standardIn.nextLine();
     }
 
-    private static void time(ArrayList<String> argv) {
-        String times = formatter.format(LocalDateTime.now());
-        Utils.step("Printing time for user.");
-        println(times);
-    }
-
-    private static void help(ArrayList<String> argv) {
-        Set<String> keys = CommandTable.keySet();
-        Utils.step("Printing help for user.");
-        for (String command : keys) {
-            println(command.toUpperCase());
-        }
-    }
-
-    private static void exit(ArrayList<String> argv) {
-        Utils.log("Exiting by user");
-    }
-
     /**
      * Interprets user input and run method found in {@link #CommandTable}
      * @return condition to close system
      */
     public static boolean interpret( ) {
-        print("> ");
-        ArrayList<String> arguments = new ArrayList<>();
-        arguments.add("ex");
+        standardOut.print("> ");
         String input = read();
-        arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
-        for (String x : arguments) {
-            Utils.log(x);
+        input = input.trim();
+        if (input.isEmpty()) {
+            return exiting;
         }
+        ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
+
+        // printing arguments for debug
+        Utils.log("Printing all arguments");
+        String args = "";
+        StringBuilder sB = new StringBuilder(args);
+        for (String x : arguments) {
+            sB.append(x);
+            sB.append(", ");
+        }
+        Utils.log(sB.toString());
         String command = arguments.get(0);
 
         if (CommandTable.get(command) == null) {
@@ -110,14 +98,11 @@ public class Shell {
                 CommandTable.get(command).accept(arguments);
             }
             catch (IndexOutOfBoundsException e) {
-                //Utils.step("Invalid number of arguments for " + command); // quite annoying
-                Utils.log("Invalid number of arguments for " + command);
+                Utils.log("Invalid number of arguments for " + command, true);
                 println("invalid number of arguments");
             }
-            return command.equals("exit");
         }
-        return false;
-
+        return exiting;
     }
 
 }
