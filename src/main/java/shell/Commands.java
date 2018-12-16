@@ -3,6 +3,7 @@ package shell;
 import assembler.Assembler;
 import filesystem.Files;
 import processess.PCB;
+import processess.PCBList;
 import utils.Utils;
 
 import java.util.ArrayList;
@@ -129,9 +130,16 @@ public interface Commands {
                 return;
             }
             Utils.log(Arrays.toString(exec));
-            PCB process = new PCB(1,"p1", 10, exec);
+            PCBList pcbList = new PCBList(); //[Mateusz] TODO: make it as argument
+            //PCB process = new PCB(1,"p1", 10, exec, pcbList);
+            //pcbList.CPU.displayQueue();
+            pcbList.newProcess("silnia", 7, exec);
+            pcbList.CPU.displayQueue(10);
+            pcbList.CPU.run();
+
+
             //noinspection StatementWithEmptyBody
-            while(process.execute());
+            //while(process.execute());
         }
     }
 

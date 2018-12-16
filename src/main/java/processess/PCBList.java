@@ -1,11 +1,9 @@
 package processess;
 
+import processor.processor;
 import utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Stores Process Control Blocks and manages them
@@ -29,15 +27,25 @@ public class PCBList {
      */
     private Random generator;
 
+    /**
+     * Reference to virtual memory manager
+     */
+    //private virtalmemory vram; TODO: uncomment
+
+
+    public processor CPU = new processor();
+
 
     /**
      * Initilaizes PCBList
      */
-    public PCBList() {
+    public PCBList(/*virtualmemory vram*/) {
         data = new ArrayList<>();
         usedPids = new ArrayList<>();
         generator = new Random();
+        //this.vram = vram; TODO: uncomment
     }
+
 
     /**
      * Generates an unique process id (pid) and adds it to used adresses arraylist
@@ -49,7 +57,7 @@ public class PCBList {
         int temp = -1;
         while (!notIn){
             notIn = true;
-            temp = generator.nextInt(1500001) + 1000000;
+            temp = generator.nextInt(101) + 800;
             for (int e: usedPids){
                 if (e == temp) {
                     notIn = false;
@@ -67,9 +75,12 @@ public class PCBList {
      * @param name name of new process
      * @param priority base priority of new process
      */
-    public void newProcess(String name, int priority){
-        data.add(new PCB(pidGen(), name, priority, null));
-        //dać znać aby przenieść z pamięci do ram TODO usunac exec z construktora
+    public void newProcess(String name, int priority, byte[] exec){
+        int tempPid = pidGen();
+        data.add(new PCB(tempPid, name, priority, exec, this));
+        //TO>Artur|Jakub< TODO: correct use of this modifier
+        CPU.AddReadyProcess(findByPID(tempPid), false);
+
     }
 
     /**
@@ -84,9 +95,27 @@ public class PCBList {
             if (temp.getPID() == pid){
                 Utils.log("Deleted process \"" + temp.getName() +
                         "\", PID: " + temp.getPID());
+                //vram.removeProcess(temp.getPID()) TODO: unncoment
+                //[Gracjan] - moze w tej funkcji zmienilbys parametr z proces na pid,
+                // w sumie to i tak tylko tego potrzebujesz, a bedzie prosciej
+
                 itr.remove();
             }
         }
+    }
+
+    public PCB findByName(String name){
+        for (PCB e: data){
+            if (e.getName().equals(name)) return e;
+        }
+        return null;
+    }
+
+    public PCB findByPID(int pid){
+        for (PCB e: data){
+            if (e.getPID() == pid) return e;
+        }
+        return null;
     }
 
     public List<PCB> getData() {

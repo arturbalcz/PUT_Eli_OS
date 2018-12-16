@@ -31,12 +31,22 @@ class OS {
                                                     "DEC AL\n" +
                                                     "JNZ loop";
 
+    private static final String FACTORIAL_8_ASM =   "LET 05H\n" +
+                                                    "MOV AL [01]\n" +
+                                                    "MOV BX AX\n" +
+                                                    "DEC AL\n" +
+                                                    "loop: MUL BX AL\n" +
+                                                    "DEC AL\n" +
+                                                    "JNZ loop";
+
+
     /**
      * Creates files with initial program codes and executables
      */
     private static void createInitialFiles() {
         Utils.log("creating initial programs");
-        createAndCompile(FACTORIAL_16_ASM, "f16");
+        //createAndCompile(FACTORIAL_16_ASM, "f16");
+        createAndCompile(FACTORIAL_8_ASM, "f8");
     }
 
     /**

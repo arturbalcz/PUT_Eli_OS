@@ -1,10 +1,12 @@
 package processor;
 
 import processess.PCB;
+import processess.PCBList;
+import processess.ProcessState;
 import processor.data_structures.Multilevel_queue;
 import utils.Utils;
 
-import javax.rmi.CORBA.Util;
+//import javax.rmi.CORBA.Util;
 import java.util.ArrayList;
 
 public class processor
@@ -13,7 +15,10 @@ public class processor
 
     private ArrayList<Boolean> ReadySummary = new ArrayList<>(18);
 
-    private PCB RunningProcess;
+    //<Mateusz>
+    //private PCB RunningProcess;
+    private PCB RunningProcess = null;
+    //</Mateusz>
 
     public PCB getRunningProcess() /** *returns currently running process */
     {
@@ -30,6 +35,13 @@ public class processor
 
     private void FinishRunning() /** *finishes running process executing after 3 orders */
     {
+        //  TO>Artur|Jakub< proces który był używany, nie miał zmienionego stanu na running i
+        //       wciąż znajdował się w kolejce ready, zmieniłem to tak aby usuwało z kolejki ten proces
+        //       TODO: sprawdzić czy nic nie popsułem przy tym
+
+
+        //<Mateusz>
+        /*
         RunningProcess = ReadyProcessQueue.poll();
 
         if(ReadyProcessQueue.isEmpty(RunningProcess.getDynamicPriority()))
@@ -42,21 +54,63 @@ public class processor
             RunningProcess.setExetucedOrders(0);
             RunningProcess.setDynamicPriority(RunningProcess.getBasePriority());
         }
-
+        //TODO: change state
         ReadyProcessQueue.add(RunningProcess, RunningProcess.getDynamicPriority());
 
         ReadySummary.set(RunningProcess.getDynamicPriority(), true);
 
         Utils.log("Process: " + RunningProcess.getName() + "finished running, priority decreased to" + RunningProcess.getDynamicPriority());
+*/
+        //----------------------------------------------
+
+        if (RunningProcess == null){
+            return;
+        }
+       /* else if (RunningProcess.getProcessState() == ProcessState.TERMINATED){
+
+            if(ReadyProcessQueue.isEmpty(RunningProcess.getDynamicPriority()))
+            {
+                ReadySummary.set(RunningProcess.getDynamicPriority(), false);
+            }
+
+
+        } */
+
+        else {
+            if(ReadyProcessQueue.isEmpty(RunningProcess.getDynamicPriority()))
+            {
+                ReadySummary.set(RunningProcess.getDynamicPriority(), false);
+            }
+
+            if(RunningProcess.getExecutedOrders() >= 2)
+            {
+                RunningProcess.setExetucedOrders(0);
+                RunningProcess.setBasePriority();
+                //RunningProcess.setDynamicPriority(RunningProcess.getBasePriority());
+            }
+
+            RunningProcess.setState(ProcessState.READY);
+            ReadyProcessQueue.add(RunningProcess, RunningProcess.getDynamicPriority());
+
+            ReadySummary.set(RunningProcess.getDynamicPriority(), true);
+
+            Utils.log("Process: " + RunningProcess.getName() + "finished running, priority decreased to" + RunningProcess.getDynamicPriority());
+
+
+
+        }
+
     }
 
     private void FindReadyProcess() /** *finds the first process with the highest priority */
     {
         FinishRunning();
 
-        RunningProcess = ReadyProcessQueue.peek();
-
+        System.out.println("Running process: ");
+        RunningProcess = ReadyProcessQueue.poll();
+        System.out.println(RunningProcess.getName());
         RunningProcess.setReadyTime(0);
+        RunningProcess.setState(ProcessState.RUNNING); //[Mateusz]
 
         Utils.log("New ready process found: " + RunningProcess.getName() + ". Priority: " + RunningProcess.getDynamicPriority());
     }
@@ -65,7 +119,17 @@ public class processor
 
     public boolean RemoveProcess(PCB process) /** *removes process from queue */
     {
-        boolean result = ReadyProcessQueue.remove(process);
+
+        //  TO>Artur|Jakub< proces który był używany, nie miał zmienionego stanu na running i
+        //       wciąż znajdował się w kolejce ready, zmieniłem to tak aby usuwało z kolejki ten proces
+        //       TODO: sprawdzić czy nic nie popsułem przy tym
+        //       TODO: zobaczyc czy wciąż nie da się zrobić kontroli błędów (chodzi o tamto return true)
+
+
+        //<Mateusz>
+
+
+       /*  boolean result = ReadyProcessQueue.remove(process);
         if(result)
         {
             if(ReadyProcessQueue.isEmpty(process.getDynamicPriority()))
@@ -87,6 +151,34 @@ public class processor
         }
 
         return result;
+        */
+
+        //------------------------------------------------
+
+
+
+            if(ReadyProcessQueue.isEmpty(process.getDynamicPriority()))
+            {
+                ReadySummary.set(process.getDynamicPriority(), false);
+            }
+
+            Utils.log("Process removed: " + process.getName());
+
+
+            //TO>Artur|Jakub< czy tu jest możliwość że RunningProcess nie będzie procesem?
+            if (RunningProcess==process)
+            {
+                this.FindReadyProcess();
+            }
+
+            process.deleteProcess();
+
+
+        return true;
+
+
+
+        //</Mateusz>
     }
 
     public void AddReadyProcess(PCB process, boolean modifier) /** *adds process to the queue */
@@ -96,6 +188,10 @@ public class processor
             process.setDynamicPriority(process.getDynamicPriority()+3);
             Utils.log("Process: " + process.getName() + "priority increased to: " + process.getDynamicPriority());
         }
+
+        //TODO: Debug
+        Utils.log("Adding process: " + process.getName());
+
         int priority = process.getDynamicPriority();
         ReadyProcessQueue.add(process, priority);
         ReadySummary.set(priority, true);
@@ -146,6 +242,8 @@ public class processor
     {
         FindReadyProcess();
 
+        System.out.println("Executing process: " + RunningProcess.getName()); //[Mateusz]
+
         while(RunningProcess.getExecutedOrders() < 3)
         {
             for(int i=0; i<3; i++)
@@ -159,8 +257,9 @@ public class processor
                 {
                     RemoveProcess(RunningProcess);
                 }
-            }
 
+
+            }
             BalanceSetManager();
         }
     }
@@ -169,6 +268,7 @@ public class processor
     {
         FindReadyProcess();
 
+        System.out.println("Executing process: " + RunningProcess.getName()); //[Mateusz]
         while(RunningProcess.getExecutedOrders() < 3)
         {
             for(int i=0; i<3; i++)
@@ -205,6 +305,7 @@ public class processor
                 }
             }
         }
+
     }
 
     public void displayQueue(int priority) /** *displays specified queue */
