@@ -48,6 +48,34 @@ public interface Commands {
     }
 
     /**
+     * Turns step work on or off
+     * @param args "on" or "off"
+     */
+    static void stepping(ArrayList<String> args) {
+        String help = "Turns step work on or off\n\n" +
+                "STEP [/ON][/OFF]\n";
+        if(args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        }
+        else {
+            String param = args.get(1);
+            switch (param.toUpperCase()) {
+                case "/ON":
+                    Utils.stepOn();
+                    break;
+                case "/OFF":
+                    Utils.stepOff();
+                    break;
+                default:
+                    Utils.log("Wrong argument");
+                    Shell.println(help);
+                    break;
+            }
+        }
+    }
+
+    /**
      * Prints time to user console
      * @param args no effect
      */
@@ -91,10 +119,12 @@ public interface Commands {
 
     /**
      * Used for testing shell
-     * @param argv anything but {@code null}
+     * @param args anything but {@code null}
      */
-    static void test(ArrayList<String> argv) {
-        Shell.println("command working " + argv.get(1));
+    static void test(ArrayList<String> args) {
+        Utils.step("step work is working" + args.get(1));
+        Utils.log("log is working" +  args.get(1));
+        Shell.println("command is working " + args.get(1));
     }
 
     static void file(ArrayList<String> args){

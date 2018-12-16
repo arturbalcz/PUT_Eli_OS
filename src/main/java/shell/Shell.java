@@ -32,6 +32,7 @@ public class Shell {
         CommandTable.put("help", Commands::help );
         CommandTable.put("exit", Commands::exit );
         CommandTable.put("log", Commands::logging);
+        CommandTable.put("step", Commands::stepping);
         CommandTable.put("test", Commands::test);
         CommandTable.put("disk", Disk::test);
         CommandTable.put("file", Commands::file);
