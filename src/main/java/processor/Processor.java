@@ -13,6 +13,7 @@ import java.util.ArrayList;
 public class Processor
 {
     private static final int LEVEL_NUMBER = 18;
+    private static final int TIME_QUANTUM = 3;
 
     private final MultilevelQueue<PCB> readyProcessQueue = new MultilevelQueue<>(LEVEL_NUMBER);
     private final ArrayList<Boolean> readySummary = new ArrayList<>(LEVEL_NUMBER);
@@ -37,9 +38,6 @@ public class Processor
     private void finishRunning()
     {
         if (runningProcess != null) {
-            if(readyProcessQueue.isEmpty(runningProcess.getDynamicPriority()))
-                readySummary.set(runningProcess.getDynamicPriority(), false);
-
             runningProcess.setExetucedOrders(0);
             runningProcess.setBasePriority();
 
@@ -52,7 +50,6 @@ public class Processor
 
             Utils.log("Process: " + runningProcess.getName() + " finished running, priority decreased to" + runningProcess.getDynamicPriority());
         }
-
     }
 
     /** finds the first process with the highest priority */
@@ -60,7 +57,7 @@ public class Processor
     {
         runningProcess = readyProcessQueue.poll();
         runningProcess.setReadyTime(0);
-        runningProcess.setState(ProcessState.RUNNING); //[Mateusz]
+        runningProcess.setState(ProcessState.RUNNING);
         Assembler.setCPUState(runningProcess.getCpuState());
 
         Utils.log("New ready process found: " + runningProcess.getName() + ". Priority: " + runningProcess.getDynamicPriority());
@@ -70,13 +67,13 @@ public class Processor
     private void removeProcess(PCB process)
     {
         readyProcessQueue.remove(process);
-        if(readyProcessQueue.isEmpty(process.getDynamicPriority()))
-            readySummary.set(process.getDynamicPriority(), false);
-        if (runningProcess==process) findReadyProcess();
         pcbList.deleteProcess(runningProcess.getPID());
 
-        Utils.log("Process removed: " + process.getName());
-        Shell.println("Process removed: " + process.getName());
+        if(readyProcessQueue.isEmpty(process.getDynamicPriority()))
+            readySummary.set(process.getDynamicPriority(), false);
+
+        Utils.log("Process removed: " + process.getSignature());
+        Shell.println("Process removed: " + process.getSignature());
     }
 
     /** adds process to the queue */
@@ -85,17 +82,14 @@ public class Processor
         if(modifier)
         {
             process.setDynamicPriority(process.getDynamicPriority()+3);
-            Utils.log("Process: " + process.getName() + "priority increased to: " + process.getDynamicPriority());
+            Utils.log("Process: " + process.getSignature() + "priority increased to: " + process.getDynamicPriority());
         }
-
-        //TODO: Debug
-        Utils.log("Adding process: " + process.getName());
 
         int priority = process.getDynamicPriority();
         readyProcessQueue.add(process, priority);
         readySummary.set(priority, true);
 
-        Utils.log("Process added: " + process.getName());
+        Utils.log("Process added: " + process.toString());
     }
 
     /** finds if any process was waiting too long and sets higher priority */
@@ -103,10 +97,10 @@ public class Processor
     {
         Utils.log("Balance Set Manager started");
 
-        PCB process = null;
+        PCB process;
         for(int i=1; i<15; i++)
         {
-            if(readySummary.get(i)==true)
+            if(readySummary.get(i))
             {
                 for(int j = 0; j < readyProcessQueue.size(i); j++) {
                     process = readyProcessQueue.poll(i);
@@ -115,11 +109,12 @@ public class Processor
                         readySummary.set(process.getDynamicPriority(), false);
                     }
 
-                    process.setReadyTime(process.getReadyTime() + 3);
+                    process.setReadyTime(process.getReadyTime() + TIME_QUANTUM);
 
                     if (process.getReadyTime() >= 15) {
-                        process.setDynamicPriority(15);
-                        Utils.log("Process: " + process.getName() + "has been waiting for: " + process.getReadyTime() + " orders. Priority increased to: " + process.getDynamicPriority());
+                        process.setDynamicPriority(process.getDynamicPriority() + 1);
+                        Utils.log("Process: " + process.getSignature() + " has been waiting for: " + process.getReadyTime() + ". Priority increased to: " + process.getDynamicPriority());
+                        process.setReadyTime(0);
                     }
 
                     readyProcessQueue.add(process, process.getDynamicPriority());
@@ -138,49 +133,24 @@ public class Processor
     {
         findReadyProcess();
 
-        Shell.println("Running process: " + runningProcess.getName());
-        Utils.log("Running process: " + runningProcess.getName());
+        Shell.println("Running process: " + runningProcess.getName() + " id: " + runningProcess.getPID());
+        Utils.log("Running process: " + runningProcess.getName() + " id: " + runningProcess.getPID());
 
-        while(runningProcess.getExecutedOrders() < 3)
+        boolean end = false;
+        while(runningProcess.getExecutedOrders() < TIME_QUANTUM)
         {
             runningProcess.setExetucedOrders(runningProcess.getExecutedOrders()+1);
-            final boolean end = !runningProcess.execute();
+            end = !runningProcess.execute();
             Utils.log("Process: " + runningProcess.getName() + " executed with result: end=" + end + ", PC=" + runningProcess.getPC());
 
-            if (end) {
-                removeProcess(runningProcess);
-                break;
-            }
+            if (end) break;
         }
+
         finishRunning();
+        if (end) removeProcess(runningProcess);
         balanceSetManager();
 
-        return !runningProcess.name.equals("DUMMY");
-    }
-
-    /** work-by-step run method*/
-    public void runByStep()
-    {
-        findReadyProcess();
-
-        System.out.println("Executing process: " + runningProcess.getName()); //[Mateusz]
-        while(runningProcess.getExecutedOrders() < 3)
-        {
-            for(int i=0; i<3; i++)
-            {
-                runningProcess.setExetucedOrders(runningProcess.getExecutedOrders()+1);
-                boolean result= runningProcess.execute();
-
-                Utils.step("Process: " + runningProcess.getName() + "executed with result: " + result + ". PC: " + runningProcess.getPC());
-
-                if (result == false)
-                {
-                    removeProcess(runningProcess);
-                }
-            }
-
-            balanceSetManager();
-        }
+        return !(runningProcess.getPID() == -1);
     }
 
     /** logs not empty queues */
@@ -195,7 +165,7 @@ public class Processor
                 for(int j = 0; j< readyProcessQueue.size(i); j++)
                 {
                     process = readyProcessQueue.poll(i);
-                    Utils.log(process.getName() + "\t" + process.getDynamicPriority());
+                    Utils.log(process.getSignature() + "\t" + process.getDynamicPriority());
                     readyProcessQueue.add(process, process.getDynamicPriority());
                 }
             }
@@ -214,7 +184,7 @@ public class Processor
                 for(int j = 0; j< readyProcessQueue.size(i); j++)
                 {
                     process = readyProcessQueue.poll(i);
-                    Shell.println(process.getName() + "\t" + process.getDynamicPriority());
+                    Shell.println(process.getSignature() + runningProcess.getPID() + "\t" + process.getDynamicPriority());
                     readyProcessQueue.add(process, process.getDynamicPriority());
                 }
             }

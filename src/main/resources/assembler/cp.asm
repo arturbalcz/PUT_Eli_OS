@@ -1,0 +1,6 @@
+CP "f8.exe" "7"
+CP "f8.exe" "1"
+CP "f8.exe" "1"
+CP "f8.exe" "7"
+CP "f8.exe" "3"
+PRT "end"

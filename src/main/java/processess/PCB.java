@@ -4,10 +4,12 @@ import assembler.Assembler;
 import assembler.CPUState;
 import utils.Utils;
 
+import java.util.Objects;
+
 /**
  * Process Control Block, represents process
  */
-public class PCB {
+public class PCB implements Comparable<PCB> {
 
     /**
      * Unique process id
@@ -167,45 +169,10 @@ public class PCB {
      * Adds given parameter to dynamic priority, if sum is bigger than 15,
      * sum is set with value 15 and gives error log
      *
-     * @param dynamicPriority value to add for dynamic priority
+     * @param newPriority value to add for dynamic priority
      */
-    public void setDynamicPriority(int dynamicPriority) {
-
-        if (basePriority < 16 && dynamicPriority > 15) {
-            dynamicPriority = 15; //[Artur]
-            Utils.log("Dynamic priority is too high, changed priority of process " + this.PID +
-                    " from " + this.dynamicPriority + " to priority max size: 15", true);
-            this.dynamicPriority = dynamicPriority;
-        }
-
-        else if (basePriority > 15 && dynamicPriority > 17) {
-            dynamicPriority = 17; //[Artur]
-            Utils.log("Real-time priority is too high, changed priority of process " + this.PID +
-                    " from " + this.dynamicPriority + " to priority max size: 17", true);
-            this.dynamicPriority = dynamicPriority;
-        }
-
-        else if (basePriority < 16 && dynamicPriority < 15) {
-            Utils.log("Changed dynamic priority of process " + this.PID + " from "
-                    + this.dynamicPriority + " to " + dynamicPriority);
-            this.dynamicPriority = dynamicPriority;
-        }
-
-        else if (basePriority > 15 && dynamicPriority < 17) {
-            Utils.log("Changed real-time priority of process " + this.PID + " from "
-                    + this.dynamicPriority + " to " + dynamicPriority);
-            this.dynamicPriority = dynamicPriority;
-        }
-
-        else if (dynamicPriority < basePriority) {
-            setBasePriority();
-        }
-
-        //[Artur]: if(dynamicPriority < basePriority) throw Exception;
-
-
-        //this.dynamicPriority = dynamicPriority;
-
+    public void setDynamicPriority(final int newPriority) {
+        dynamicPriority = (newPriority < 15) ? newPriority : 15;
     }
     /**
      * Sets dynamic priority with it's base value
@@ -232,13 +199,7 @@ public class PCB {
     public boolean execute() {
         Assembler.execute(this);
 
-
-        if (PC >= code.length) {
-//            setState(ProcessState.TERMINATED);
-            return false;
-        } else
-            return  true/*PC < code.length*/;
-        //return PC < code.length;
+        return PC < code.length;
     }
 
     public byte getByteAt(final byte address) {
@@ -253,7 +214,7 @@ public class PCB {
     }
 
     public void setCPUState(CPUState cpuState) {
-        this.cpuState = cpuState;
+        this.cpuState.set(cpuState);
     }
 
     @Override
@@ -268,5 +229,14 @@ public class PCB {
                 ", readyTime=" + readyTime +
                 ", executedOrders=" + executedOrders +
                 '}';
+    }
+
+    public String getSignature() {
+        return name + " id: " + PID;
+    }
+
+    @Override
+    public int compareTo(PCB o) {
+        return 0;
     }
 }

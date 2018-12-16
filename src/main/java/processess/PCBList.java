@@ -77,9 +77,9 @@ public class PCBList {
     }
 
     public void addDummy(final byte[] dummyExec) {
-        final PCB newProcess = new PCB(-1, "DUMMY", 0, dummyExec);
-        data.add(newProcess);
-        processor.addReadyProcess(newProcess, false);
+        final PCB dummy = new PCB(-1, "DUMMY", 0, dummyExec);
+        data.add(dummy);
+        processor.addReadyProcess(dummy, false);
     }
 
     /**

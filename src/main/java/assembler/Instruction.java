@@ -301,6 +301,27 @@ abstract class Instruction {
         instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
+        instruction = new Instruction(
+                "CP",
+                2,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT),
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                int firstArgEnd = 0;
+                while (args[firstArgEnd] != -1) firstArgEnd++;
+
+                Assembler.cp(
+                        Arrays.copyOfRange(args, 1, firstArgEnd),
+                        "fromAsm".getBytes(),
+                        (byte) Integer.parseInt(new String(Arrays.copyOfRange(args, firstArgEnd+2, args.length-1)))
+                );
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
         return instructionsMap;
     }
 

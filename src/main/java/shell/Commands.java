@@ -197,7 +197,6 @@ public interface Commands {
 
     /**
      * Creates process with given program, name and priority
-     * <p>IN DEVELOPMENT</p>
      * @param args name of .exe file
      */
     static void cp(ArrayList<String> args) {

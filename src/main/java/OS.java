@@ -47,6 +47,13 @@ public class OS {
                                                     "DEC AL\n" +
                                                     "JNZ loop";
 
+    private static final String CP_ASM = "CP \"f16.exe\" \"7\"\n" +
+                                        "CP \"f8.exe\" \"1\"\n" +
+                                        "CP \"f8.exe\" \"1\"\n" +
+                                        "CP \"f8.exe\" \"5\"\n" +
+                                        "CP \"f8.exe\" \"1\"\n" +
+                                        "PRT \"end\"";
+
     private static final String LOGO =  "    ____  __  ________   _________ __           ____  _____\n" +
                                         "   / __ \\/ / / /_  __/  / ____/ (_) /_____ _   / __ \\/ ___/\n" +
                                         "  / /_/ / / / / / /    / __/ / / / __/ __ `/  / / / /\\__ \\ \n" +
@@ -81,6 +88,7 @@ public class OS {
         createAndCompile(DUMMY, "dummy", false);
         createAndCompile(FACTORIAL_8_ASM, "f8", true);
         createAndCompile(FACTORIAL_16_ASM, "f16", true);
+        createAndCompile(CP_ASM, "cp", true);
     }
 
     /**
