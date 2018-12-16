@@ -1,6 +1,6 @@
 package processess;
 
-import processor.processor;
+import processor.Processor;
 import utils.Utils;
 
 import java.util.*;
@@ -33,7 +33,7 @@ public class PCBList {
     //private virtalmemory vram; TODO: uncomment
 
 
-    public processor CPU = new processor();
+    public Processor CPU = new Processor();
 
 
     /**
@@ -79,7 +79,7 @@ public class PCBList {
         int tempPid = pidGen();
         data.add(new PCB(tempPid, name, priority, exec, this));
         //TO>Artur|Jakub< TODO: correct use of this modifier
-        CPU.AddReadyProcess(findByPID(tempPid), false);
+        CPU.addReadyProcess(findByPID(tempPid), false);
 
     }
 
