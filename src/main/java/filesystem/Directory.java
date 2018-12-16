@@ -43,4 +43,17 @@ public class Directory {
         }
         Shell.println("No directory named: " + name);
     }
+
+    public void tree(int level){
+        String temp = "";
+        //if(level==0) { temp = " "; }
+        for (int i = 0; i < level; i++) {
+            temp += "\t";
+        }
+        Shell.println(temp + name + " ");
+        for(Directory e:dirs){
+            e.tree(level+1);
+        }
+    }
+
 }

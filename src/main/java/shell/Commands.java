@@ -228,4 +228,16 @@ public interface Commands {
             Shell.println("Invalid index");
         }
     }
+
+    static void tree(ArrayList<String> args) {
+         String help = "TREE - displays all directories \n";
+        if (args.size() != 1) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        } else try {
+            Directories.getCurrentDir().tree(0);
+        } catch (IndexOutOfBoundsException e) {
+            Shell.println("Invalid index");
+        }
+    }
 }
