@@ -189,6 +189,18 @@ public interface Commands {
         }
     }
 
+    static void rmdir(ArrayList<String> args) {
+        String help = "RM - remove file \n";
+        if (args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        } else try {
+            Directories.getCurrentDir().removeDir(args.get(1));
+        } catch (IndexOutOfBoundsException e) {
+            Shell.println("Invalid index");
+        }
+    }
+
     static void mkdir(ArrayList<String> args) {
         String help = "MKDIR - creates a directory \n";
         if (args.size() != 2) {

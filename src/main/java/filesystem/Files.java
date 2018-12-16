@@ -81,9 +81,10 @@ public class Files {
             if (e.getName().equals(name)){
                 Disk.remove(e.getIndexBlock());
                 allFiles.remove(e);
-                break;
+                return;
             }
         }
+        Shell.println("No file named: " + name);
     }
 
 }

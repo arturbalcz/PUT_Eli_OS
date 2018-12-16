@@ -1,6 +1,7 @@
 package shell;
 
 import filesystem.Directories;
+import filesystem.Directory;
 import filesystem.Disk;
 import utils.Utils;
 
@@ -40,6 +41,7 @@ public class Shell {
         CommandTable.put("disk", Disk::test);
         CommandTable.put("file", Commands::file);
         CommandTable.put("rm", Commands::rm);
+        CommandTable.put("rmdir", Commands::rmdir);
         CommandTable.put("more", Commands::more);
         CommandTable.put("cd", Commands::cd);
         CommandTable.put("mkdir", Commands::mkdir);
@@ -99,8 +101,8 @@ public class Shell {
      */
     public static boolean interpret( ) {
         String history = "";
-        for (String e: Directories.getHistory()){
-            history += e + "/";
+        for (Directory e: Directories.getHistory()){
+            history += e.getName() + "/";
         }
         print(history + Directories.getCurrentDir().getName() + "> ");
         ArrayList<String> arguments = new ArrayList<>();

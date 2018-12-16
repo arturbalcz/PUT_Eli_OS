@@ -1,5 +1,7 @@
 package filesystem;
 
+import shell.Shell;
+
 import java.util.Vector;
 
 public class Directory {
@@ -32,4 +34,13 @@ public class Directory {
         return files;
     }
 
+    public void removeDir(String name) {
+        for(Directory e:dirs){
+            if(e.getName().equals(name)){
+                dirs.remove(e);
+                return;
+            }
+        }
+        Shell.println("No directory named: " + name);
+    }
 }

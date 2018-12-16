@@ -8,8 +8,7 @@ public class Directories {
 
     private static Directory dir = new Directory("root");
     private static Directory currentDir = dir;
-    private static Directory previousDir = dir;
-    private static Stack<String> history = new Stack<>();
+    private static Stack<Directory> history = new Stack<>();
 
     public static Directory getDir() {
         return dir;
@@ -34,13 +33,11 @@ public class Directories {
                 Shell.println("Already at top level");
                 return;
             }
-            history.pop();
-            currentDir = previousDir;
+            currentDir = history.pop();
         }else {
             Directory findDir = findDirectory(name);
             if (findDir != null) {
-                history.push(currentDir.getName());
-                previousDir = currentDir;
+                history.push(currentDir);
                 Directories.currentDir = findDir;
             } else {
                 Shell.println("No such directory");
@@ -53,7 +50,7 @@ public class Directories {
         //Directories.currentDir = dir;
     }
 
-    public static Stack<String> getHistory() {
+    public static Stack<Directory> getHistory() {
         return history;
     }
 }
