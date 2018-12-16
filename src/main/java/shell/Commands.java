@@ -60,11 +60,7 @@ public interface Commands {
 
     static void file(ArrayList<String> args) {
 
-        String help = "FILE - create and modify files \n" +
-                "   Options: \n" +
-                "       CREATE - \n" +
-                "       SHOW - \n" +
-                "       DELETE - \n";
+        String help = "FILE - create and modify files \n";
         if (args.size() != 2 && args.size() != 3 && args.size() != 4) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -74,9 +70,17 @@ public interface Commands {
             switch (param.toUpperCase()) {
                 case "CREATE":
                     Scanner scan = new Scanner(System.in);
-                    System.out.print(": ");
+                    Shell.println("Enter content, --- to finish");
+                    Shell.print(": ");
                     String input = scan.nextLine();
-                    Directories.getCurrentDir().getFiles().createFile(args.get(2), input.getBytes());
+                    String result = "";
+                    while(!input.equals("---")) {
+                        Shell.print(": ");
+                        result += input + "\n";
+                        input = scan.nextLine();
+                    }
+                    result = result.substring(0,result.length()-1); //get rid of last newline char
+                    Directories.getCurrentDir().getFiles().createFile(args.get(2), result.getBytes());
                     break;
                 default:
                     Utils.log("Wrong argument");
