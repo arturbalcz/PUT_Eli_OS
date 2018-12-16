@@ -48,6 +48,7 @@ public class Shell {
         CommandTable.put("dir", Commands::dir);
         CommandTable.put("copy", Commands::copy);
         CommandTable.put("tree", Commands::tree);
+        CommandTable.put("edit", Commands::edit);
         CommandTable.put("com", Commands::com);
         CommandTable.put("cp", Commands::cp);
     }

@@ -179,7 +179,7 @@ public abstract class Disk {
         for (int i = 0; i < BLOCK_SIZE; i++) {
             System.out.print(i % 10 + " ");
         }
-        System.out.print("  taken");
+        System.out.print(" \t\ttaken");
         System.out.println();
         for (int i = 0; i < physicalDisk.length / BLOCK_SIZE; i++) {
             System.out.print((i < 10 ? " " + i : i) + "  ");

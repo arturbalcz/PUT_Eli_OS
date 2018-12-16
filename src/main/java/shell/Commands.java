@@ -3,6 +3,7 @@ package shell;
 import assembler.Assembler;
 import filesystem.Directories;
 import filesystem.Directory;
+import filesystem.Disk;
 import filesystem.Files;
 import processess.PCB;
 import utils.Utils;
@@ -240,6 +241,42 @@ public interface Commands {
             Shell.println(help);
         } else try {
             Directories.getCurrentDir().tree(0);
+        } catch (IndexOutOfBoundsException e) {
+            Shell.println("Invalid index");
+        }
+    }
+
+    static void edit(ArrayList<String> args) {
+        String help = "EDIT - append content to file \n";
+        if (args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        } else try {
+            Files current = Directories.getCurrentDir().getFiles();
+            byte[] temp = current.getFileClean(args.get(1));
+            if(temp[0] == -1){
+                return;
+            }
+            current.deleteFile(args.get(1));
+            String result = "";
+            for (byte e : temp) {
+                result += (char)e;
+            }
+            Shell.println("Enter content, --- to finish");
+            Shell.print(result);
+            Scanner scan = new Scanner(System.in);
+            Shell.print(": ");
+            String input = scan.nextLine();
+            String modify = "";
+            while(!input.equals("---")) {
+                Shell.print(": ");
+                modify += input + "\n";
+                input = scan.nextLine();
+            }
+            modify = modify.substring(0,modify.length()-1); //get rid of last newline char
+
+
+            current.createFile(args.get(1), (result + modify).getBytes());
         } catch (IndexOutOfBoundsException e) {
             Shell.println("Invalid index");
         }
