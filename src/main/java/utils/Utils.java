@@ -113,10 +113,8 @@ public class Utils {
      * @param msg the message to log
      */
     public static void step(String msg) {
+        Utils.log(msg, false);
         if (steppingOn) {
-            boolean log = loggingOn;
-            loggingOn();
-            Utils.log(msg, false);
             Utils.log("Click ENTER to continue..." , false);
             try {
                 semaphore.acquire();
@@ -124,7 +122,6 @@ public class Utils {
                 e.printStackTrace();
             }
             Utils.log("Continued", false);
-            loggingOn = log;
         }
     }
 }
