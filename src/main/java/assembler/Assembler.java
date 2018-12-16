@@ -1,6 +1,8 @@
 package assembler;
 
+import filesystem.Files;
 import processess.PCB;
+import shell.Shell;
 import utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +17,18 @@ import java.util.List;
  */
 public class Assembler {
     public static final CPU cpu = new CPU();
+
+    /**
+     * Gets initial state of the CPU
+     *
+     * @see CPU
+     * @see processess.PCB
+     * @see PCB#execute()
+     * @return initial state of the CPU
+     */
+    public static CPUState getFreshCPU() {
+        return new CPUState();
+    }
 
     /**
      *  Returns current state od processor to save in {@link PCB}
@@ -50,6 +64,8 @@ public class Assembler {
         cpu.setZF(cpuState.getZF());
     }
 
+    private static final String MEMORY_ALLOCATOR = "LET";
+
     /**
      * Compiles given program to executable
      *
@@ -73,6 +89,12 @@ public class Assembler {
 
         int i = 0;
         try{
+            for (; commands[i].startsWith(Assembler.MEMORY_ALLOCATOR); i++) {
+                String[] line = commands[i].split(" ");
+                if(line.length != 2) throw new Exception("invalid static storage allocation");
+                if(!ArgumentTypes.isValue(line[1])) throw new Exception("static storage must be allocated with hex value");
+            }
+
             for (; i < commands.length; i++) Instruction.validate(commands[i], this);
         } catch (Exception e) {
             System.out.println(e.getMessage() + " at line " + (i+1));
@@ -97,11 +119,17 @@ public class Assembler {
         List<Byte> bytes = new LinkedList<>();
         final String[] commands = AssemblerUtils.toCommandsArray(code);
 
-        Arrays.stream(commands).forEach((c) -> bytes.addAll(Instruction.getExecutable(c, this, (byte) bytes.size())));
+        int i = 0;
+        List<Byte> lets = new LinkedList<>();
+        for (; commands[i].startsWith(Assembler.MEMORY_ALLOCATOR); i++) lets.add(AssemblerUtils.hexToByte(commands[i].split(" ")[1]));
+        bytes.add((byte) i);
+        bytes.addAll(lets);
+        for (; i < commands.length; i++) bytes.addAll(Instruction.getExecutable(commands[i], this, (byte) bytes.size()));
 
         final byte[] result = new byte[bytes.size()];
-        for(int i = 0; i < bytes.size(); i++) result[i] = bytes.get(i);
+        for(i = 0; i < bytes.size(); i++) result[i] = bytes.get(i);
 
+        Utils.log("executable: " + Arrays.toString(result));
         return result;
     }
 
@@ -115,35 +143,42 @@ public class Assembler {
         Utils.log("executing instruction at " + address + " from " + pcb.name);
 
         Instruction instruction = Instruction.getByCode(pcb.getByteAt(address++));
-        byte[] args = null;
+
+        List<Byte> argsList = new ArrayList<>();
         if(instruction.argsNumber > 0) {
             byte argTypesBin = pcb.getByteAt(address++);
             String argTypes = AssemblerUtils.byteToString(argTypesBin);
             byte arg1Type = AssemblerUtils.hexToByte(argTypes.charAt(0));
+            argsList.add(arg1Type);
+            address = getArgument(pcb, address, argsList, arg1Type);
+
             if(argTypes.charAt(1) != 'F'){
                 byte arg2Type = AssemblerUtils.hexToByte(argTypes.charAt(1));
-                args = new byte[] {arg1Type, pcb.getByteAt(address++), arg2Type, pcb.getByteAt(address++)};
-            }
-            else {
-                if(ArgumentTypes.getType(arg1Type) == ArgumentTypes.TEXT) {
-                    List<Byte> temp = new ArrayList<>();
-                    temp.add(arg1Type);
-                    byte letter = pcb.getByteAt(address++);
-                    while (letter != -1) {
-                        temp.add(letter);
-                        letter = pcb.getByteAt(address++);
-                    }
-                    args = new byte[temp.size()];
-                    for (int i = 0; i < temp.size(); i++) {
-                        args[i] = temp.get(i);
-                    }
-                }
-                else args = new byte[] {arg1Type, pcb.getByteAt(address++)};
+                argsList.add(arg2Type);
+                address = getArgument(pcb, address, argsList, arg2Type);
             }
         }
 
+        byte[] args = new byte[argsList.size()];
+        int i = 0;
+        for (byte a : argsList) args[i++] = a;
         pcb.setPC(address);
         instruction.execute(pcb, args);
+    }
+
+    private static byte getArgument(PCB pcb, byte address, List<Byte> argsList, byte argType) {
+        if(ArgumentTypes.getType(argType) == ArgumentTypes.TEXT) {
+            List<Byte> temp = new ArrayList<>();
+            byte letter = pcb.getByteAt(address++);
+            while (letter != -1) {
+                temp.add(letter);
+                letter = pcb.getByteAt(address++);
+            }
+            argsList.addAll(temp);
+            argsList.add((byte) -1);
+        }
+        else argsList.add(pcb.getByteAt(address++));
+        return address;
     }
 
     /**
@@ -216,12 +251,13 @@ public class Assembler {
      * Retrieves data from given argument
      *
      * @see ArgumentTypes
-     * @see Assembler#writeData(byte, byte, boolean[])
+     * @see Assembler#writeData(byte, byte, boolean[], PCB)
      * @param type type of argument to retrieve
      * @param arg argument to retrieve
+     * @param pcb used for getting data from RAM otherwise can be {@code null}
      * @return binary representation of argument value
      */
-    private static boolean[] getData(final byte type, final byte arg) {
+    private static boolean[] getData(final byte type, final byte arg, final PCB pcb) {
         final ArgumentTypes argumentType = ArgumentTypes.getType(type);
         boolean [] data = AssemblerUtils.emptyRegistry();
         switch (argumentType) {
@@ -230,7 +266,7 @@ public class Assembler {
                 data = Assembler.cpu.getRegistryById(arg);
                 break;
             case MEMORY:
-                data = Assembler.getFromMemory(arg);
+                data = Assembler.getFromMemory(arg, pcb);
                 break;
             case VALUE:
             case CHARACTER:
@@ -243,37 +279,38 @@ public class Assembler {
     }
 
     /**
-     * Gets single byte from system memory
-     * <p>NOT IMPLEMENTED</p>
+     * Gets single byte from RAM
      *
      * @param address address of memory cell to read data from
+     * @param pcb {@link PCB} of current process
      * @return retrieved data
      */
-    private static boolean[] getFromMemory(final byte address) {
-        System.out.println("ASSEMBLER + MEMORY not yet implemented");
-        return AssemblerUtils.emptyRegistry();
+    private static boolean[] getFromMemory(final byte address, final PCB pcb) {
+        return AssemblerUtils.byteToBin(pcb.getByteAt(address));
     }
 
     /**
-     * Writes single byte from system memory
-     * <p>NOT IMPLEMENTED</p>
+     * Writes single byte to RAM
      *
      * @param address address of memory cell to write data to
+     * @param data data to write
+     * @param pcb {@link PCB} of current process
      */
-    private static void writeToMemory(final byte address, boolean[] data) {
-        System.out.println("ASSEMBLER + MEMORY not yet implemented");
+    private static void writeToMemory(final byte address, boolean[] data, final PCB pcb) {
+        pcb.writeByteAt(address, AssemblerUtils.binToByte(data));
     }
-
+    
     /**
      * Writes given data to location specified by given argument and type
      *
      * @see ArgumentTypes
-     * @see Assembler#getData(byte, byte)
+     * @see Assembler#getData(byte, byte, PCB)
      * @param type type of argument
      * @param address address of location to write data
      * @param data data to write
+     * @param pcb {@link PCB} of current process
      */
-    private static void writeData(final byte type, final byte address, boolean[] data) {
+    private static void writeData(final byte type, final byte address, boolean[] data, final PCB pcb) {
         data = Arrays.copyOf(data, data.length);
         if(type == ArgumentTypes.REGISTRY.ordinal() || type == ArgumentTypes.FULL_REGISTRY.ordinal()){
             Utils.log("writing data to registry");
@@ -281,7 +318,7 @@ public class Assembler {
         }
         else {
             Utils.log("writing data to memory");
-            Assembler.writeToMemory(address, data);
+            Assembler.writeToMemory(address, data, pcb);
         }
         Assembler.checkZF(data);
     }
@@ -294,9 +331,9 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void mov(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        final boolean[] data = Assembler.getData(type2, arg2);
-        Assembler.writeData(type1, arg1, data);
+    static void mov(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        final boolean[] data = Assembler.getData(type2, arg2, pcb);
+        Assembler.writeData(type1, arg1, data, pcb);
     }
 
     /**
@@ -309,9 +346,9 @@ public class Assembler {
      * @param arg2 second argument
      * @param useCF if {@code true} uses carry from past operations
      */
-    static void add(final byte type1, final byte arg1, final byte type2, final byte arg2, final boolean useCF) {
-        boolean[] source = Assembler.getData(type1, arg1);
-        boolean[] value = Assembler.getData(type2, arg2);
+    static void add(final byte type1, final byte arg1, final byte type2, final byte arg2, final boolean useCF, final PCB pcb) {
+        boolean[] source = Assembler.getData(type1, arg1, pcb);
+        boolean[] value = Assembler.getData(type2, arg2, pcb);
 
         boolean carry = false;
         if(useCF && Assembler.cpu.getCF()) {
@@ -338,19 +375,19 @@ public class Assembler {
         }
 
         if(carry) Assembler.cpu.setCF(true);
-        Assembler.writeData(type1, arg1, source);
+        Assembler.writeData(type1, arg1, source, pcb);
     }
 
     /**
      * Increments given argument
      * If the result exceeds 8bit range, sets CF
      *
-     * @see Assembler#add(byte, byte, byte, byte, boolean)
+     * @see Assembler#add(byte, byte, byte, byte, boolean, PCB)
      * @param type type of argument
      * @param arg argument
      */
-    static void inc(final byte type, final byte arg) {
-        Assembler.add(type, arg, (byte) ArgumentTypes.VALUE.ordinal(), (byte) 1, false);
+    static void inc(final byte type, final byte arg, final PCB pcb) {
+        Assembler.add(type, arg, (byte) ArgumentTypes.VALUE.ordinal(), (byte) 1, false, pcb);
     }
 
     /**
@@ -362,9 +399,9 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void sub(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        boolean[] source = Assembler.getData(type1, arg1);
-        boolean[] value = Assembler.getData(type2, arg2);
+    static void sub(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        boolean[] source = Assembler.getData(type1, arg1, pcb);
+        boolean[] value = Assembler.getData(type2, arg2, pcb);
 
         for(int i = 0; i < source.length; i++) {
             if(source[i] && value[i]) source[i] = false;
@@ -378,18 +415,18 @@ public class Assembler {
             }
         }
 
-        Assembler.writeData(type1, arg1, source);
+        Assembler.writeData(type1, arg1, source, pcb);
     }
 
     /**
      * Decrements given argument
      *
-     * @see Assembler#sub(byte, byte, byte, byte)
+     * @see Assembler#sub(byte, byte, byte, byte, PCB)
      * @param type type of argument
      * @param arg argument
      */
-    static void dec(final byte type, final byte arg) {
-        Assembler.sub(type, arg, (byte) ArgumentTypes.VALUE.ordinal(), (byte) 1);
+    static void dec(final byte type, final byte arg, final PCB pcb) {
+        Assembler.sub(type, arg, (byte) ArgumentTypes.VALUE.ordinal(), (byte) 1, pcb);
     }
 
     /**
@@ -401,13 +438,14 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void mul(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        final boolean[] initialValueBin = Assembler.getData(type1, arg1);
+    static void mul(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        Assembler.cpu.setCF(false);
+        final boolean[] initialValueBin = Assembler.getData(type1, arg1, pcb);
         final byte initialValue = AssemblerUtils.binToByte(initialValueBin);
-        final boolean[] nBin = Assembler.getData(type2, arg2);
+        final boolean[] nBin = Assembler.getData(type2, arg2, pcb);
         final byte n = AssemblerUtils.binToByte(nBin);
         for (int i = 1; i < n; i++)
-            Assembler.add(type1, arg1, (byte) ArgumentTypes.VALUE.ordinal(), initialValue, true);
+            Assembler.add(type1, arg1, (byte) ArgumentTypes.VALUE.ordinal(), initialValue, true, pcb);
     }
 
     /**
@@ -419,13 +457,13 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void div(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        final boolean[] divisorBin = Assembler.getData(type2, arg2);
+    static void div(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        final boolean[] divisorBin = Assembler.getData(type2, arg2, pcb);
         final byte divisor = AssemblerUtils.binToByte(divisorBin);
         byte quotient = 0;
 
-        while (AssemblerUtils.greaterOrEqual(Assembler.getData(type1, arg1), divisorBin)) {
-            Assembler.sub(type1, arg1, (byte) ArgumentTypes.VALUE.ordinal(), divisor);
+        while (AssemblerUtils.greaterOrEqual(Assembler.getData(type1, arg1, pcb), divisorBin)) {
+            Assembler.sub(type1, arg1, (byte) ArgumentTypes.VALUE.ordinal(), divisor, pcb);
             quotient++;
         }
 
@@ -434,7 +472,7 @@ public class Assembler {
         else if(arg1 == CPU.getRegistryId("BX")) quotientDestination =  CPU.getRegistryId("BH");
         else if(arg1 == CPU.getRegistryId("CX")) quotientDestination =  CPU.getRegistryId("CH");
         else /*if(arg1 == CPU.getRegistryId("DX"))*/ quotientDestination =  CPU.getRegistryId("DH");
-        Assembler.writeData(type1, quotientDestination, AssemblerUtils.byteToBin(quotient));
+        Assembler.writeData(type1, quotientDestination, AssemblerUtils.byteToBin(quotient), pcb);
     }
 
     /**
@@ -445,13 +483,13 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void and(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        boolean[] source = Assembler.getData(type1, arg1);
-        boolean[] value = Assembler.getData(type2, arg2);
+    static void and(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        boolean[] source = Assembler.getData(type1, arg1, pcb);
+        boolean[] value = Assembler.getData(type2, arg2, pcb);
 
         for(int i = 0; i < source.length; i++) source[i] = source[i] && value[i];
 
-        Assembler.writeData(type1, arg1, source);
+        Assembler.writeData(type1, arg1, source, pcb);
     }
 
     /**
@@ -462,13 +500,13 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void nand(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        boolean[] source = Assembler.getData(type1, arg1);
-        boolean[] value = Assembler.getData(type2, arg2);
+    static void nand(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        boolean[] source = Assembler.getData(type1, arg1, pcb);
+        boolean[] value = Assembler.getData(type2, arg2, pcb);
 
         for(int i = 0; i < source.length; i++) source[i] = !(source[i] && value[i]);
 
-        Assembler.writeData(type1, arg1, source);
+        Assembler.writeData(type1, arg1, source, pcb);
     }
 
     /**
@@ -479,13 +517,13 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void or(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        boolean[] source = Assembler.getData(type1, arg1);
-        boolean[] value = Assembler.getData(type2, arg2);
+    static void or(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        boolean[] source = Assembler.getData(type1, arg1, pcb);
+        boolean[] value = Assembler.getData(type2, arg2, pcb);
 
         for(int i = 0; i < source.length; i++) source[i] = source[i] || value[i];
 
-        Assembler.writeData(type1, arg1, source);
+        Assembler.writeData(type1, arg1, source, pcb);
     }
 
     /**
@@ -496,13 +534,13 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void nor(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        boolean[] source = Assembler.getData(type1, arg1);
-        boolean[] value = Assembler.getData(type2, arg2);
+    static void nor(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        boolean[] source = Assembler.getData(type1, arg1, pcb);
+        boolean[] value = Assembler.getData(type2, arg2, pcb);
 
         for (int i = 0; i < source.length; i++) source[i] = !(source[i] || value[i]);
 
-        Assembler.writeData(type1, arg1, source);
+        Assembler.writeData(type1, arg1, source, pcb);
     }
 
     /**
@@ -513,13 +551,13 @@ public class Assembler {
      * @param type2 type of second argument
      * @param arg2 second argument
      */
-    static void xor(final byte type1, final byte arg1, final byte type2, final byte arg2) {
-        boolean[] source = Assembler.getData(type1, arg1);
-        boolean[] value = Assembler.getData(type2, arg2);
+    static void xor(final byte type1, final byte arg1, final byte type2, final byte arg2, final PCB pcb) {
+        boolean[] source = Assembler.getData(type1, arg1, pcb);
+        boolean[] value = Assembler.getData(type2, arg2, pcb);
 
         for(int i = 0; i < source.length; i++) source[i] = source[i] ^ value[i];
 
-        Assembler.writeData(type1, arg1, source);
+        Assembler.writeData(type1, arg1, source, pcb);
     }
 
     /**
@@ -528,14 +566,14 @@ public class Assembler {
      * @param type type of argument
      * @param arg argument
      */
-    static void not(final byte type, final byte arg) {
-        boolean[] source = Assembler.getData(type, arg);
+    static void not(final byte type, final byte arg, final PCB pcb) {
+        boolean[] source = Assembler.getData(type, arg, pcb);
 
         for(int i = 0; i < source.length; i++) {
             source[i] = !source[i];
         }
 
-        Assembler.writeData(type, arg, source);
+        Assembler.writeData(type, arg, source, pcb);
     }
 
     /**
@@ -559,6 +597,7 @@ public class Assembler {
      */
     static void jnz(final byte address, PCB pcb) {
         if(!Assembler.cpu.getZF()) Assembler.jmp(address, pcb);
+        else Utils.log("jump not performed");
     }
 
     /**
@@ -567,17 +606,39 @@ public class Assembler {
      * @param type type of value to print
      * @param arg value to print
      */
-    static void prt(final byte type, final byte... arg) {
+    static void prt(final byte type, final PCB pcb, final byte... arg) {
         StringBuilder output = new StringBuilder();
 
         if(ArgumentTypes.getType(type) == ArgumentTypes.TEXT)
             for(final byte c : arg) output.append((char) c);
         else
-            output.append(AssemblerUtils.binToChar(Assembler.getData(type, arg[0])));
+            output.append(AssemblerUtils.binToChar(Assembler.getData(type, arg[0], pcb)));
 
-        System.out.println(output);
+        Shell.println(output.toString());
 
         Utils.log("PRT " + Arrays.toString(arg));
+    }
+
+    /**
+     * Creates new file with given name and content
+     *
+     * @param name name of new file
+     * @param content content to write in new file
+     */
+    static void flc(final byte[] name, final byte[] content) {
+        StringBuilder nameBuilder = new StringBuilder();
+        for(final byte c : name) nameBuilder.append((char) c);
+        Files.createFile(nameBuilder.toString(), content);
+    }
+
+    /**
+     *  Gets content of selected file and does nothing. Used to test and demonstrate synchronization methods
+     * @param name name of file to get
+     */
+    static void flg(final byte[] name) {
+        StringBuilder nameBuilder = new StringBuilder();
+        for(final byte c : name) nameBuilder.append((char) c);
+        Files.getFile(nameBuilder.toString());
     }
 
     /**

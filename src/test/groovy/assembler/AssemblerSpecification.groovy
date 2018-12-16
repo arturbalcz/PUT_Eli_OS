@@ -1,11 +1,14 @@
 package assembler
 
 import processess.PCB
+import shell.Shell
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class AssemblerSpecification extends Specification {
     def assembler = new Assembler()
+
+    PCB pcb = Mock()
 
     def setup() {
         // clear registers
@@ -26,7 +29,9 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte)
+                value as byte,
+                pcb
+        )
         then:
         assembler.cpu.getRegistryById(registry).toList() == result
 
@@ -49,7 +54,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.REGISTRY.ordinal() as byte,
-                source as byte
+                source as byte,
+                pcb
         )
         then:
         assembler.cpu.getRegistryById(registry) == assembler.cpu.getRegistryById(source)
@@ -73,7 +79,8 @@ class AssemblerSpecification extends Specification {
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
                 value as byte,
-                false
+                false,
+                pcb
         )
         then:
         assembler.cpu.getRegistryById(registry).toList() == result
@@ -99,7 +106,8 @@ class AssemblerSpecification extends Specification {
                 registry as byte,
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 value as byte,
-                false
+                false,
+                pcb
         )
         then:
         assembler.cpu.getRegistryById(registry).toList() == result
@@ -123,14 +131,16 @@ class AssemblerSpecification extends Specification {
                 CPU.AX_ID,
                 ArgumentTypes.VALUE.ordinal() as byte,
                 5 as byte,
-                false
+                false,
+                pcb
         )
         assembler.add(
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 CPU.BX_ID,
                 ArgumentTypes.VALUE.ordinal() as byte,
                 1 as byte,
-                true
+                true,
+                pcb
         )
 
         then:
@@ -149,7 +159,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte
+                value as byte,
+                pcb
         )
 
         then:
@@ -169,7 +180,8 @@ class AssemblerSpecification extends Specification {
         when:
         assembler.inc(
                 ArgumentTypes.REGISTRY.ordinal() as byte,
-                CPU.AX_ID
+                CPU.AX_ID,
+                pcb
         )
 
         then:
@@ -183,7 +195,8 @@ class AssemblerSpecification extends Specification {
         when:
         assembler.dec(
                 ArgumentTypes.REGISTRY.ordinal() as byte,
-                CPU.AX_ID
+                CPU.AX_ID,
+                pcb
         )
 
         then:
@@ -201,7 +214,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte
+                value as byte,
+                pcb
         )
         then:
         assembler.cpu.getRegistryById(registry).toList() == result
@@ -225,7 +239,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte
+                value as byte,
+                pcb
         )
         then:
         assembler.cpu.getRegistryById(registry).toList() == result
@@ -247,7 +262,8 @@ class AssemblerSpecification extends Specification {
                     ArgumentTypes.REGISTRY.ordinal() as byte,
                     registry as byte,
                     ArgumentTypes.VALUE.ordinal() as byte,
-                    value as byte
+                    value as byte,
+                    pcb
             )
 
         then:
@@ -270,7 +286,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte
+                value as byte,
+                pcb
         )
 
         then:
@@ -293,7 +310,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte
+                value as byte,
+                pcb
         )
 
         then:
@@ -316,7 +334,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte
+                value as byte,
+                pcb
         )
 
         then:
@@ -339,7 +358,8 @@ class AssemblerSpecification extends Specification {
                 ArgumentTypes.REGISTRY.ordinal() as byte,
                 registry as byte,
                 ArgumentTypes.VALUE.ordinal() as byte,
-                value as byte
+                value as byte,
+                pcb
         )
 
         then:
@@ -361,7 +381,8 @@ class AssemblerSpecification extends Specification {
         when:
         Assembler.not(
                 ArgumentTypes.REGISTRY.ordinal() as byte,
-                registry
+                registry,
+                pcb
         )
 
         then:
@@ -400,23 +421,6 @@ class AssemblerSpecification extends Specification {
     }
 
     @Unroll
-    def "PRT - should print given text to console"() {
-        when:
-        def buffer = new ByteArrayOutputStream()
-        System.out = new PrintStream(buffer)
-        Assembler.prt((byte) type, (byte[]) value)
-
-        then:
-        buffer.toString().startsWith(new String(value))
-
-        where:
-        type                                | value
-        ArgumentTypes.CHARACTER.ordinal()   | ['a'] as char[]
-        ArgumentTypes.TEXT.ordinal()        | ['a', 'b', 'c', 'd'] as char[]
-        ArgumentTypes.VALUE.ordinal()       | [65] as byte[] // 'A'
-    }
-
-    @Unroll
     def "Should trigger the ZERO FLAG when result of operation is ZERO"() {
         given:
         Assembler.cpu.A.set([true, true, true, true, true, true, true, true] as boolean[])
@@ -425,7 +429,8 @@ class AssemblerSpecification extends Specification {
         when:
         Assembler.inc(
                 ArgumentTypes.REGISTRY.ordinal() as byte,
-                registry as byte
+                registry as byte,
+                pcb
         )
 
         then:
@@ -446,7 +451,8 @@ class AssemblerSpecification extends Specification {
         when:
         Assembler.inc(
                 ArgumentTypes.REGISTRY.ordinal() as byte,
-                registry as byte
+                registry as byte,
+                pcb
         )
 
         then:

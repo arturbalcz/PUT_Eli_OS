@@ -1,5 +1,6 @@
 package shell;
 
+import filesystem.Disk;
 import utils.Utils;
 
 import java.io.PrintStream;
@@ -33,17 +34,29 @@ public class Shell {
         CommandTable.put("time", Shell::time );
         CommandTable.put("help", Shell::help );
         CommandTable.put("exit", Shell::exit );
-        CommandTable.put("log", Commands::logging);
+        CommandTable.put("log",  Commands::logging);
         CommandTable.put("test", Commands::test);
+        CommandTable.put("disk", Disk::test);
+        CommandTable.put("file", Commands::file);
+        CommandTable.put("com", Commands::com);
+        CommandTable.put("cp", Commands::cp);
     }
     private static Integer size = CommandTable.size();
 
     /**
-     * Prints parameter to the console
+     * Prints parameter to the console with new line
+     * @param msg message to print for user
+     */
+    public static void println(String msg) {
+        standardOut.println(msg);
+    }
+
+    /**
+     * Prints parameter to the console without new line
      * @param msg message to print for user
      */
     public static void print(String msg) {
-        standardOut.println(msg);
+        standardOut.print(msg);
     }
 
     /**
@@ -58,14 +71,14 @@ public class Shell {
     private static void time(ArrayList<String> argv) {
         String times = formatter.format(LocalDateTime.now());
         Utils.step("Printing time for user.");
-        print(times);
+        println(times);
     }
 
     private static void help(ArrayList<String> argv) {
         Set<String> keys = CommandTable.keySet();
         Utils.step("Printing help for user.");
         for (String command : keys) {
-            print(command.toUpperCase());
+            println(command.toUpperCase());
         }
     }
 
@@ -78,6 +91,7 @@ public class Shell {
      * @return condition to close system
      */
     public static boolean interpret( ) {
+        print("> ");
         ArrayList<String> arguments = new ArrayList<>();
         arguments.add("ex");
         String input = read();
@@ -95,8 +109,9 @@ public class Shell {
                 CommandTable.get(command).accept(arguments);
             }
             catch (IndexOutOfBoundsException e) {
-                Utils.step("Invalid number of arguments for " + command);
-                print("invalid number of arguments");
+                //Utils.step("Invalid number of arguments for " + command); // quite annoying
+                Utils.log("Invalid number of arguments for " + command);
+                println("invalid number of arguments");
             }
             return command.equals("exit");
         }
