@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.lang.System;
-import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 
@@ -20,7 +19,6 @@ import java.util.function.Consumer;
  */
 public class Shell {
 
-    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
     private static final PrintStream standardOut = System.out;
     static boolean exiting = false;
 
@@ -73,6 +71,7 @@ public class Shell {
     public static boolean interpret( ) {
         standardOut.print("> ");
         String input = read();
+        input = input.trim();
         if (input.isEmpty()) {
             return exiting;
         }
