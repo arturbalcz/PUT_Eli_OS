@@ -47,11 +47,11 @@ public class OS {
                                                     "DEC AL\n" +
                                                     "JNZ loop";
 
-    private static final String CP_ASM = "CP \"f16.exe\" \"7\"\n" +
-                                        "CP \"f8.exe\" \"1\"\n" +
-                                        "CP \"f8.exe\" \"1\"\n" +
-                                        "CP \"f8.exe\" \"5\"\n" +
-                                        "CP \"f8.exe\" \"1\"\n" +
+    private static final String CP_ASM = "CP \"f16.exe F16\" 07H\n" +
+                                        "CP \"f8.exe F8-1\" 01H\n" +
+                                        "CP \"f8.exe F8-2\" 01H\n" +
+                                        "CP \"f8.exe F8-3\" 05H\n" +
+                                        "CP \"f8.exe F8-4\" 01H\n" +
                                         "PRT \"end\"";
 
     private static final String LOGO =  "    ____  __  ________   _________ __           ____  _____\n" +

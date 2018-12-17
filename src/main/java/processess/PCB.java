@@ -4,8 +4,6 @@ import assembler.Assembler;
 import assembler.CPUState;
 import utils.Utils;
 
-import java.util.Objects;
-
 /**
  * Process Control Block, represents process
  */
@@ -62,7 +60,7 @@ public class PCB implements Comparable<PCB> {
      * @param priority process base priority
      * @param exec temporary ram
      */
-    public PCB(int PID, String name, int priority, byte[] exec) {
+    PCB(int PID, String name, int priority, byte[] exec) {
         this.PID = PID;
         this.name = name;
 

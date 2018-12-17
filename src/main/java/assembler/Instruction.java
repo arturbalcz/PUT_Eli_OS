@@ -305,18 +305,20 @@ abstract class Instruction {
                 "CP",
                 2,
                 ArgumentTypes.getTypes(ArgumentTypes.TEXT),
-                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+                ArgumentTypes.getTypes(ArgumentTypes.VALUE)
         ) {
             @Override
             void command(PCB pcb, byte... args) {
-                int firstArgEnd = 0;
-                while (args[firstArgEnd] != -1) firstArgEnd++;
+                int argEnd = 0;
+                while (args[argEnd] != -1) argEnd++;
+                final byte[] textArgs = Arrays.copyOfRange(args, 1, argEnd);
 
-                Assembler.cp(
-                        Arrays.copyOfRange(args, 1, firstArgEnd),
-                        "fromAsm".getBytes(),
-                        (byte) Integer.parseInt(new String(Arrays.copyOfRange(args, firstArgEnd+2, args.length-1)))
-                );
+                argEnd = 0;
+                while (textArgs[argEnd] != ' ') argEnd++;
+                final byte[] exeName =  Arrays.copyOfRange(textArgs, 0, argEnd);
+                final byte[] processName =  Arrays.copyOfRange(textArgs, argEnd+1, textArgs.length);
+
+                Assembler.cp(exeName, processName, args[args.length-1]);
             }
         };
         instructionsMap.put(code, instruction);

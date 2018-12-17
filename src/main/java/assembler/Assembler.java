@@ -6,7 +6,6 @@ import processess.PCBList;
 import shell.Shell;
 import utils.Utils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -650,11 +649,10 @@ public class Assembler {
     }
 
     // processes
-    private static int fromAsmID = 1;
 
     static void cp(final byte[] filename, final byte[] name, final byte priority) {
         final byte[] exe = Files.getCleanFile(new String(filename));
-        PCBList.list.newProcess(new String(name) + fromAsmID++, (int) priority, exe);
+        PCBList.list.newProcess(new String(name), (int) priority, exe);
     }
 
     /**
