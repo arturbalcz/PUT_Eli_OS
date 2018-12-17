@@ -16,8 +16,8 @@ public class Utils {
     /**
      * If set to true, logs are printed
      */
-    static private boolean loggingOn = true;
-    static private boolean steppingOn = true;
+    static private boolean logging = true;
+    static private boolean stepping = true;
 
     private static final JFrame frame = new JFrame();
     private static final JTextArea textArea = new JTextArea(50, 10);
@@ -66,25 +66,25 @@ public class Utils {
     /**
      * Turns logging on
      */
-    public static void loggingOn() { Utils.loggingOn = true; }
+    public static void loggingOn() { Utils.logging = true; }
 
     /**
      * Turns logging on
      */
-    public static void loggingOff() { Utils.loggingOn = false; }
+    public static void loggingOff() { Utils.logging = false; }
 
     /**
      * Turns step work on
      */
-    public static void stepOn() { Utils.steppingOn = true; }
+    public static void stepOn() { Utils.stepping = true; }
 
     /**
      * Turns step work on
      */
-    public static void stepOff() { Utils.steppingOn = false; }
+    public static void stepOff() { Utils.stepping = false; }
 
     /**
-     * If {@link Utils#loggingOn} is set to true, logs message to the console
+     * If {@link Utils#logging} is set to true, logs message to the console
      *
      * @param  msg  the message to log
      */
@@ -93,14 +93,14 @@ public class Utils {
     }
 
     /**
-     * If {@link Utils#loggingOn} is set to true, logs message to the console.
+     * If {@link Utils#logging} is set to true, logs message to the console.
      * Optionally adds error tah to the message
      *
      * @param  msg  the message to log
      * @param  error  if true the message is printed as an error
      */
     public static void log(String msg, boolean error) {
-        if(loggingOn) {
+        if(logging) {
             if(error) msg = "ERR: " + msg;
             String time = formatter.format(LocalDateTime.now());
             printStream.println(time + " - " + msg);
@@ -108,13 +108,15 @@ public class Utils {
     }
 
     /**
-     * If loggingOn is set to true, logs message to the console and
+     * If logging is set to true, logs message to the console and
      * wait for user to click ENTER
      * @param msg the message to log
      */
     public static void step(String msg) {
+        boolean log = logging;
+        loggingOn();
         Utils.log(msg, false);
-        if (steppingOn) {
+        if (stepping) {
             Utils.log("Click ENTER to continue..." , false);
             try {
                 semaphore.acquire();
@@ -123,5 +125,6 @@ public class Utils {
             }
             Utils.log("Continued", false);
         }
+        logging = log;
     }
 }
