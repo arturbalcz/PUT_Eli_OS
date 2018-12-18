@@ -1,0 +1,4 @@
+package synchronization
+
+class LockFunctionSpecification {
+}
