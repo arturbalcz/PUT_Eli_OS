@@ -2,68 +2,34 @@ package processess;
 
 import assembler.Assembler;
 import assembler.CPUState;
-import utils.Utils;
 
-/**
- * Process Control Block, represents process
- */
 public class PCB {
-
-    /**
-     * Unique process id
-     */
     final private int PID;
-
     public final String name;
-
-    /**
-     * Process state (READY, RUNNING, WAITING, TERMINATED)
-     *
-     * @see ProcessState
-     */
     private ProcessState state;
-
-    /**
-     * Program counter
-     */
     private byte PC;
-
-    /**
-     * Unchangeable base priority, set in constructor, min value 0, max value 15
-     */
+    //@Max(17)
     private final int basePriority;
-
-    /**
-     * Dynamically changed priority, min value 0, max value 15
-     */
+    //@Max(17)
+    //real-time priority: 16, 17 [Artur]
+    //dynamic priority 1-15 [Artur]
     private int dynamicPriority;
+    private int readyTime;
+    private int executedOrders;
 
     private CPUState cpuState;
 
     // temporary ram, see constructor
     private final byte[] code;
 
-    /**
-     * Creates Porcess Contol Block
-     *
-     * @param PID unique process id
-     * @param name name of the process
-     * @param priority process base priority
-     * @param exec temporary ram
-     */
     public PCB(int PID, String name, int priority, byte[] exec) {
         this.PID = PID;
         this.name = name;
-        //TODO unique name
-        //TODO prority <= 0 pogadac: dummy process, czy mam się tym jakoś przejmować, czy udostepnić jakieś możliwości zmainy
-        if (priority > 15) {
-            Utils.log("Priority is too high, changed to priority max size - 15", true);
-            priority = 15;
-        }
         this.basePriority = priority;
         this.dynamicPriority = priority;
         this.state = ProcessState.READY;
         this.cpuState = Assembler.getFreshCPU();
+        this.readyTime=0;
 
         // TODO: ram
         // temporary ram solution for testing assembler
@@ -71,6 +37,18 @@ public class PCB {
         this.PC = (byte) (exec[0] + 1); // sets PC after allocated values ('LETs')
     }
 
+
+
+    public int getReadyTime() { return  readyTime; }
+
+    public void setReadyTime(int readyTime)
+    {
+        this.readyTime=readyTime;
+    }
+
+    public int getExecutedOrders() {return executedOrders; }
+
+    public void setExetucedOrders(int executedOrders) {this.executedOrders = executedOrders; }
 
     public int getPID() {
         return PID;
@@ -102,35 +80,16 @@ public class PCB {
         return dynamicPriority;
     }
 
-    /**
-     * Adds given parameter to dynamic priority, if sum is bigger than 15,
-     * sum is set with value 15 and gives error log
-     *
-     * @param dynamicPriority value to add for dynamic priority
-     */
     public void setDynamicPriority(int dynamicPriority) {
 
-        if (this.dynamicPriority + dynamicPriority > 15){
-            Utils.log("Priority is too high, changed priority of process " + this.PID +
-                    " from " + this.dynamicPriority + " to priority max size: 15", true);
-            this.dynamicPriority = 15;
+        if(basePriority < 16 && dynamicPriority > 15) dynamicPriority = 15; //[Artur]
+        if(basePriority > 15 && dynamicPriority > 17) dynamicPriority = 17; //[Artur]
 
-        } else {
-            int sum = this.dynamicPriority + dynamicPriority;
-            Utils.log("Changed priority of process " + this.PID + " from "
-                    + this.dynamicPriority + " to " + (sum));
-            this.dynamicPriority = sum;
-        }
+        //[Artur]: if(dynamicPriority < basePriority) throw Exception;
 
-    }
 
-    /**
-     * Sets dynamic priority with it's base value
-     */
-    public void setBasePriority(){
-        this.dynamicPriority = this.basePriority;
-        Utils.log("Changed priority of process " + this.PID + " from " + this.dynamicPriority +
-                " to it's base value - " + this.basePriority);
+        this.dynamicPriority = dynamicPriority;
+
     }
 
 
@@ -148,7 +107,6 @@ public class PCB {
      */
     public boolean execute() {
         Assembler.execute(this);
-        //TODO terminated
         return PC < code.length;
     }
 
