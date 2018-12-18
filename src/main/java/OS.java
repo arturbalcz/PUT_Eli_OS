@@ -4,6 +4,8 @@ import processess.PCBList;
 import shell.Shell;
 import utils.Utils;
 
+import java.io.IOException;
+
 /**
  * Collects together all modules and run system
  */
@@ -76,7 +78,12 @@ public class OS {
         Shell.println(LOGO);
         boolean closing = false;
         while(!closing) {
-            closing = Shell.interpret();
+            Utils.log("os step");
+            PCBList.list.processor.run();
+            try {
+                closing = Shell.interpret();
+            } catch (IOException ignored) {
+            }
         }
     }
 

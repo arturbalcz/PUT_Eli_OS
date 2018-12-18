@@ -2,6 +2,7 @@ package shell;
 
 import assembler.Assembler;
 import filesystem.Files;
+import processess.PCB;
 import processess.PCBList;
 import utils.Utils;
 
@@ -141,7 +142,7 @@ public interface Commands {
             String param = args.get(1);
             switch (param.toUpperCase()) {
                 case "/C":
-                    Shell.print(">");
+                    Shell.print("@");
                     String input = Shell.read();
                     Files.createFile(args.get(2), input.getBytes());
                     break;
@@ -204,11 +205,7 @@ public interface Commands {
 
         final byte[] exec = Files.getCleanFile(args.get(1));
         if (exec[0] == -1) Shell.println("Program does not exist");
-        else {
-            PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
-            // noinspection StatementWithEmptyBody
-            while (PCBList.list.processor.run());
-        }
+        else PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
     }
 
     /**
@@ -225,5 +222,21 @@ public interface Commands {
         PCBList.list.processor.printQueue();
     }
 
+    /**
+     * Prints running process
+     */
+    static void rp(ArrayList<String> args) {
+        Shell.println(PCBList.list.processor.getRunningProcess().toString());
+    }
+
+    /**
+     * Deletes selected process
+     */
+    static void dp(ArrayList<String> args) {
+        final int processId = Integer.parseInt(args.get(1));
+        final PCB process = PCBList.list.findByPID(processId);
+        if (process != null) PCBList.list.processor.removeProcess(process);
+        else Shell.println("process does not exist");
+    }
 
 }

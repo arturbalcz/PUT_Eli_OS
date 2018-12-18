@@ -176,9 +176,11 @@ public class PCB implements Comparable<PCB> {
      * Sets dynamic priority with it's base value
      */
     public void setBasePriority(){
-        this.dynamicPriority = this.basePriority;
-        Utils.log("Changed priority of process " + this.PID + " from " + this.dynamicPriority +
-                " to it's base value - " + this.basePriority);
+        if(dynamicPriority != basePriority) {
+            this.dynamicPriority = this.basePriority;
+            Utils.log("Changed priority of " + this.getSignature() + " from " + this.dynamicPriority +
+                    " to base value - " + this.basePriority);
+        }
     }
 
 

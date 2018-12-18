@@ -76,8 +76,10 @@ public class PCBList {
         return temp;
     }
 
+    public static final int DUMMY_ID = -1;
+
     public void addDummy(final byte[] dummyExec) {
-        final PCB dummy = new PCB(-1, "DUMMY", 0, dummyExec);
+        final PCB dummy = new PCB(DUMMY_ID, "DUMMY", 0, dummyExec);
         data.add(dummy);
         processor.addReadyProcess(dummy, false);
     }

@@ -10,7 +10,8 @@ public class AppStart {
         OS os = new OS();
         os.run();
 
-        Utils.log("quitting...");
+        Utils.stepOn();
+        Utils.step("quitting...");
         Utils.closeLogs();
     }
 }

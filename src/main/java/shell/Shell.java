@@ -3,6 +3,9 @@ package shell;
 import filesystem.Disk;
 import utils.Utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +21,11 @@ import java.util.function.Consumer;
  */
 public class Shell {
 
+    private static final int READ_TIMEOUT = 1000;
     private static final PrintStream standardOut = System.out;
     static boolean exiting = false;
+
+    private static boolean empty = true;
 
     /**
      * Main map that stores all of connected commends and methods references
@@ -39,6 +45,8 @@ public class Shell {
         CommandTable.put("cp", Commands::cp);
         CommandTable.put("lpq", Commands::lpq);
         CommandTable.put("lp", Commands::lp);
+        CommandTable.put("rp", Commands::rp);
+        CommandTable.put("dp", Commands::dp);
     }
 
     /**
@@ -70,9 +78,26 @@ public class Shell {
      * Interprets user input and run method found in {@link #CommandTable}
      * @return condition to close system
      */
-    public static boolean interpret( ) {
-        standardOut.print("> ");
-        String input = read();
+    public static boolean interpret( ) throws IOException {
+        if (empty) {
+            standardOut.print("> ");
+            empty = false;
+        }
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        long startTime = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && !in.ready()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        String input;
+        if (in.ready()) input = in.readLine();
+        else throw new IOException();
+
         input = input.trim();
         if (input.isEmpty()) {
             return exiting;
@@ -102,6 +127,8 @@ public class Shell {
                 println("invalid number of arguments");
             }
         }
+
+        empty = true;
         return exiting;
     }
 

@@ -127,4 +127,8 @@ public class Utils {
         }
         logging = log;
     }
+
+    public static boolean isStepping() {
+        return stepping;
+    }
 }
