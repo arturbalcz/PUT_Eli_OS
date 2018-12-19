@@ -7,10 +7,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 
@@ -23,6 +21,7 @@ public class Shell {
 
     private static final int READ_TIMEOUT = 1000;
     private static final PrintStream standardOut = System.out;
+    private static Queue<String> threadedInput = new ConcurrentLinkedQueue<>();
     static boolean exiting = false;
 
     private static boolean empty = true;
@@ -48,6 +47,33 @@ public class Shell {
         CommandTable.put("rp", Commands::rp);
         CommandTable.put("dp", Commands::dp);
         CommandTable.put("update", Commands::update);
+
+        //Creating thread with input from console
+        Thread inputT = new Thread(() -> {
+            Scanner sc = new Scanner(System.in);
+            String a;
+            while (true)
+            {
+                a = sc.nextLine();
+
+                try {
+                    if (threadedInput.size() > 0) {
+                        //System.out.println("Queue is full");
+                        Thread.sleep(1000);
+                    }
+                    else  {
+                        threadedInput.add(a);
+                        if (a.equals("exit")) break;
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+
+                }
+            }
+
+
+        });
+        inputT.start();
     }
 
     /**
@@ -85,6 +111,24 @@ public class Shell {
             empty = false;
         }
 
+        String input;
+
+        try {
+            String mes = threadedInput.poll();
+            if (mes == null) {
+                //System.out.println("Queue empty");
+                input = "";
+                Thread.sleep(500);
+            }
+            //System.out.println("Response: " + mes);
+            else input = mes;
+        }
+        catch (NullPointerException | InterruptedException e) {
+            input = "";
+            e.printStackTrace();
+        }
+
+        /*
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && !in.ready()) {
@@ -98,11 +142,13 @@ public class Shell {
         String input;
         if (in.ready()) input = in.readLine();
         else throw new IOException();
+        */
 
-        input = input.trim();
+
         if (input.isEmpty()) {
             return exiting;
         }
+        input = input.trim();
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
 
         // printing arguments for debug
