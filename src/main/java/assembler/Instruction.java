@@ -503,7 +503,7 @@ abstract class Instruction {
         command(pcb, args);
 
         Utils.log("after " + name + ":");
-        Assembler.cpu.print(true);
+        Assembler.cpu.print();
     }
 
     /**

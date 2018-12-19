@@ -141,6 +141,8 @@ public class Processor
         else if (runningProcess.getExecutedOrders() >= TIME_QUANTUM && pcbList.getData().size() > 1) finishRunning();
 
         balanceSetManager();
+
+        Utils.step("");
     }
 
     /** logs not empty queues */
