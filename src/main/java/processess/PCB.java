@@ -197,6 +197,7 @@ public class PCB implements Comparable<PCB> {
      * @see Assembler#getCPUState()
      */
     public boolean execute() {
+        Utils.log(toString());
         Assembler.execute(this);
 
         return PC < code.length;

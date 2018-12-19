@@ -47,6 +47,7 @@ public class Shell {
         CommandTable.put("lp", Commands::lp);
         CommandTable.put("rp", Commands::rp);
         CommandTable.put("dp", Commands::dp);
+        CommandTable.put("update", Commands::update);
     }
 
     /**

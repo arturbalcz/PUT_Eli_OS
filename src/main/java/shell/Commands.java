@@ -2,6 +2,7 @@ package shell;
 
 import assembler.Assembler;
 import filesystem.Files;
+import os.OS;
 import processess.PCB;
 import processess.PCBList;
 import utils.Utils;
@@ -18,6 +19,11 @@ import java.util.Set;
  * @see Shell
  */
 public interface Commands {
+
+    /** updates code of initial programs */
+    static void update(ArrayList<String> args) {
+        OS.updateInitialFiles();
+    }
 
     /**
      * Turns logging on or off
