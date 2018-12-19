@@ -32,12 +32,39 @@ public class virtualmemory {
 
     //funkcja sprzątająca po zakonczeniu procesu, wszystkie niezbedne wartośći ustawia na -1 i usuwa wpisy w PageFile i PageTable
     void removeProcess(Process proc){
+        Queue <Integer> tmpQueue = victimQueue, beginQ = null;
+        Integer frame, Qsize;
         for(int i = 0; i<16; i++){
             if(RamStatus[i].ProcessID == proc.processId){
+                Qsize = tmpQueue.size();
+                //Updating queue
+                //szukamy w calej kolejce ramko, ktora zajmowal proces
+                for(int j=0; j<Qsize; j++){
+                    frame = tmpQueue.poll();
+                    if(frame != i) {
+                        //Poczatek calej kolejki jest zapisywany do innej kolejki jezeli ramka jest rozna od szukanej
+                        beginQ.add(frame);
+                    } else break;
+                }
+                Qsize = tmpQueue.size();
+                //Do kolejki poczatkowej przypisujemy pozostale elementy kolejki oprocz szukanej ramki
+                for(int a=0; a<Qsize; a++){
+                    beginQ.addAll(tmpQueue);
+                }
+                //czyszczenie kolejki tymczasowej
+                tmpQueue.removeAll(tmpQueue);
+                //zapisanie do tymczasowej kolejki kolejki zmodyfikowanej, bez szukanej ramki
+                tmpQueue.addAll(beginQ);
+                //czyszczenie kolejki z poczatkiem kolejki tymczasowej
+                beginQ.removeAll(beginQ);
                 RamStatus[i].ProcessID = -1;
                 RamStatus[i].PageID = -1;
             }
         }
+        //czyszczenie kolejki glownej
+        victimQueue.removeAll(victimQueue);
+        //aktualizacja zawartosci kolejki glownej
+        victimQueue.addAll(tmpQueue);
         PageFile.remove(proc.processId, proc);
         PageTables.remove(proc.processId);
     }
@@ -85,6 +112,7 @@ public class virtualmemory {
         System.out.println();
     }
     void printNextVictim(){
+        //Mozna uzyc tez .peek()
         System.out.println("#### Printing next victim page ####");
         Queue<Integer> tmp = victimQueue;
         System.out.println(tmp.poll());
