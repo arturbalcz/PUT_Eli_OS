@@ -104,12 +104,35 @@ public class Shell {
     }
 
     /**
-     * Gets from console whole line inserted by user
+     * Tries to get from console whole line inserted by user
      * @return input from user
      */
-    public static String read() {
-        Scanner standardIn = new Scanner(System.in);
-        return standardIn.nextLine();
+    private static String read(boolean once) throws IOException {
+        final long startTime = System.currentTimeMillis();
+        String mes;
+        do {
+            mes = threadedInput.poll();
+
+            // slow down a bit ;)
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && mes == null);
+        if (mes == null) {throw new IOException(); }
+        return mes;
+    }
+
+    static String read() {
+        String result = "";
+        while(result.isEmpty()) {
+            try {
+                result = read(false);
+            } catch (IOException ignored) {
+            }
+        }
+        return result;
     }
 
     /**
@@ -127,22 +150,7 @@ public class Shell {
             empty = false;
         }
 
-        //getting from second thread input from console
-        final long startTime = System.currentTimeMillis();
-        String mes;
-        do {
-            mes = threadedInput.poll();
-
-            // slow down a bit ;)
-            try {
-                Thread.sleep(30);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && mes == null);
-        if (mes == null) throw new IOException();
-
-        String input = mes.trim();
+        String input = read(true).trim();
         if (input.isEmpty()) return exiting;
 
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
@@ -151,9 +159,12 @@ public class Shell {
         Utils.log("Printing all arguments");
         String args = "";
         StringBuilder sB = new StringBuilder(args);
+        sB.append("[");
         for (String x : arguments) {
             sB.append(x).append(", ");
         }
+        sB.delete(sB.length()-2, sB.length()-1);
+        sB.append("]");
         Utils.log(sB.toString());
 
         //finding command in CommandTable

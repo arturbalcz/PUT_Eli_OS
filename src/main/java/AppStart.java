@@ -11,7 +11,7 @@ public class AppStart {
         OS os = new OS();
         os.run();
 
-        Utils.stepOn();
+        //Utils.stepOn();
         Utils.step("quitting...");
         Utils.closeLogs();
     }

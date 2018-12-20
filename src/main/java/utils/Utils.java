@@ -25,7 +25,7 @@ public class Utils {
     private static final JButton enterButton = new JButton(KEY);
     private static final PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
     private static final Semaphore semaphore = new Semaphore(0);
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     /**
      * Action wrapper for mapping KEY with JButton
@@ -42,7 +42,7 @@ public class Utils {
         frame.pack();
         frame.setVisible( true );
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        textArea.setFont(new Font("Courier", Font.PLAIN,20));
+        textArea.setFont(new Font("Lucida Console", Font.PLAIN,14));
         textArea.setEditable( false );
         frame.setSize(800,600);
         frame.setAlwaysOnTop(true  );
@@ -59,9 +59,7 @@ public class Utils {
     /**
      * Closes second window
      */
-    public static void closeLogs() {
-        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-    }
+    public static void closeLogs() { frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)); }
 
     /**
      * Turns logging on

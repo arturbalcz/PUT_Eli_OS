@@ -9,10 +9,11 @@ import processess.PCB;
 import processess.PCBList;
 import utils.Utils;
 
+import javax.rmi.CORBA.Util;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.Vector;
 
@@ -95,7 +96,7 @@ public interface Commands {
             Shell.println(help);
             return;
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         String times = formatter.format(LocalDateTime.now());
         Utils.log("Printing time for user.");
         Shell.println(times);
@@ -119,10 +120,13 @@ public interface Commands {
      */
     static void exit(ArrayList<String> args) {
         String help = "Quits the system.\n";
-        if (args.size() == 2 && args.get(1).equals("/?")) {
+        if (args.size() > 2) {
             Shell.println(help);
             return;
         }
+        else if (args.size() == 2 && args.get(1).equals("t")) Utils.stepOff();
+        else Utils.stepOn();
+
         Utils.log("Exiting by user");
         Shell.exiting = true;
     }
@@ -209,15 +213,16 @@ public interface Commands {
             Shell.println(help);
         } else {
             String name = Directories.path(args.get(1));
-            Scanner scan = new Scanner(System.in);
+            //Scanner scan = new Scanner(System.in);
+
             Shell.println("Enter content, --- to finish");
             Shell.print(": ");
-            String input = scan.nextLine();
+            String input = Shell.read();
             String result = "";
             while (!input.equals("---")) {
                 Shell.print(": ");
                 result += input + "\n";
-                input = scan.nextLine();
+                input = Shell.read();
             }
             result = result.substring(0, result.length() - 1); //get rid of last newline char
             Directories.getTargetDir().getFiles().createFile(name, result.getBytes());
@@ -362,14 +367,14 @@ public interface Commands {
             }
             Shell.println("Enter content, --- to finish");
             Shell.print(result);
-            Scanner scan = new Scanner(System.in);
+            //Scanner scan = new Scanner(System.in);
             Shell.print(": ");
-            String input = scan.nextLine();
+            String input = Shell.read();
             String modify = "";
             while (!input.equals("---")) {
                 Shell.print(": ");
                 modify += input + "\n";
-                input = scan.nextLine();
+                input = Shell.read();
             }
             modify = modify.substring(0, modify.length() - 1); //get rid of last newline char
 
