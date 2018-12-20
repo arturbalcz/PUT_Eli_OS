@@ -2,7 +2,6 @@ package os;
 
 import assembler.Assembler;
 import filesystem.Directories;
-import filesystem.Files;
 import processess.PCBList;
 import shell.Shell;
 import utils.Utils;
@@ -32,6 +31,10 @@ public class OS {
         createAndCompile(DUMMY, "dummy", false);
         final byte[] dummyExec = Directories.getTargetDir().getFiles().getFileClean("dummy.exe");
         PCBList.list.addDummy(dummyExec);
+
+        // clear the console
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 
     /**
@@ -53,12 +56,23 @@ public class OS {
 
     private static final String PATH_TO_FILES = "src/main/resources/assembler/";
     private static final String[] INITIAL_PROGRAMS = new String[] { "f16", "f8", "cp" };
-    private static final String INITIAL_PROGRAMS_DIR = "samples";
+    private static final String INITIAL_PROGRAMS_DIR = "sample";
 
     public static void updateInitialFiles() {
         Utils.log("updating initial programs");
-        Directories.getTargetDir().addDirectory("sample");
-        Directories.setCurrentDir("sample");
+
+        Directories.setCurrentDir(Directories.getDir().getName());
+        Directories.setCurrentDir(INITIAL_PROGRAMS_DIR);
+        for (final String filename : INITIAL_PROGRAMS) {
+            Directories.getCurrentDir().getFiles().deleteFile(filename + ".asm");
+            Directories.getCurrentDir().getFiles().deleteFile(filename + ".exe");
+        }
+
+        Directories.setCurrentDir(Directories.getDir().getName());
+        Directories.getDir().removeDir(INITIAL_PROGRAMS_DIR);
+        Directories.getDir().addDirectory(INITIAL_PROGRAMS_DIR);
+        Directories.setCurrentDir(INITIAL_PROGRAMS_DIR);
+
         for (final String filename : INITIAL_PROGRAMS) {
             try {
                 createAndCompile(getFileContent(filename), filename, true);
@@ -67,7 +81,7 @@ public class OS {
             }
         }
 
-        Directories.setCurrentDir(Directories.getTargetDir().getName());
+        Directories.setCurrentDir(Directories.getDir().getName());
     }
 
     private static String getFileContent(final String filename) throws IOException {
