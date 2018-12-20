@@ -1,4 +1,5 @@
 import assembler.Assembler;
+import filesystem.Directories;
 import filesystem.Files;
 import shell.Shell;
 import utils.Utils;
@@ -46,11 +47,11 @@ class OS {
      */
     private static void createAndCompile(final String codeText, final String fileName) {
         final byte[] code = codeText.getBytes();
-        Files.createFile(fileName + ".asm", code);
+        Directories.getCurrentDir().getFiles().createFile(fileName + ".asm", code);
 
         Assembler assembler = new Assembler();
         final byte[] exec = assembler.compile(code);
-        Files.createFile(fileName + ".exe", exec);
+        Directories.getCurrentDir().getFiles().createFile(fileName + ".exe", exec);
     }
 
     OS() {

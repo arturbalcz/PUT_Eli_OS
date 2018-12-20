@@ -1,5 +1,7 @@
 package shell;
 
+import filesystem.Directories;
+import filesystem.Directory;
 import filesystem.Disk;
 import utils.Utils;
 
@@ -36,6 +38,15 @@ public class Shell {
         CommandTable.put("test", Commands::test);
         CommandTable.put("disk", Disk::test);
         CommandTable.put("file", Commands::file);
+        CommandTable.put("rm", Commands::rm);
+        CommandTable.put("rmdir", Commands::rmdir);
+        CommandTable.put("more", Commands::more);
+        CommandTable.put("cd", Commands::cd);
+        CommandTable.put("mkdir", Commands::mkdir);
+        CommandTable.put("dir", Commands::dir);
+        CommandTable.put("copy", Commands::copy);
+        CommandTable.put("tree", Commands::tree);
+        CommandTable.put("edit", Commands::edit);
         CommandTable.put("com", Commands::com);
         CommandTable.put("cp", Commands::cp);
     }
@@ -70,7 +81,11 @@ public class Shell {
      * @return condition to close system
      */
     public static boolean interpret( ) {
-        standardOut.print("> ");
+        String history = "";
+        for (Directory e: Directories.getHistory()){
+            history += e.getName() + "/";
+        }
+        print(history + Directories.getCurrentDir().getName() + "> ");
         String input = read();
         input = input.trim();
         if (input.isEmpty()) {
