@@ -652,7 +652,7 @@ public class Assembler {
     // processes
 
     static void cp(final byte[] filename, final byte[] name, final byte priority) {
-        final byte[] exe = Files.getCleanFile(new String(filename));
+        final byte[] exe = Directories.getCurrentDir().getFiles().getFileClean(new String(filename));
         PCBList.list.newProcess(new String(name), (int) priority, exe);
     }
 

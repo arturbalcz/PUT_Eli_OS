@@ -1,4 +1,4 @@
-﻿package virtualmemory;
+package virtualmemory;
 
 import java.util.Map;
 import java.util.Queue;

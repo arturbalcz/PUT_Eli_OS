@@ -148,12 +148,12 @@ public interface Commands {
         if (args.get(1).equals("/?")) Shell.println(help);
         else {
             final String fileName = args.get(1);
-            final byte[] code = Files.getFileClean(fileName); //error, non-static method in static context
+            final byte[] code = Directories.getCurrentDir().getFiles().getFileClean(fileName); //error, non-static method in static context
 
             Assembler assembler = new Assembler();
             final byte[] exec = assembler.compile(code);
             if (exec == null) Shell.println("compilation failed");
-            else Files.createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec); //error, non-static method in static context
+            else Directories.getCurrentDir().getFiles().createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec); //error, non-static method in static context
         }
     }
 
@@ -164,7 +164,7 @@ public interface Commands {
     static void cp(ArrayList<String> args) {
         if (args.size() != 4) Shell.println("invalid number of arguments");
 
-        final byte[] exec = Files.getFileClean(args.get(1)); //error, non-static method in static context
+        final byte[] exec = Directories.getCurrentDir().getFiles().getFileClean(args.get(1)); //error, non-static method in static context
         if (exec[0] == -1) Shell.println("Program does not exist");
         else PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
     }

@@ -3,6 +3,7 @@ package shell;
 import filesystem.Directories;
 import filesystem.Directory;
 import filesystem.Disk;
+import org.omg.CORBA.TIMEOUT;
 import utils.Utils;
 
 import java.io.BufferedReader;
@@ -126,22 +127,37 @@ public class Shell {
             empty = false;
         }
 
-        String input;
+        final long startTime = System.currentTimeMillis();
+        String mes;
+        do {
+            mes = threadedInput.poll();
 
-        try {
-            String mes = threadedInput.poll();
-            if (mes == null) {
-                //queue empty, skipping
-                throw new IOException();
+            // slow down a bit ;)
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            //System.out.println("Response: " + mes);
-            else input = mes;
-        }
-        catch (NullPointerException e) {
-            e.printStackTrace();
-            throw new IOException();
-        }
+        } while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && mes == null);
 
+        if (mes == null) throw new IOException();
+
+        String input = mes;
+
+//        try {
+//            String mes = threadedInput.poll();
+//            if (mes == null) {
+//                //queue empty, skipping
+//                Thread.sleep(READ_TIMEOUT);
+//                throw new IOException();
+//            }
+//            //System.out.println("Response: " + mes);
+//            else input = mes;
+//        }
+//        catch (NullPointerException | InterruptedException e) {
+//            e.printStackTrace();
+//            throw new IOException();
+//        }
 
         if (input.isEmpty()) {
             return exiting;

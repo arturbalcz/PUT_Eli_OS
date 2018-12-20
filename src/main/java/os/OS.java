@@ -1,6 +1,7 @@
 package os;
 
 import assembler.Assembler;
+import filesystem.Directories;
 import filesystem.Files;
 import processess.PCBList;
 import shell.Shell;
@@ -29,7 +30,7 @@ public class OS {
         updateInitialFiles();
 
         createAndCompile(DUMMY, "dummy", false);
-        final byte[] dummyExec = Files.getFile("dummy.exe"); //error, non-static method in static context
+        final byte[] dummyExec = Directories.getTargetDir().getFiles().getFileClean("dummy.exe");
         PCBList.list.addDummy(dummyExec);
     }
 
@@ -56,6 +57,8 @@ public class OS {
 
     public static void updateInitialFiles() {
         Utils.log("updating initial programs");
+        Directories.getTargetDir().addDirectory("sample");
+        Directories.setCurrentDir("sample");
         for (final String filename : INITIAL_PROGRAMS) {
             try {
                 createAndCompile(getFileContent(filename), filename, true);
@@ -63,6 +66,8 @@ public class OS {
                 e.printStackTrace();
             }
         }
+
+        Directories.setCurrentDir(Directories.getTargetDir().getName());
     }
 
     private static String getFileContent(final String filename) throws IOException {
@@ -85,11 +90,11 @@ public class OS {
      */
     private static void createAndCompile(final String codeText, final String fileName, final boolean withSource) {
         final byte[] code = codeText.getBytes();
-        if (withSource) Files.createFile(fileName + ".asm", code); //error, non-static method in static context
+        if (withSource)  Directories.getCurrentDir().getFiles().createFile(fileName + ".asm", code);
 
         Assembler assembler = new Assembler();
         final byte[] exec = assembler.compile(code);
-        Files.createFile(fileName + ".exe", exec); //error, non-static method in static context
+        Directories.getCurrentDir().getFiles().createFile(fileName + ".exe", exec); //error, non-static method in static context
     }
 
 }

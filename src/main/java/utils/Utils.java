@@ -17,7 +17,7 @@ public class Utils {
      * If set to true, logs are printed
      */
     static private boolean logging = true;
-    static private boolean stepping = true;
+    static private boolean stepping = false;
 
     private static final JFrame frame = new JFrame();
     private static final JTextArea textArea = new JTextArea(50, 10);
