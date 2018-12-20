@@ -61,7 +61,7 @@ public class Shell {
         CommandTable.put("update", Commands::update);
 
         //Creating thread with input from console
-        Thread inputT = new Thread(() -> {
+        new Thread(() -> {
             Scanner sc = new Scanner(System.in);
             String a;
             while (true)
@@ -70,7 +70,7 @@ public class Shell {
 
                 try {
                     if (threadedInput.size() > 0) {
-                        //System.out.println("Queue is full");
+                        // Queue is full
                         Thread.sleep(1000);
                     }
                     else  {
@@ -84,8 +84,7 @@ public class Shell {
             }
 
 
-        });
-        inputT.start();
+        }).start();
     }
 
     /**
@@ -118,6 +117,7 @@ public class Shell {
      * @return condition to close system
      */
     public static boolean interpret( ) throws IOException {
+        //check if current line is empty and ready for new interpreting session
         if (empty) {
             String history = "";
 	        for (Directory e: Directories.getHistory()){
@@ -127,6 +127,7 @@ public class Shell {
             empty = false;
         }
 
+        //getting from second thread input from console
         final long startTime = System.currentTimeMillis();
         String mes;
         do {
@@ -139,30 +140,11 @@ public class Shell {
                 e.printStackTrace();
             }
         } while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && mes == null);
-
         if (mes == null) throw new IOException();
 
-        String input = mes;
+        String input = mes.trim();
+        if (input.isEmpty()) return exiting;
 
-//        try {
-//            String mes = threadedInput.poll();
-//            if (mes == null) {
-//                //queue empty, skipping
-//                Thread.sleep(READ_TIMEOUT);
-//                throw new IOException();
-//            }
-//            //System.out.println("Response: " + mes);
-//            else input = mes;
-//        }
-//        catch (NullPointerException | InterruptedException e) {
-//            e.printStackTrace();
-//            throw new IOException();
-//        }
-
-        if (input.isEmpty()) {
-            return exiting;
-        }
-        input = input.trim();
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
 
         // printing arguments for debug
@@ -170,14 +152,17 @@ public class Shell {
         String args = "";
         StringBuilder sB = new StringBuilder(args);
         for (String x : arguments) {
-            sB.append(x);
-            sB.append(", ");
+            sB.append(x).append(", ");
         }
         Utils.log(sB.toString());
-        String command = arguments.get(0);
 
+        //finding command in CommandTable
+        String command = arguments.get(0);
         if (CommandTable.get(command) == null) {
-            standardOut.println("\"" + input + "\" can't resolve command");
+            //if not found
+            standardOut.println("\'" + input + "\'  " +
+                    "is not recognized as an internal or external command,\n" +
+                    "operable program or batch file.");
         }
         else {
             try {
