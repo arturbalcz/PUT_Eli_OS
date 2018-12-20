@@ -14,6 +14,12 @@ public class Directory {
         this.name = name;
     }
 
+    Directory(Directory newDir){
+        this.name = newDir.name;
+        this.dirs = newDir.dirs;
+        this.files = newDir.files;
+    }
+
     public String getName() {
         return name;
     }
