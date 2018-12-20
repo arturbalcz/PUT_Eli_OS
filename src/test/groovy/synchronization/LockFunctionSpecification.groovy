@@ -42,9 +42,10 @@ class LockFunctionSpecification extends Specification {
     def "should unlock" () {
         given:
         lockFunction.locked = true
+        lockFunction.kolejka = []
 
         when:
-        lockFunction.unlock(true)
+        lockFunction.unlock()
 
         then:
         !lockFunction.locked
@@ -58,7 +59,7 @@ class LockFunctionSpecification extends Specification {
         lockFunction.kolejka = [p2]
 
         when:
-        lockFunction.unlock(true)
+        lockFunction.unlock()
 
         then:
         lockFunction.locked
