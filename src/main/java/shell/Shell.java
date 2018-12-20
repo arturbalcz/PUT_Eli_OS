@@ -1,5 +1,7 @@
 package shell;
 
+import filesystem.Directories;
+import filesystem.Directory;
 import filesystem.Disk;
 import utils.Utils;
 
@@ -40,6 +42,15 @@ public class Shell {
         CommandTable.put("test", Commands::test);
         CommandTable.put("disk", Disk::test);
         CommandTable.put("file", Commands::file);
+        CommandTable.put("rm", Commands::rm);
+        CommandTable.put("rmdir", Commands::rmdir);
+        CommandTable.put("more", Commands::more);
+        CommandTable.put("cd", Commands::cd);
+        CommandTable.put("mkdir", Commands::mkdir);
+        CommandTable.put("dir", Commands::dir);
+        CommandTable.put("copy", Commands::copy);
+        CommandTable.put("tree", Commands::tree);
+        CommandTable.put("edit", Commands::edit);
         CommandTable.put("com", Commands::com);
         CommandTable.put("cp", Commands::cp);
         CommandTable.put("lpq", Commands::lpq);
@@ -107,7 +118,11 @@ public class Shell {
      */
     public static boolean interpret( ) throws IOException {
         if (empty) {
-            standardOut.print("> ");
+            String history = "";
+	        for (Directory e: Directories.getHistory()){
+	            history += e.getName() + "/";
+	        }
+        	print(history + Directories.getCurrentDir().getName() + "> ");
             empty = false;
         }
 
@@ -116,33 +131,16 @@ public class Shell {
         try {
             String mes = threadedInput.poll();
             if (mes == null) {
-                //System.out.println("Queue empty");
-                input = "";
-                Thread.sleep(500);
+                //queue empty, skipping
+                throw new IOException();
             }
             //System.out.println("Response: " + mes);
             else input = mes;
         }
-        catch (NullPointerException | InterruptedException e) {
-            input = "";
+        catch (NullPointerException e) {
             e.printStackTrace();
+            throw new IOException();
         }
-
-        /*
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        long startTime = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && !in.ready()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        String input;
-        if (in.ready()) input = in.readLine();
-        else throw new IOException();
-        */
 
 
         if (input.isEmpty()) {

@@ -13,9 +13,10 @@ import static java.lang.Integer.parseInt;
 public abstract class Disk {
     private static final int BLOCK_SIZE = 32;
     static final byte EMPTY_CELL = -3;
+    static final byte INDEX_CELL = -2; //marks beginning of an index block
 
     private static byte physicalDisk[] = new byte[1024];
-    private static boolean blockTaken[] = new boolean[physicalDisk.length/ BLOCK_SIZE];
+    private static boolean blockTaken[] = new boolean[physicalDisk.length / BLOCK_SIZE];
     private static int blockAmount = blockTaken.length;
     private static int currentBlock = 0;
 
@@ -24,7 +25,7 @@ public abstract class Disk {
     }
 
     public static byte[] empty() {
-        return new byte[] { EMPTY_CELL };
+        return new byte[]{EMPTY_CELL};
     }
 
     public static byte[] invalid() {
@@ -32,7 +33,7 @@ public abstract class Disk {
     }
 
     public static byte[] index() {
-        return new byte[]{-2};
+        return new byte[]{INDEX_CELL};
     }
 
 
@@ -42,60 +43,59 @@ public abstract class Disk {
      * @param index block to be returned
      * @return byte[] corresponding to specified block
      */
-    public static byte[] getBlock(int index){
-        return Arrays.copyOfRange(physicalDisk, index* BLOCK_SIZE, index* BLOCK_SIZE + BLOCK_SIZE);
+    public static byte[] getBlock(int index) {
+        return Arrays.copyOfRange(physicalDisk, index * BLOCK_SIZE, index * BLOCK_SIZE + BLOCK_SIZE);
     }
 
     /***
      * Gets all blocks assigned to an index block
      *
      * @param index     which index block to get content from
-     * @return          byte[] of all data blocks
+     * @return byte[] of all data blocks
      */
-   public static byte[] getBlockByIndex(int index){
-       byte[] indexBlock = getBlock(index);
-       int blockAmount = 0;
-       Vector<Byte> temp = new Vector<>();
-       for(int i = 1; i < indexBlock.length; i++) {
-           if (indexBlock[i] == 0) break;
-           blockAmount++;
-       }
-       for (int i = 1; i <= blockAmount; i++) {
-            for(byte e: getBlock((char)indexBlock[i])) {
+    public static byte[] getBlockByIndex(int index) {
+        byte[] indexBlock = getBlock(index);
+        int blockAmount = 0;
+        Vector<Byte> temp = new Vector<>();
+        for (int i = 1; i < indexBlock.length; i++) {
+            if (indexBlock[i] == EMPTY_CELL) break;
+            blockAmount++;
+        }
+        for (int i = 1; i <= blockAmount; i++) {
+            for (byte e : getBlock((char) indexBlock[i])) {
                 temp.add(e);
             }
-       }
-       byte[] result = new byte[blockAmount* BLOCK_SIZE];
-       for (int i = 0; i < blockAmount * BLOCK_SIZE; i++) {
-           result[i] = temp.get(i);
-       }
-       return result;
-   }
+        }
+        byte[] result = new byte[blockAmount * BLOCK_SIZE];
+        for (int i = 0; i < blockAmount * BLOCK_SIZE; i++) {
+            result[i] = temp.get(i);
+        }
+        return result;
+    }
 
 
     /**
      * Inserts data into a block. Does not divide data, does not check for empty block.
      *
-     * @param index     which block to insert into
-     * @param content   content ot be inserted, no longer than {@value BLOCK_SIZE}
+     * @param index   which block to insert into
+     * @param content content ot be inserted, no longer than {@value BLOCK_SIZE}
      */
-    static void setBlock(int index, byte[] content){
+    static void setBlock(int index, byte[] content) {
         int max = content.length < BLOCK_SIZE ? BLOCK_SIZE : content.length;
         blockTaken[index] = true;
         for (int i = 0; i < max; i++) {
-                if(i >= content.length) {
-                    physicalDisk[index* BLOCK_SIZE + i] = EMPTY_CELL;
-                }
-                else {
-                    physicalDisk[index * BLOCK_SIZE + i] = content[i];
-                }
+            if (i >= content.length) {
+                physicalDisk[index * BLOCK_SIZE + i] = EMPTY_CELL;
+            } else {
+                physicalDisk[index * BLOCK_SIZE + i] = content[i];
+            }
         }
     }
 
 
-    static boolean isTaken(int index){
-       return blockTaken[index];
-   }
+    static boolean isTaken(int index) {
+        return blockTaken[index];
+    }
 
     /**
      * Finds free block on disk, checking whole disk
@@ -103,90 +103,111 @@ public abstract class Disk {
      * @param index from which index to start looking
      * @return next free index
      */
-    static int findNextFree(int index){
+    static int findNextFree(int index) {
         for (int i = index; i < blockAmount; i++) {
             if (!isTaken(i)) {
                 return i;
             }
         }
         for (int i = 0; i < index; i++) {
-            if(!isTaken(i)){
+            if (!isTaken(i)) {
                 return i;
             }
         }
         return -1;
     }
 
-    static byte[] divideContent(byte content[]){
-        if( content.length < BLOCK_SIZE){ return content; }
+    static byte[] divideContent(byte content[]) {
+        if (content.length < BLOCK_SIZE) {
+            return content;
+        }
         return Arrays.copyOfRange(content, 0, BLOCK_SIZE);
     }
 
-     /**
+    /**
      * Writes data onto disk searching for free space, dividing as needed.
      *
-     * @param content   content to be written
-     * @param index     from which index to start searching
-     * @return          number of the assigned index block`
+     * @param content content to be written
+     * @param index   from which index to start searching
+     * @return number of the assigned index block`
      */
-    public static int addContent(byte[] content, int index){
+    public static int addContent(byte[] content, int index) {
         int currentIndex = findNextFree(index);
         int x = 0;
         byte currentContent[] = content;
         byte indexBlock[] = new byte[BLOCK_SIZE];
-        indexBlock[0] = -2;
-        do{
+        Arrays.fill(indexBlock, EMPTY_CELL);
+        indexBlock[0] = INDEX_CELL;
+        do {
             currentIndex = findNextFree(currentIndex);
-            currentContent = Arrays.copyOfRange(content, BLOCK_SIZE *x, content.length);
+            currentContent = Arrays.copyOfRange(content, BLOCK_SIZE * x, content.length);
             setBlock(currentIndex, divideContent(currentContent));
             x++;
             indexBlock[x] = Byte.parseByte(Integer.toString(currentIndex));
-        }while(currentContent.length > BLOCK_SIZE);
+        } while (currentContent.length > BLOCK_SIZE);
 //        System.out.println(Arrays.toString(indexBlock));
         int freeIndex = findNextFree(0);
         setBlock(freeIndex, indexBlock);
         return freeIndex;
     }
 
+    public static void remove(int index) {
+        byte[] indexBlock = getBlock(index);
+        if (indexBlock[0] == INDEX_CELL) {
+            blockTaken[index] = false;
+            for (int i = 1; i < BLOCK_SIZE; i++) {
+                if (indexBlock[i] != EMPTY_CELL) {
+                    blockTaken[indexBlock[i]] = false;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+
     /***
      * Shows disk content in a formatted table
      */
-    private static void show(){
+    private static void show() {
         System.out.print("    ");
-        for (int i = 0; i <= BLOCK_SIZE /10; i++) {
+        for (int i = 0; i <= BLOCK_SIZE / 10; i++) {
             System.out.print(i + "                   ");
         }
         System.out.println();
         System.out.print("    ");
         for (int i = 0; i < BLOCK_SIZE; i++) {
-            System.out.print(i%10 + " ");
+            System.out.print(i % 10 + " ");
         }
-        System.out.print("  taken");
+        System.out.print(" \t\ttaken");
         System.out.println();
         for (int i = 0; i < physicalDisk.length / BLOCK_SIZE; i++) {
-            System.out.print((i<10 ? " " + i: i) + "  ");
+            System.out.print((i < 10 ? " " + i : i) + "  ");
             boolean iBlock = false;
-            for(byte y : getBlock(i)) {
-                char temp = (char)y;
+            for (byte y : getBlock(i)) {
+                char temp = (char) y;
                 if (iBlock) {
-                    System.out.print((int)temp + " ");
+                    System.out.print((y == EMPTY_CELL ? "_" : (int) temp) + " ");
                     continue;
                 }
-                if(Character.isSpaceChar(temp)){ temp = ' '; }
-                else if (temp == '\n'){ temp = '⏎'; }
-                else if (temp == '\t'){ temp = '⇥';}
-                else if (y == -2){
+                if (Character.isSpaceChar(temp)) {
+                    temp = ' ';
+                } else if (temp == '\n') {
+                    temp = '⏎';
+                } else if (temp == '\t') {
+                    temp = '⇥';
+                } else if (y == -2) {
                     temp = '!';
                     iBlock = true;
                 }
                 System.out.print((y == EMPTY_CELL ? "_" : temp) + " ");
             }
-            System.out.println("  " + blockTaken[i]);
+            System.out.println(" \t\t" + blockTaken[i]);
         }
         System.out.println();
     }
 
-    public static boolean run(){
+    public static boolean run() {
         Scanner scan = new Scanner(System.in);
         System.out.print(">");
         String input = scan.nextLine();
@@ -196,28 +217,25 @@ public abstract class Disk {
         return true;
     }
 
-    public static void test(ArrayList<String> args){
+    public static void test(ArrayList<String> args) {
 
         String help = "DISK - tests if disk is working";
-        if(args.size() != 1 && args.size() != 2 && args.size() != 3) {
+        if (args.size() != 1 && args.size() != 2 && args.size() != 3) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
-        }
-        else {
-            if(args.size() == 1){
+        } else {
+            if (args.size() == 1) {
                 try {
                     run();
-                }
-                catch (IndexOutOfBoundsException e) {
+                } catch (IndexOutOfBoundsException e) {
                     Utils.step("Disk out of bounds");
                 }
-            }
-            else{
+            } else {
                 String param = args.get(1);
                 switch (param.toUpperCase()) {
                     case "CLEAR":
                         physicalDisk = new byte[1024];
-                        blockTaken = new boolean[physicalDisk.length/ BLOCK_SIZE];
+                        blockTaken = new boolean[physicalDisk.length / BLOCK_SIZE];
                         break;
                     case "SHOW":
                         show();
@@ -226,13 +244,13 @@ public abstract class Disk {
                         currentBlock = parseInt(args.get(2));
                         break;
                     case "NEWLINE":
-                        addContent("Testowy string\n w nowej lini :)\n z\ttabem".getBytes(),10);
+                        addContent("Testowy string\n w nowej lini :)\n z\ttabem".getBytes(), 10);
                         break;
                     case "GET":
                         byte[] temp;
                         temp = getBlockByIndex(Integer.parseInt(args.get(2)));
-                        for(byte e:temp){
-                            System.out.print((char)e);
+                        for (byte e : temp) {
+                            System.out.print((char) e);
                         }
                         break;
                     default:

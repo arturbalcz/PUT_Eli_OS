@@ -29,7 +29,7 @@ public class OS {
         updateInitialFiles();
 
         createAndCompile(DUMMY, "dummy", false);
-        final byte[] dummyExec = Files.getFile("dummy.exe");
+        final byte[] dummyExec = Files.getFile("dummy.exe"); //error, non-static method in static context
         PCBList.list.addDummy(dummyExec);
     }
 
@@ -85,11 +85,11 @@ public class OS {
      */
     private static void createAndCompile(final String codeText, final String fileName, final boolean withSource) {
         final byte[] code = codeText.getBytes();
-        if (withSource) Files.createFile(fileName + ".asm", code);
+        if (withSource) Files.createFile(fileName + ".asm", code); //error, non-static method in static context
 
         Assembler assembler = new Assembler();
         final byte[] exec = assembler.compile(code);
-        Files.createFile(fileName + ".exe", exec);
+        Files.createFile(fileName + ".exe", exec); //error, non-static method in static context
     }
 
 }
