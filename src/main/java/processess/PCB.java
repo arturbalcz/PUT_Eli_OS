@@ -105,7 +105,7 @@ public class PCB implements Comparable<PCB> {
 
     public int getExecutedOrders() {return executedOrders; }
 
-    public void setExetucedOrders(int executedOrders) {this.executedOrders = executedOrders; }
+    public void setExecutedOrders(int executedOrders) {this.executedOrders = executedOrders; }
 
     public int getPID() {
         return PID;
@@ -169,8 +169,10 @@ public class PCB implements Comparable<PCB> {
      *
      * @param newPriority value to add for dynamic priority
      */
-    public void setDynamicPriority(final int newPriority) {
+    public void setDynamicPriority(final int newPriority)
+    {
         dynamicPriority = (newPriority < 15) ? newPriority : 15;
+        if(dynamicPriority < basePriority) {dynamicPriority=basePriority;}
     }
     /**
      * Sets dynamic priority with it's base value

@@ -15,6 +15,8 @@ public class Processor
     private static final int LEVEL_NUMBER = 18;
     private static final int TIME_QUANTUM = 3;
 
+    private int balanceTimer = TIME_QUANTUM;
+
     private final MultilevelQueue<PCB> readyProcessQueue = new MultilevelQueue<>(LEVEL_NUMBER);
     private final ArrayList<Boolean> readySummary = new ArrayList<>(LEVEL_NUMBER);
     private PCB runningProcess = null;
@@ -34,12 +36,15 @@ public class Processor
         for (int i = 0; i < LEVEL_NUMBER; i++) readySummary.add(false);
     }
 
-    /** finishes running process executing after 3 orders */
+    /** finishes running process executing */
     private void finishRunning()
     {
         if (runningProcess != null) {
-            runningProcess.setExetucedOrders(0);
-            runningProcess.setBasePriority();
+            if(runningProcess.getExecutedOrders()>=TIME_QUANTUM)
+            {
+                runningProcess.setExecutedOrders(0);
+                runningProcess.setBasePriority();
+            }
 
             runningProcess.setState(ProcessState.READY);
             readyProcessQueue.add(runningProcess, runningProcess.getDynamicPriority());
@@ -73,6 +78,8 @@ public class Processor
         readyProcessQueue.remove(process);
         pcbList.deleteProcess(process.getPID());
 
+        //if process goes to WAITING state shouldn't be removed from PCBList and set as TERMINATED, should be removed only from readyProcessQueue
+
         if(readyProcessQueue.isEmpty(process.getDynamicPriority()))
             readySummary.set(process.getDynamicPriority(), false);
 
@@ -94,6 +101,8 @@ public class Processor
         readySummary.set(priority, true);
 
         Utils.log("Process added: " + process.toString());
+
+        if((runningProcess!=null) && (process.getDynamicPriority() > runningProcess.getDynamicPriority())) {finishRunning();}
     }
 
     /** finds if any process was waiting too long and sets higher priority */
@@ -113,10 +122,12 @@ public class Processor
 
                     process.setReadyTime(process.getReadyTime() + TIME_QUANTUM);
 
-                    if (process.getReadyTime() >= 15) {
-                        process.setDynamicPriority(process.getDynamicPriority() + 1);
+                    if (process.getReadyTime() >= 9) {
+                        if(process.getReadyTime() < 18) { process.setDynamicPriority(5); }
+                        else if(process.getReadyTime() < 27) {process.setDynamicPriority(10);}
+                        else {process.setDynamicPriority(15);}
+
                         Utils.log("Process: " + process.getSignature() + " has been waiting for: " + process.getReadyTime() + ". Priority increased to: " + process.getDynamicPriority());
-                        process.setReadyTime(0);
                     }
 
                     readyProcessQueue.add(process, process.getDynamicPriority());
@@ -133,14 +144,21 @@ public class Processor
         if (runningProcess == null || runningProcess.getProcessState() != ProcessState.RUNNING) findReadyProcess();
         Utils.log("Executing process: " + runningProcess.getName() + " id: " + runningProcess.getPID());
 
-        runningProcess.setExetucedOrders(runningProcess.getExecutedOrders()+1);
+        runningProcess.setExecutedOrders(runningProcess.getExecutedOrders()+1);
         final boolean end = !runningProcess.execute();
         Utils.log("Process: " + runningProcess.getName() + " executed with result: end=" + end + ", PC=" + runningProcess.getPC());
 
         if (end) removeProcess(runningProcess);
         else if (runningProcess.getExecutedOrders() >= TIME_QUANTUM && pcbList.getData().size() > 1) finishRunning();
 
-        balanceSetManager();
+        balanceTimer--;
+
+        if(balanceTimer <= 0)
+        {
+            balanceSetManager();
+            balanceTimer = TIME_QUANTUM;
+        }
+
 
         Utils.step("");
     }
