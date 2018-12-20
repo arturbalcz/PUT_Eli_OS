@@ -1,12 +1,9 @@
 package utils;
 
-import shell.Shell;
-
 import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +16,7 @@ public class Utils {
      * If set to true, logs are printed
      */
     static private boolean loggingOn = true;
+    static private boolean steppingOn = true;
 
     private static final JFrame frame = new JFrame();
     private static final JTextArea textArea = new JTextArea(50, 10);
@@ -75,6 +73,16 @@ public class Utils {
     public static void loggingOff() { Utils.loggingOn = false; }
 
     /**
+     * Turns step work on
+     */
+    public static void stepOn() { Utils.steppingOn = true; }
+
+    /**
+     * Turns step work on
+     */
+    public static void stepOff() { Utils.steppingOn = false; }
+
+    /**
      * If {@link Utils#loggingOn} is set to true, logs message to the console
      *
      * @param  msg  the message to log
@@ -104,7 +112,9 @@ public class Utils {
      * @param msg the message to log
      */
     public static void step(String msg) {
-        if (loggingOn) {
+        if (steppingOn) {
+            boolean log = loggingOn;
+            loggingOn();
             Utils.log(msg, false);
             Utils.log("Click ENTER to continue..." , false);
             try {
@@ -113,6 +123,7 @@ public class Utils {
                 e.printStackTrace();
             }
             Utils.log("Continued", false);
+            loggingOn = log;
         }
     }
 }
