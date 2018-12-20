@@ -85,9 +85,7 @@ public class Shell {
         for (Directory e: Directories.getHistory()){
             history += e.getName() + "/";
         }
-        standardOut(history + Directories.getCurrentDir().getName() + "> ");
-        ArrayList<String> arguments = new ArrayList<>();
-        arguments.add("ex");
+        print(history + Directories.getCurrentDir().getName() + "> ");
         String input = read();
         input = input.trim();
         if (input.isEmpty()) {
