@@ -9,8 +9,6 @@ import processess.PCB;
 import processess.PCBList;
 import utils.Utils;
 
-import javax.rmi.CORBA.Util;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -129,6 +127,30 @@ public interface Commands {
 
         Utils.log("Exiting by user");
         Shell.exiting = true;
+    }
+
+    static void echo(ArrayList<String> args) {
+        String help = "Turns printing on or off\n\n" +
+                "ECHO [/ON][/OFF]\n";
+        if(args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        }
+        else {
+            String param = args.get(1);
+            switch (param.toUpperCase()) {
+                case "/ON":
+                    Shell.echoOn();
+                    break;
+                case "/OFF":
+                    Shell.echoOff();
+                    break;
+                default:
+                    Utils.log("Wrong argument");
+                    Shell.println(help);
+                    break;
+            }
+        }
     }
 
     /**

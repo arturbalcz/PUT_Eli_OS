@@ -31,10 +31,6 @@ public class OS {
         createAndCompile(DUMMY, "dummy", false);
         final byte[] dummyExec = Directories.getTargetDir().getFiles().getFileClean("dummy.exe");
         PCBList.list.addDummy(dummyExec);
-
-        // clear the console
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 
     /**
@@ -42,6 +38,7 @@ public class OS {
      */
     public void run() {
         Utils.log("system started");
+        Shell.echoOn();
         Shell.println(LOGO);
         boolean closing = false;
         while(!closing) {

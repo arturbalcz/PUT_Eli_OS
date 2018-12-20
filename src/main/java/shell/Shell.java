@@ -3,12 +3,10 @@ package shell;
 import filesystem.Directories;
 import filesystem.Directory;
 import filesystem.Disk;
-import org.omg.CORBA.TIMEOUT;
 import utils.Utils;
 
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -26,8 +24,8 @@ public class Shell {
     private static final PrintStream standardOut = System.out;
     private static Queue<String> threadedInput = new ConcurrentLinkedQueue<>();
     static boolean exiting = false;
-
     private static boolean empty = true;
+    private static boolean echo = false;
 
     /**
      * Main map that stores all of connected commends and methods references
@@ -40,6 +38,7 @@ public class Shell {
         CommandTable.put("exit", Commands::exit );
         CommandTable.put("log", Commands::logging);
         CommandTable.put("step", Commands::stepping);
+        CommandTable.put("echo", Commands::echo);
         CommandTable.put("test", Commands::test);
         CommandTable.put("disk", Disk::test);
         CommandTable.put("file", Commands::file);
@@ -71,7 +70,7 @@ public class Shell {
                 try {
                     if (threadedInput.size() > 0) {
                         // Queue is full
-                        Thread.sleep(1000);
+                        Thread.sleep(READ_TIMEOUT);
                     }
                     else  {
                         threadedInput.add(a);
@@ -87,12 +86,15 @@ public class Shell {
         }).start();
     }
 
+    public static void echoOn() { echo = true; }
+    public static void echoOff() { echo = false; }
+
     /**
      * Prints parameter to the console with new line
      * @param msg message to print for user
      */
     public static void println(String msg) {
-        standardOut.println(msg);
+        if (echo) standardOut.println(msg);
     }
 
     /**
@@ -100,14 +102,14 @@ public class Shell {
      * @param msg message to print for user
      */
     public static void print(String msg) {
-        standardOut.print(msg);
+        if (echo) standardOut.print(msg);
     }
 
     /**
      * Tries to get from console whole line inserted by user
      * @return input from user
      */
-    private static String read(boolean once) throws IOException {
+    private static String readOnce() throws IOException {
         final long startTime = System.currentTimeMillis();
         String mes;
         do {
@@ -124,11 +126,11 @@ public class Shell {
         return mes;
     }
 
-    static String read() {
+    public static String read() {
         String result = "";
         while(result.isEmpty()) {
             try {
-                result = read(false);
+                result = readOnce();
             } catch (IOException ignored) {
             }
         }
@@ -144,13 +146,15 @@ public class Shell {
         if (empty) {
             String history = "";
 	        for (Directory e: Directories.getHistory()){
-	            history += e.getName() + "/";
+	            history += e.getName() + "\\";
 	        }
-        	print(history + Directories.getCurrentDir().getName() + "> ");
+	        String dirName = Directories.getCurrentDir().getName();
+	        if (dirName.charAt(dirName.length()-1) == ':') dirName += "\\";
+        	print(history + dirName + "> ");
             empty = false;
         }
 
-        String input = read(true).trim();
+        String input = readOnce().trim().toLowerCase();
         if (input.isEmpty()) return exiting;
 
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));

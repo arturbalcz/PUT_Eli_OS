@@ -26,6 +26,7 @@ public class Utils {
     private static final PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
     private static final Semaphore semaphore = new Semaphore(0);
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static String lastLogTime = "00:00:00";
 
     /**
      * Action wrapper for mapping KEY with JButton
@@ -101,7 +102,10 @@ public class Utils {
         if(logging) {
             if(error) msg = "ERR: " + msg;
             String time = formatter.format(LocalDateTime.now());
-            printStream.println(time + " - " + msg);
+
+            if (lastLogTime.equals(time)) time = "        ";
+            else lastLogTime = time;
+            printStream.println(time + " " + msg);
         }
     }
 
