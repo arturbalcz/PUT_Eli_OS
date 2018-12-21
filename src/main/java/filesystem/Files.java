@@ -9,7 +9,7 @@ public class Files {
 
     private Vector<File> allFiles = new Vector<>();
 
-    private boolean fileExists(String name) {
+    public boolean fileExists(String name) {
         for (File e : allFiles) {
             if (e.getName().equals(name)) {
                 Shell.println("Name taken");

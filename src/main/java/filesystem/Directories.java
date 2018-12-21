@@ -32,7 +32,7 @@ public class Directories {
         return sourceDir;
     }
 
-    private static Directory findDirectory(String name, String src) {
+    public static Directory findDirectory(String name, String src) {
         switch(src){
             case "current":
                 for (Directory e : currentDir.getDirectories()) {
