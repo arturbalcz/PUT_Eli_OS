@@ -1,41 +1,40 @@
 ﻿package virtualmemory;
-
 import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 import java.util.function.Function;
 
 public class virtualmemory {
-    public
-    //Jak Szymon zrobi to wezmę tą klasę od niego
-    class Frame{
+
+     //Jak Szymon zrobi to wezmę tą klasę od niego
+     public class Frame{
         Integer id;
     }
 
     //Tymczasowa klasa, jak będę mial dokładniejsze info to po prostu wezmę klase z innego modułu (prawd, PCB)
-    class Process{
+    public class Process{
         Integer processId;
         Vector<Byte> code;
     }
 
     //Funkcja otrzymująca proces od PCB
-    void getProcess(Process p){
+    public void getProcess(Process p){
         processProcessing(p);
         startProcessZero(p.processId);
     }
     //Funkcja wywoływana w momencie, gdy dana strona nie jest w ramie - wywolanie stronicowania na żądanie
-    void demandPage(Integer ProcessID, Integer PageID){
+    public void demandPage(Integer ProcessID, Integer PageID){
         putPageInRam(ProcessID, PageID);
     }
     //Mapa wszystkich Tablic Stron, int to ProcessID, a Vector to tablica stron
     Map<Integer,  Vector<PageEntry>> PageTables;
 
     //funkcja sprzątająca po zakonczeniu procesu, wszystkie niezbedne wartośći ustawia na -1 i usuwa wpisy w PageFile i PageTable
-    void removeProcess(Process proc){
+    public void removeProcess(Integer processID){
         Queue <Integer> tmpQueue = victimQueue, beginQ = null;
         Integer frame, Qsize;
         for(int i = 0; i<16; i++){
-            if(RamStatus[i].ProcessID == proc.processId){
+            if(RamStatus[i].ProcessID == processID){
                 Qsize = tmpQueue.size();
                 //Updating queue
                 //szukamy w calej kolejce ramko, ktora zajmowal proces
@@ -65,11 +64,11 @@ public class virtualmemory {
         victimQueue.removeAll(victimQueue);
         //aktualizacja zawartosci kolejki glownej
         victimQueue.addAll(tmpQueue);
-        PageFile.remove(proc.processId, proc);
-        PageTables.remove(proc.processId);
+        PageFile.remove(processID);
+        PageTables.remove(processID);
     }
     //Funkcje związane z wypisywaniem tego co jest gdziekolwiek, do pracy krokowej.
-    void printPageTable (Integer processID){
+    public void printPageTable (Integer processID){
         System.out.println("#### Printing page table, process ID: " + processID + " ####");
         for(int i=0; i<PageTables.get(processID).size(); i++){
             System.out.println("Page no."+ i + " " + PageTables.get(processID).get(i).frame + " " + PageTables.get(processID).get(i).valid);
@@ -77,7 +76,7 @@ public class virtualmemory {
         System.out.println();
     }
 
-    void printQueue(){
+    public void printQueue(){
         Queue<Integer> tmp = victimQueue;
         System.out.println("#### Printing victimQueue ####");
         for(int i=0; i<tmp.size(); i++){
@@ -86,7 +85,7 @@ public class virtualmemory {
         System.out.println();
     }
 
-    void printProcessPages(Integer processID){
+    public void printProcessPages(Integer processID){
         System.out.println("#### Printing process pages, process ID: " + processID + " ####");
         Vector<Vector<Byte>> pages = PageFile.get(processID);
         for(int i=0; i<pages.size(); i++){
@@ -97,21 +96,21 @@ public class virtualmemory {
         }
         System.out.println();
     }
-    void printPage(Integer processID, Integer pageID){
+    public void printPage(Integer processID, Integer pageID){
         System.out.println("#### Printing process page, process ID: " + processID + " pageID: " + pageID + " ####");
         for(int j=0; j<PageFile.get(processID).get(pageID).size(); j++){
             System.out.println(PageFile.get(processID).get(pageID).get(j));
         }
         System.out.println();
     }
-    void printRamStatus(){
+    public void printRamStatus(){
         System.out.println("#### Printing current RAM status ####");
         for(int i=0; i<16; i++){
             System.out.println("Frame ID: " + i + " PageID " + RamStatus[i].PageID + " ProcessID " + RamStatus[i].ProcessID);
         }
         System.out.println();
     }
-    void printNextVictim(){
+    public void printNextVictim(){
         //Mozna uzyc tez .peek()
         System.out.println("#### Printing next victim page ####");
         Queue<Integer> tmp = victimQueue;
@@ -119,9 +118,7 @@ public class virtualmemory {
     }
 
     // $#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$##$#$#$#$#$#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$#$ //
-
-private
-        //Pojedynczy wpis w tablicy stronic
+    // Pojedynczy wpis w tablicy stronic
     class PageEntry
     {
         boolean valid;
