@@ -15,9 +15,11 @@ public class LockFunction {
     private List<processess.PCB> kolejka = new LinkedList<>();
     //kolejka uzywana do zmiennych warunkowyc
     private List<processess.PCB> Condition=new LinkedList<>();
+    private processor processor;
 
-    LockFunction()
+    LockFunction(processor processor)
     {
+        this.processor=processor;
         locked=false;
     }
     //it can be usfull we will see(never enough variable :D )
@@ -62,7 +64,7 @@ public class LockFunction {
             PCB process = kolejka.get(0);
             System.out.println("Process" + process.name + "rozpoaczac swoja akcje");
             process.setState(ProcessState.READY);
-          //  processor.AddReadyProcess(process,0);
+           processor.AddReadyProcess(process,0);
         }
         //reclaim the locked
         //procces is been activate from the stopped
@@ -77,7 +79,7 @@ public class LockFunction {
             PCB pcb=Condition.get(0);
             pcb.setState(ProcessState.READY);
           //cos nie dziala
-            // processor.AddReadyProcess(pcb,0);
+            processor.AddReadyProcess(pcb,0);
             Condition.remove(0);
             locked=false;
          }
