@@ -32,32 +32,58 @@ public class Shell {
      * Method need to have ArrayList<String> as array of parameters from user
      */
     static HashMap<String, Consumer<ArrayList<String>>> CommandTable = new HashMap<>();
+    static HashMap<String, String> HelpingTable = new HashMap<>();
     static {
         CommandTable.put("time", Commands::time );
+        HelpingTable.put("time", "Displays the system time.\n");
         CommandTable.put("help", Commands::help );
+        HelpingTable.put("help", "Provides help information for PUT Elita OS commands.\n\nHELP [command]\n\n\tcommand - displays help information on that command.\n");
         CommandTable.put("exit", Commands::exit );
+        HelpingTable.put("exit", "Quits the system.\n\nEXIT [t]\n\n\tt - if set, quits the system without confirm in step log\n");
         CommandTable.put("log", Commands::logging);
+        HelpingTable.put("log", "Turns logging on or off.\n\nLOG [/ON | /OFF]\n");
         CommandTable.put("step", Commands::stepping);
+        HelpingTable.put("step", "Turns step work on or off.\n\nSTEP [/ON][/OFF]\n");
         CommandTable.put("echo", Commands::echo);
+        HelpingTable.put("echo", "Turns printing on or off.\n\nECHO [/ON][/OFF]\n");
         CommandTable.put("test", Commands::test);
+        HelpingTable.put("test", "Testing!!.\n");
         CommandTable.put("disk", Disk::test);
+        HelpingTable.put("disk", "Displays the raw contents of a local disk.\n");
         CommandTable.put("file", Commands::file);
-        CommandTable.put("rm", Commands::rm);
+        HelpingTable.put("file", "Create and modify file.\n");
+        CommandTable.put("del", Commands::rm);
+        HelpingTable.put("del", "Deletes one or more files.\n");
         CommandTable.put("rmdir", Commands::rmdir);
+        HelpingTable.put("rmdir", "Removes a directory.\n");
         CommandTable.put("more", Commands::more);
+        HelpingTable.put("more", "Displays the contents of a text file.\n");
         CommandTable.put("cd", Commands::cd);
+        HelpingTable.put("cd", "Displays the name of or changes the current directory.\n");
         CommandTable.put("mkdir", Commands::mkdir);
+        HelpingTable.put("mkdir", "Creates a directory.\n");
         CommandTable.put("dir", Commands::dir);
+        HelpingTable.put("dir", "Displays a list of files and subdirectories in a directory.\n");
         CommandTable.put("copy", Commands::copy);
+        HelpingTable.put("copy", "Copies one files to another location.\n");
         CommandTable.put("tree", Commands::tree);
+        HelpingTable.put("tree", "Graphically displays the directory structure of a drive or path.\n");
         CommandTable.put("edit", Commands::edit);
+        HelpingTable.put("edit", "Opens editor with given file.\n");
         CommandTable.put("com", Commands::com);
+        HelpingTable.put("com", "Compiles given program.\n\nCOM filename\n\n\tfilename - Specifies the file to compile.\n");
         CommandTable.put("cp", Commands::cp);
+        HelpingTable.put("cp", "Creates process or application.\n");
         CommandTable.put("lpq", Commands::lpq);
+        HelpingTable.put("lpq", "Displays all ready tasks.\n");
         CommandTable.put("lp", Commands::lp);
+        HelpingTable.put("lp", "Displays all tasks.\n");
         CommandTable.put("rp", Commands::rp);
+        HelpingTable.put("rp", "Displays all currently running tasks.\n");
         CommandTable.put("dp", Commands::dp);
+        HelpingTable.put("dp", "Kill or stop a running process or application.\n");
         CommandTable.put("update", Commands::update);
+        HelpingTable.put("update", "Updates code of initial programs.\n");
 
         //Creating thread with input from console
         new Thread(() -> {
@@ -150,32 +176,34 @@ public class Shell {
 	        }
 	        String dirName = Directories.getCurrentDir().getName();
 	        if (dirName.charAt(dirName.length()-1) == ':') dirName += "\\";
-        	print(history + dirName + "> ");
+        	print(history + dirName + ">");
             empty = false;
         }
 
         String input = readOnce().trim().toLowerCase();
         if (input.isEmpty()) return exiting;
 
+        boolean echoPrevState = echo;
+        if (input.charAt(0) == '@') {
+            echoOff();
+            input = input.substring(1, input.length());
+        }
+
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
 
         // printing arguments for debug
-        Utils.log("Printing all arguments");
-        String args = "";
-        StringBuilder sB = new StringBuilder(args);
-        sB.append("[");
-        for (String x : arguments) {
-            sB.append(x).append(", ");
+        Utils.log("Interprete(): arguments = "+arguments.toString());
+
+        if (Commands.localExe(arguments)) {
+            empty = true;
+            return exiting;
         }
-        sB.delete(sB.length()-2, sB.length()-1);
-        sB.append("]");
-        Utils.log(sB.toString());
 
         //finding command in CommandTable
         String command = arguments.get(0);
         if (CommandTable.get(command) == null) {
             //if not found
-            standardOut.println("\'" + input + "\'  " +
+            standardOut.println("\'" + command + "\' " +
                     "is not recognized as an internal or external command,\n" +
                     "operable program or batch file.");
         }
@@ -184,11 +212,12 @@ public class Shell {
                 CommandTable.get(command).accept(arguments);
             }
             catch (IndexOutOfBoundsException e) {
-                Utils.log("Invalid number of arguments for " + command, true);
+                Utils.log("Interprete(): CommandTable::IndexOutOfBoundsException::"+command+"::"+arguments, true);
                 println("invalid number of arguments");
             }
         }
 
+        echo = echoPrevState;
         empty = true;
         return exiting;
     }

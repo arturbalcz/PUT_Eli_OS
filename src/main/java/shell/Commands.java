@@ -11,9 +11,7 @@ import utils.Utils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Stores implementation of every shell command with dependencies on external modules
@@ -28,13 +26,14 @@ public interface Commands {
         OS.updateInitialFiles();
     }
 
+    /* shell commands */
+
     /**
      * Turns logging on or off
      * @param args "on" or "off"
      */
     static void logging(ArrayList<String> args) {
-        String help = "Turns logging on or off\n\n" +
-                "LOG [/ON][/OFF]\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if(args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -49,7 +48,6 @@ public interface Commands {
                     Utils.loggingOff();
                     break;
                 default:
-                    Utils.log("Wrong argument");
                     Shell.println(help);
                     break;
             }
@@ -61,8 +59,7 @@ public interface Commands {
      * @param args "on" or "off"
      */
     static void stepping(ArrayList<String> args) {
-        String help = "Turns step work on or off\n\n" +
-                "STEP [/ON][/OFF]\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if(args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -89,7 +86,7 @@ public interface Commands {
      * @param args no effect
      */
     static void time(ArrayList<String> args) {
-        String help = "Prints time to user console\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if (args.size() == 2 && args.get(1).equals("/?")) {
             Shell.println(help);
             return;
@@ -105,11 +102,19 @@ public interface Commands {
      * @param args no effect
      */
     static void help(ArrayList<String> args) {
-        Set<String> keys = Shell.CommandTable.keySet();
-        Utils.log("Printing help for user.");
-        for (String command : keys) {
-            Shell.println(command.toUpperCase());
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() >= 2) { Shell.println(help); return; }
+        List<String> sortedKeys = new ArrayList<>(Shell.CommandTable.keySet());
+        Collections.sort(sortedKeys);
+        for (String command : sortedKeys) {
+            Shell.print(command.toUpperCase());
+            //if (command.length() < 4) Shell.print("\t\t");
+            Shell.print("\t");
+            String commandHelp = Shell.HelpingTable.get(command);
+            int endIndex = commandHelp.indexOf('\n');
+            Shell.println(commandHelp.substring(0, endIndex));
         }
+        Shell.println("");
     }
 
     /**
@@ -117,7 +122,7 @@ public interface Commands {
      * @param args no effect
      */
     static void exit(ArrayList<String> args) {
-        String help = "Quits the system.\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if (args.size() > 2) {
             Shell.println(help);
             return;
@@ -130,8 +135,7 @@ public interface Commands {
     }
 
     static void echo(ArrayList<String> args) {
-        String help = "Turns printing on or off\n\n" +
-                "ECHO [/ON][/OFF]\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if(args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -158,9 +162,38 @@ public interface Commands {
      * @param args anything but {@code null}
      */
     static void test(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         Utils.step("step work is working" + args.get(1));
         Utils.log("log is working" +  args.get(1));
         Shell.println("command is working " + args.get(1));
+    }
+
+    static boolean localExe(ArrayList<String> args) {
+        String arg = args.get(0);
+        Utils.log("localEXE(): input : "+arg);
+        String fileName = Directories.path(arg);
+        if (!fileName.matches("\\w+\\.\\w+")){
+            Utils.log("localEXE(): no extension: " + fileName);
+            fileName=fileName+".exe";
+            arg = arg + ".exe";
+        }
+
+        if (Directories.getTargetDir().getFiles().fileExists(fileName)) {
+            String[] file = fileName.split("\\.");
+            Utils.log("localEXE(): file found, creating process \'"+file[0]+"\'");
+            if (file[1].equals("exe")) {
+                ArrayList<String> arga = new ArrayList<>();
+                arga.add("cp");
+                arga.add(arg);
+                arga.add(file[0]);
+                arga.add("7");
+                Utils.log(arga.toString());
+                cp(arga);
+                return true;
+            }
+            else return false;
+        }
+        return false;
     }
 
     /**
@@ -168,8 +201,7 @@ public interface Commands {
      * @param args asm program to compile
      */
     static void com(ArrayList<String> args) {
-        String help = "Compiles given program\n\n" +
-                "COM filename\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if (args.size() == 1) Shell.println("no program file specified");
         if (args.get(1).equals("/?")) Shell.println(help);
         else {
@@ -188,9 +220,12 @@ public interface Commands {
      * @param args name of .exe file
      */
     static void cp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+
         if (args.size() != 4) Shell.println("invalid number of arguments");
 
-        final byte[] exec = Directories.getCurrentDir().getFiles().getFileClean(args.get(1)); //error, non-static method in static context
+        String fileName = Directories.path(args.get(1));
+        final byte[] exec = Directories.getTargetDir().getFiles().getFileClean(fileName);
         if (exec[0] == -1) Shell.println("Program does not exist");
         else PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
     }
@@ -199,6 +234,7 @@ public interface Commands {
      * List all processes
      */
     static void lp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         PCBList.list.print();
     }
 
@@ -206,6 +242,7 @@ public interface Commands {
      * List ready processes
      */
     static void lpq(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         PCBList.list.processor.printQueue();
     }
 
@@ -213,6 +250,7 @@ public interface Commands {
      * Prints running process
      */
     static void rp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         Shell.println(PCBList.list.processor.getRunningProcess().toString());
     }
 
@@ -220,6 +258,7 @@ public interface Commands {
      * Deletes selected process
      */
     static void dp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         final int processId = Integer.parseInt(args.get(1));
         final PCB process = PCBList.list.findByPID(processId);
         if (process != null) PCBList.list.processor.removeProcess(process);
@@ -229,7 +268,8 @@ public interface Commands {
 	/* filesystem commands */
 	
 	static void file(ArrayList<String> args) {
-        String help = "FILE - create and modify files \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+        //String help = "FILE - create and modify files \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -253,7 +293,8 @@ public interface Commands {
     }
 
     static void more(ArrayList<String> args) {
-        String help = "MORE - print file content \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "MORE - print file content \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -273,7 +314,8 @@ public interface Commands {
     }
 
     static void dir(ArrayList<String> args) {
-        String help = "DIR - print directory content \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "DIR - print directory content \n";
         if (args.size() != 1) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -282,7 +324,7 @@ public interface Commands {
             if (dirs != null) {
                 for (Directory e : dirs) {
                     if (e != null) {
-                        Shell.println("<dir>\t" + e.getName());
+                        Shell.println("\t<DIR>\t" + e.getName());
                     }
                 }
                 Directories.getCurrentDir().getFiles().showFiles();
@@ -291,8 +333,9 @@ public interface Commands {
     }
 
     static void copy(ArrayList<String> args) {
-        String help = "COPY - copies file \n" +
-                "   COPY [source] [target]";
+        String help = Shell.HelpingTable.get(args.get(0));
+//        String help = "COPY - copies file \n" +
+//                "   COPY [source] [target]";
         if (args.size() != 3) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -305,7 +348,8 @@ public interface Commands {
     }
 	
 	static void rm(ArrayList<String> args) {
-        String help = "RM - remove file \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "RM - remove file \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -318,7 +362,8 @@ public interface Commands {
     }
 
     static void rmdir(ArrayList<String> args) {
-        String help = "RM - remove file \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "RM - remove file \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -331,7 +376,8 @@ public interface Commands {
     }
 
     static void mkdir(ArrayList<String> args) {
-        String help = "MKDIR - creates a directory \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "MKDIR - creates a directory \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -344,7 +390,8 @@ public interface Commands {
     }
 
     static void cd(ArrayList<String> args) {
-        String help = "CD - changes current directory \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "CD - changes current directory \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -359,7 +406,8 @@ public interface Commands {
     }
 
     static void tree(ArrayList<String> args) {
-        String help = "TREE - displays all directories \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "TREE - displays all directories \n";
         if (args.size() != 1) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -371,7 +419,8 @@ public interface Commands {
     }
 
     static void edit(ArrayList<String> args) {
-        String help = "EDIT - append content to file \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+	    //String help = "EDIT - append content to file \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
