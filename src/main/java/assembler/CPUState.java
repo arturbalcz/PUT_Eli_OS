@@ -12,8 +12,8 @@ public class CPUState {
     private final Registry C;
     private final Registry D;
 
-    private final boolean CF;
-    private final boolean ZF;
+    private boolean CF;
+    private boolean ZF;
 
     CPUState() {
         A = new Registry();
@@ -55,5 +55,14 @@ public class CPUState {
 
     public boolean getZF() {
         return ZF;
+    }
+
+    public void set(final CPUState updateState) {
+        A.set(updateState.A.get());
+        B.set(updateState.B.get());
+        C.set(updateState.C.get());
+        D.set(updateState.D.get());
+        ZF = updateState.ZF;
+        CF = updateState.CF;
     }
 }
