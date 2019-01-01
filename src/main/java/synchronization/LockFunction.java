@@ -32,7 +32,7 @@ public class LockFunction {
             Utils.log("Lock has been already taken."+proces.name+" has to wait");
             kolejka.add(proces);
         } else {
-            if(//something which unable to use)
+            if(1==2)//something which unable to use)
             {
                 wait(proces);
             }
@@ -64,7 +64,7 @@ public class LockFunction {
             PCB process = kolejka.get(0);
             System.out.println("Process" + process.name + "rozpoaczac swoja akcje");
             process.setState(ProcessState.READY);
-           processor.AddReadyProcess(process,0);
+           processor.AddReadyProcess(process,false);
         }
         //reclaim the locked
         //procces is been activate from the stopped
@@ -79,7 +79,7 @@ public class LockFunction {
             PCB pcb=Condition.get(0);
             pcb.setState(ProcessState.READY);
           //cos nie dziala
-            processor.AddReadyProcess(pcb,0);
+            processor.AddReadyProcess(pcb,false);
             Condition.remove(0);
             locked=false;
          }
