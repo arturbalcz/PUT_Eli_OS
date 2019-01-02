@@ -52,7 +52,7 @@ public class OS {
     }
 
     private static final String PATH_TO_FILES = "src/main/resources/assembler/";
-    private static final String[] INITIAL_PROGRAMS = new String[] { "f16", "f8", "cp" };
+    private static final String[] INITIAL_PROGRAMS = new String[] { "f16", "f8", "files", "prc", "get"};
     private static final String INITIAL_PROGRAMS_DIR = "sample";
 
     public static void updateInitialFiles() {
@@ -72,7 +72,9 @@ public class OS {
 
         for (final String filename : INITIAL_PROGRAMS) {
             try {
-                createAndCompile(getFileContent(filename), filename, true);
+                createAndCompile(getFileContent(filename), filename, false);
+//                if (filename.equals(INITIAL_PROGRAMS[0])) // save space on disk
+//                    Directories.getCurrentDir().getFiles().deleteFile(filename + ".asm");
             } catch (IOException e) {
                 e.printStackTrace();
             }
