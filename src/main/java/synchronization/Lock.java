@@ -8,7 +8,7 @@ import processess.ProcessState;
 
 import javax.print.DocFlavor;
 
-public class LockFunction {
+public class Lock {
     //initilize locked which is open
     private boolean locked;
    // kolejka uzywana do lock
@@ -16,7 +16,7 @@ public class LockFunction {
     //kolejka uzywana do zmiennych warunkowyc
     private List<processess.PCB> Condition=new LinkedList<>();
 
-    LockFunction()
+    Lock()
     {
         locked=false;
     }
