@@ -12,7 +12,7 @@ public class virtualmemory {
     class Process{
         Integer processId;
         Vector<Byte> code;
-    }
+}
 
     //Funkcja otrzymująca proces od PCB
     void getProcess(Process p){

@@ -53,6 +53,25 @@ public class Memory {
     }
 
 
+
+    // odczytaj zawartość całej ramki
+    public static Vector<Byte> read(int frame) {
+        Utils.log(String.format("reading page from frame %d", frame));
+
+        // czytam z pamięci
+        Vector<Byte> tmp = new Vector<Byte>();
+        try {
+            for (int i = 0; i < 15; i++) {
+                tmp.add(memory[frame * 16 + i]);
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return tmp;
+    }
+
     // odczytaj bajt spod adresu zgodnego z tablicą stronic danego procesu
     byte read(int processID, byte address) {
         // translacja adresu
