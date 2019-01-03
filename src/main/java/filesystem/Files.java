@@ -71,7 +71,7 @@ public class Files {
      */
     public void showFiles(){
         for(File e: allFiles){
-            Shell.println(e.getSize() + "\t" + e.getName() );
+            Shell.println("\t" + e.getSize() + "\t" + e.getName() );
         }
     }
 

@@ -324,7 +324,7 @@ public interface Commands {
             if (dirs != null) {
                 for (Directory e : dirs) {
                     if (e != null) {
-                        Shell.println("\t<DIR>\t" + e.getName());
+                        Shell.println("<DIR>\t\t" + e.getName());
                     }
                 }
                 Directories.getCurrentDir().getFiles().showFiles();
