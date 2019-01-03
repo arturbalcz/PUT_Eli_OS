@@ -1,7 +1,5 @@
 package filesystem;
 
-import static filesystem.Disk.findNextFree;
-
 public class File {
     private String name;
     private String extension;
@@ -17,7 +15,9 @@ public class File {
     }
 
     public void setName(String name) {
+        String[] splitName = name.split("[.]");
         this.name = name;
+        this.extension = splitName[1];
     }
 
     public String getExtension() {

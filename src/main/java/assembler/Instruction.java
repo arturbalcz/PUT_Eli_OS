@@ -301,6 +301,29 @@ abstract class Instruction {
         instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
+        instruction = new Instruction(
+                "CP",
+                2,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT),
+                ArgumentTypes.getTypes(ArgumentTypes.VALUE)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                int argEnd = 0;
+                while (args[argEnd] != -1) argEnd++;
+                final byte[] textArgs = Arrays.copyOfRange(args, 1, argEnd);
+
+                argEnd = 0;
+                while (textArgs[argEnd] != ' ') argEnd++;
+                final byte[] exeName =  Arrays.copyOfRange(textArgs, 0, argEnd);
+                final byte[] processName =  Arrays.copyOfRange(textArgs, argEnd+1, textArgs.length);
+
+                Assembler.cp(exeName, processName, args[args.length-1]);
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
         return instructionsMap;
     }
 
@@ -480,7 +503,7 @@ abstract class Instruction {
         command(pcb, args);
 
         Utils.log("after " + name + ":");
-        Assembler.cpu.print(true);
+        Assembler.cpu.print();
     }
 
     /**

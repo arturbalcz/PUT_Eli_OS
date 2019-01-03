@@ -1,8 +1,8 @@
 package utils;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.swing.JTextArea;
 
 
 /**
