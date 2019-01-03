@@ -98,23 +98,41 @@ public interface Commands {
     }
 
     /**
-     * Prints all available commends
-     * @param args no effect
+     * Prints all available commends or help for specified command
+     * @param args name of command
      */
     static void help(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
-        if (args.size() >= 2) { Shell.println(help); return; }
-        List<String> sortedKeys = new ArrayList<>(Shell.CommandTable.keySet());
-        Collections.sort(sortedKeys);
-        for (String command : sortedKeys) {
-            Shell.print(command.toUpperCase());
-            //if (command.length() < 4) Shell.print("\t\t");
-            Shell.print("\t");
-            String commandHelp = Shell.HelpingTable.get(command);
-            int endIndex = commandHelp.indexOf('\n');
-            Shell.println(commandHelp.substring(0, endIndex));
+        if (args.size() > 2) Shell.println(help);
+        else if(args.size() == 2) {
+            String command = args.get(1);
+            if (Shell.CommandTable.get(command) == null) {
+                //if not found
+                Shell.println("This command is not supported by the help utility.  Try \""+command+" /?\".");
+            }
+            else {
+                try {
+                    Shell.println(Shell.HelpingTable.get(command));
+                }
+                catch (IndexOutOfBoundsException e) {
+                    Utils.log("help(): HelpingTable::IndexOutOfBoundsException::"+command, true);
+                    Shell.println("invalid number of arguments");
+                }
+            }
         }
-        Shell.println("");
+        else {
+            List<String> sortedKeys = new ArrayList<>(Shell.CommandTable.keySet());
+            Collections.sort(sortedKeys);
+            for (String command : sortedKeys) {
+                Shell.print(command.toUpperCase());
+                //if (command.length() < 4) Shell.print("\t\t");
+                Shell.print("\t");
+                String commandHelp = Shell.HelpingTable.get(command);
+                int endIndex = commandHelp.indexOf('\n');
+                Shell.println(commandHelp.substring(0, endIndex));
+            }
+            Shell.println("");
+        }
     }
 
     /**
@@ -123,7 +141,7 @@ public interface Commands {
      */
     static void exit(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
-        if (args.size() > 2) {
+        if (args.size() > 2 || (args.size() == 2 && args.get(1).equals("help")))  {
             Shell.println(help);
             return;
         }
