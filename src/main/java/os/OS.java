@@ -52,7 +52,7 @@ public class OS {
     }
 
     private static final String PATH_TO_FILES = "src/main/resources/assembler/";
-    private static final String[] INITIAL_PROGRAMS = new String[] { "f16", "f8", "files", "prc", "get"};
+    private static final String[] INITIAL_PROGRAMS = new String[] { "f16", "f8", "files", "prc", "get" };
     private static final String INITIAL_PROGRAMS_DIR = "sample";
 
     public static void updateInitialFiles() {

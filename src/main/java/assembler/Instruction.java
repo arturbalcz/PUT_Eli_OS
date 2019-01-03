@@ -377,6 +377,32 @@ abstract class Instruction {
         instructionsMap.put(code, instruction);
         Instruction.codes.put(instruction.name, code++);
 
+        instruction = new Instruction(
+                "LCK",
+                1,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                Assembler.lock(Arrays.copyOfRange(args, 1, args.length-1), pcb);
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
+        instruction = new Instruction(
+                "ULC",
+                1,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                Assembler.unlock(Arrays.copyOfRange(args, 1, args.length-1), pcb);
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
         return instructionsMap;
     }
 

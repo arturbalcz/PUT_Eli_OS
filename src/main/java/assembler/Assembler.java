@@ -5,6 +5,7 @@ import filesystem.Files;
 import processess.PCB;
 import processess.PCBList;
 import shell.Shell;
+import synchronization.Lock;
 import utils.Utils;
 
 import java.util.ArrayList;
@@ -683,6 +684,17 @@ public class Assembler {
     static void cp(final byte[] filename, final byte[] name, final byte priority) {
         final byte[] exe = Directories.getCurrentDir().getFiles().getFileClean(new String(filename));
         PCBList.list.newProcess(new String(name), (int) priority, exe);
+    }
+
+    // synchronization
+
+    static void lock(final byte[] filename, final PCB pcb) {
+        final boolean locked = Lock.lockFile(new String(filename), pcb);
+        if (!locked) PCBList.list.makeProcessWait(pcb);
+    }
+
+    static void unlock(final byte[] filename, final PCB pcb) {
+        Lock.unlockFile(new String(filename));
     }
 
     /**

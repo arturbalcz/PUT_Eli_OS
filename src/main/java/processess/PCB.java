@@ -135,7 +135,7 @@ public class PCB implements Comparable<PCB> {
 
         if (this.state != state){//in case of some error
 
-            Utils.log("Changed state of proces " + this.PID + " from " + this.state
+            Utils.log("Changed state of proces " + this.getSignature() + " from " + this.state
                     + " to " + state);
 
             switch (state){
