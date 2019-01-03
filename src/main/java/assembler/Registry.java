@@ -12,11 +12,18 @@ class Registry {
     private boolean[] registry = AssemblerUtils.emptyRegistry();
 
     public final boolean[] get() {
-        return this.registry;
+        return Arrays.copyOf(this.registry, this.registry.length);
     }
 
     public void set(boolean [] value) {
-        this.registry = value;
+        this.registry[7] = value[7];
+        this.registry[6] = value[6];
+        this.registry[5] = value[5];
+        this.registry[4] = value[4];
+        this.registry[3] = value[3];
+        this.registry[2] = value[2];
+        this.registry[1] = value[1];
+        this.registry[0] = value[0];
     }
 
     final boolean[] getH() {

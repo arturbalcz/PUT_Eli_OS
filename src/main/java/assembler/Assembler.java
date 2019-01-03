@@ -1,9 +1,12 @@
 package assembler;
 
+import filesystem.Directories;
 import filesystem.Files;
 import processess.PCB;
+import processess.PCBList;
 import shell.Shell;
 import utils.Utils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,12 +59,15 @@ public class Assembler {
      * @see PCB#execute()
      */
     public static void setCPUState(CPUState cpuState) {
-        cpu.getA().set(cpu.getA().get());
-        cpu.getB().set(cpu.getB().get());
-        cpu.getC().set(cpu.getC().get());
-        cpu.getD().set(cpu.getD().get());
+        cpu.getA().set(cpuState.getA().get());
+        cpu.getB().set(cpuState.getB().get());
+        cpu.getC().set(cpuState.getC().get());
+        cpu.getD().set(cpuState.getD().get());
         cpu.setCF(cpuState.getCF());
         cpu.setZF(cpuState.getZF());
+
+        Utils.log("Assembler.CPU state updated");
+        cpu.print();
     }
 
     private static final String MEMORY_ALLOCATOR = "LET";
@@ -619,6 +625,8 @@ public class Assembler {
         Utils.log("PRT " + Arrays.toString(arg));
     }
 
+    // files
+
     /**
      * Creates new file with given name and content
      *
@@ -628,7 +636,7 @@ public class Assembler {
     static void flc(final byte[] name, final byte[] content) {
         StringBuilder nameBuilder = new StringBuilder();
         for(final byte c : name) nameBuilder.append((char) c);
-        Files.createFile(nameBuilder.toString(), content);
+        Directories.getCurrentDir().getFiles().createFile(nameBuilder.toString(), content);
     }
 
     /**
@@ -638,7 +646,14 @@ public class Assembler {
     static void flg(final byte[] name) {
         StringBuilder nameBuilder = new StringBuilder();
         for(final byte c : name) nameBuilder.append((char) c);
-        Files.getFile(nameBuilder.toString());
+        Directories.getCurrentDir().getFiles().getFile(nameBuilder.toString());
+    }
+
+    // processes
+
+    static void cp(final byte[] filename, final byte[] name, final byte priority) {
+        final byte[] exe = Directories.getCurrentDir().getFiles().getFileClean(new String(filename));
+        PCBList.list.newProcess(new String(name), (int) priority, exe);
     }
 
     /**
