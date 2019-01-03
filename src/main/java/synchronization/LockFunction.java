@@ -1,7 +1,7 @@
 package synchronization;
 import processess.PCB;
 import utils.Utils;
-import processor.processor;
+import processor.Processor;
 import java.util.LinkedList;
 import java.util.List;
 import processess.ProcessState;
@@ -15,9 +15,9 @@ public class LockFunction {
     private List<processess.PCB> kolejka = new LinkedList<>();
     //kolejka uzywana do zmiennych warunkowyc
     private List<processess.PCB> Condition=new LinkedList<>();
-    private processor processor;
+    private Processor processor;
 
-    LockFunction(processor processor)
+    LockFunction(Processor processor)
     {
         this.processor=processor;
         locked=false;
