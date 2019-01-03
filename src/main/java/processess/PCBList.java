@@ -1,5 +1,6 @@
 package processess;
 
+
 import processor.Processor;
 import shell.Shell;
 import utils.Utils;
@@ -18,7 +19,7 @@ public class PCBList {
 
     /** Instance of PCBList */
     public static final PCBList list = new PCBList();
-
+  
     /**
      * Stores process control blocks
      */
@@ -42,7 +43,6 @@ public class PCBList {
 
     public Processor processor = new Processor(this);
 
-
     /**
      * Initilaizes PCBList
      */
@@ -52,7 +52,6 @@ public class PCBList {
         generator = new Random();
         //this.vram = vram; TODO: uncomment
     }
-
 
     /**
      * Generates an unique process id (pid) and adds it to used adresses arraylist
@@ -112,7 +111,6 @@ public class PCBList {
                 //vram.removeProcess(temp.getPID()) TODO: unncoment
                 //[Gracjan] - moze w tej funkcji zmienilbys parametr z proces na pid,
                 // w sumie to i tak tylko tego potrzebujesz, a bedzie prosciej
-
                 itr.remove();
             }
         }
