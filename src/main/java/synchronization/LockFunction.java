@@ -1,7 +1,7 @@
 package synchronization;
 import processess.PCB;
 import utils.Utils;
-import processor.processor;
+import processor.Processor;
 import java.util.LinkedList;
 import java.util.List;
 import processess.ProcessState;
@@ -30,10 +30,10 @@ public class LockFunction {
             Utils.log("Lock has been already taken."+proces.name+" has to wait");
             kolejka.add(proces);
         } else {
-            if(//something which unable to use)
-            {
-                wait(proces);
-            }
+            //if()//something which unable to use)
+            //{
+            //    wait(proces);
+            //}
             //jesli cos nie dziala to wait;
             Utils.log(proces.name+" has taken the lock");
             locked = true;
