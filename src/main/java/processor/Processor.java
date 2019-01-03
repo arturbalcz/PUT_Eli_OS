@@ -109,7 +109,7 @@ public class Processor
     private void balanceSetManager()
     {
         PCB process;
-        for(int i=1; i<15; i++)
+        for(int i=14; i>0; i--)
         {
             if(readySummary.get(i))
             {
