@@ -302,6 +302,59 @@ abstract class Instruction {
         Instruction.codes.put(instruction.name, code++);
 
         instruction = new Instruction(
+                "FCP",
+                2,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT),
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                int firstArgEnd = 0;
+                while (args[firstArgEnd] != -1) firstArgEnd++;
+
+                Assembler.fcp(
+                        Arrays.copyOfRange(args, 1, firstArgEnd),
+                        Arrays.copyOfRange(args, firstArgEnd+2, args.length-1)
+                );
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
+        instruction = new Instruction(
+                "FRM",
+                1,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                Assembler.frm(Arrays.copyOfRange(args, 1, args.length-1));
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
+        instruction = new Instruction(
+                "FED",
+                2,
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT),
+                ArgumentTypes.getTypes(ArgumentTypes.TEXT)
+        ) {
+            @Override
+            void command(PCB pcb, byte... args) {
+                int firstArgEnd = 0;
+                while (args[firstArgEnd] != -1) firstArgEnd++;
+
+                Assembler.fed(
+                        Arrays.copyOfRange(args, 1, firstArgEnd),
+                        Arrays.copyOfRange(args, firstArgEnd+2, args.length-1)
+                );
+            }
+        };
+        instructionsMap.put(code, instruction);
+        Instruction.codes.put(instruction.name, code++);
+
+        instruction = new Instruction(
                 "CP",
                 2,
                 ArgumentTypes.getTypes(ArgumentTypes.TEXT),
@@ -355,8 +408,9 @@ abstract class Instruction {
                 Instruction.instructions.get(codes.get(pieces.get(begin)))
         ).orElseThrow(() -> new Exception("Invalid instruction: " + pieces.get(begin)));
 
-        if(instruction.argsNumber != pieces.size()-(begin+1))
-            throw new Exception("Invalid number of arguments: " + instruction.name);
+        final int givenArgsNumber = pieces.size()-(begin+1);
+        if(instruction.argsNumber != givenArgsNumber)
+            throw new Exception("Invalid number of arguments for " + instruction.name + ". Given " + givenArgsNumber + ", expected " + instruction.argsNumber);
 
         for(int i = begin+1; i <= instruction.argsNumber; i++) {
             if(instruction.getArgTypes()[i-1].length == 1 && instruction.getArgTypes()[i-1][0] == ArgumentTypes.LABEL) {
