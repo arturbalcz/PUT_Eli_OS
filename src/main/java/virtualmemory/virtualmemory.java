@@ -18,8 +18,17 @@ public class virtualmemory {
         Vector<Byte> code;
     }
 
+    //pomocnicza funkcja tworząca proces [Mateusz]
+    public Process createProcess(int pid, Vector<Byte> exec){
+        Process p = new Process();
+        p.processId = pid;
+        p.code = exec;
+
+        return p;
+    }
+
     //Funkcja otrzymująca proces od PCB
-    void getProcess(Process p){
+    public void getProcess(Process p){
         processProcessing(p);
         startProcessZero(p.processId);
     }
@@ -31,7 +40,7 @@ public class virtualmemory {
     Map<Integer,  Vector<PageEntry>> PageTables;
 
     //funkcja sprzątająca po zakonczeniu procesu, wszystkie niezbedne wartośći ustawia na -1 i usuwa wpisy w PageFile i PageTable
-    void removeProcess(Process proc){
+    public void removeProcess(Process proc){
         Queue <Integer> tmpQueue = victimQueue, beginQ = null;
         Integer frame, Qsize;
         for(int i = 0; i<16; i++){

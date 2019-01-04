@@ -3,6 +3,7 @@ package processess;
 import assembler.Assembler;
 import assembler.CPUState;
 import utils.Utils;
+import virtualmemory.virtualmemory;
 
 /**
  * Process Control Block, represents process
@@ -49,8 +50,8 @@ public class PCB implements Comparable<PCB> {
 
 
     // temporary ram, see constructor
-    private final byte[] code;
-    //virtalmemmory vram; TODO: unncoment
+    //private final byte[] code;
+    virtualmemory vram;
 
     /**
      * Creates Porcess Contol Block
@@ -58,13 +59,14 @@ public class PCB implements Comparable<PCB> {
      * @param PID unique process id
      * @param name name of the process
      * @param priority process base priority
-     * @param exec temporary ram
+     * //@param exec temporary ram
      */
-    PCB(int PID, String name, int priority, byte[] exec) {
+    PCB(int PID, String name, int priority, virtualmemory vram) {
         this.PID = PID;
         this.name = name;
 
-        //TODO priority 0
+
+
         if (priority < 0){
             Utils.log("Priority is too low, cannot create process", true);
         }
@@ -76,15 +78,13 @@ public class PCB implements Comparable<PCB> {
         this.dynamicPriority = priority;
         this.cpuState = Assembler.getFreshCPU();
         this.readyTime=0;
-
-        //this.vram = vram; TODO: unncoment
-
-        // TODO: ram
-
+        this.vram = vram;
 
         // temporary ram solution for testing assembler
-        this.code = exec;
-        this.PC = (byte) (exec[0] + 1); // sets PC after allocated values ('LETs')
+       // this.code = exec;
+
+        //TODO reference to ram
+        //this.PC = (byte) (exec[0] + 1); // sets PC after allocated values ('LETs')
 
 
         this.state = ProcessState.READY;
@@ -138,15 +138,6 @@ public class PCB implements Comparable<PCB> {
             Utils.log("Changed state of proces " + this.PID + " from " + this.state
                     + " to " + state);
 
-            switch (state){
-                //TODO: find some way to use it or delete
-                case READY:{
-                    break;
-                }
-                case RUNNING:{
-                    break;
-                }
-            }
 
             this.state = state;
         } //else do nothing
@@ -205,9 +196,11 @@ public class PCB implements Comparable<PCB> {
         return PC < code.length;
     }
 
+    //TODO: connect with vram
     public byte getByteAt(final byte address) {
         return this.code[address];
     }
+
     public void writeByteAt(final byte address, final byte value) {
         this.code[address] = value;
     }

@@ -1,13 +1,11 @@
 package processess;
 
 import processor.Processor;
+import virtualmemory.virtualmemory;
 import shell.Shell;
 import utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Stores Process Control Blocks and manages them
@@ -37,20 +35,20 @@ public class PCBList {
     /**
      * Reference to virtual memory manager
      */
-    //private virtalmemory vram; TODO: uncomment
+    private virtualmemory vram = new virtualmemory();
 
 
     public Processor processor = new Processor(this);
 
 
+
     /**
      * Initilaizes PCBList
      */
-    public PCBList(/*virtualmemory vram*/) {
+    public PCBList() {
         data = new ArrayList<>();
         usedPids = new ArrayList<>();
         generator = new Random();
-        //this.vram = vram; TODO: uncomment
     }
 
 
@@ -64,7 +62,7 @@ public class PCBList {
         int temp = -1;
         while (!notIn){
             notIn = true;
-            temp = generator.nextInt(101) + 800;
+            temp = generator.nextInt(850) + 101;
             for (int e: usedPids){
                 if (e == temp) {
                     notIn = false;
@@ -78,8 +76,11 @@ public class PCBList {
 
     public static final int DUMMY_ID = -1;
 
+
+
     public void addDummy(final byte[] dummyExec) {
-        final PCB dummy = new PCB(DUMMY_ID, "DUMMY", 0, dummyExec);
+        final PCB dummy = new PCB(DUMMY_ID, "DUMMY", 0, vram);
+        vram.getProcess(vram.createProcess(DUMMY_ID, toObjects(dummyExec)));
         data.add(dummy);
         processor.addReadyProcess(dummy, false);
     }
@@ -89,12 +90,46 @@ public class PCBList {
      *
      * @param name name of new process
      * @param priority base priority of new process
+     * @param exec program executable code
      */
     public void newProcess(final String name, final int priority, final byte[] exec){
         final int id = pidGen();
-        final PCB newProcess = new PCB(id, name, priority, exec);
+        final PCB newProcess = new PCB(id, name, priority, vram);
         data.add(newProcess);
+        vram.getProcess(vram.createProcess(id, toObjects(exec)));
         processor.addReadyProcess(newProcess, false);
+    }
+
+    /**
+     * Changes byte array to Byte vector
+     *
+     * @param bytesPrim byte array
+     * @return Byte vector
+     */
+    public Vector<Byte> toObjects(byte[] bytesPrim) {
+        Vector<Byte> bytes = new Vector<>();
+
+        int i = 0;
+        for (byte b : bytesPrim)  bytes.add(i++, b); // Autoboxing
+
+        return bytes;
+    }
+
+    /**
+     * Changes Byte vector to byte array
+     *
+     * @param oBytes Byte vector
+     * @return byte array
+     */
+    public byte[] toPrimitives(Vector<Byte> oBytes)
+    {
+        byte[] bytes = new byte[oBytes.size()];
+
+        for(int i = 0; i < oBytes.size(); i++) {
+            bytes[i] = oBytes.elementAt(i);
+        }
+
+        return bytes;
     }
 
     /**
@@ -110,14 +145,14 @@ public class PCBList {
                 Utils.log("Deleted process \"" + temp.getName() +
                         "\", PID: " + temp.getPID());
                 //vram.removeProcess(temp.getPID()) TODO: unncoment
-                //[Gracjan] - moze w tej funkcji zmienilbys parametr z proces na pid,
-                // w sumie to i tak tylko tego potrzebujesz, a bedzie prosciej
+                vram.removeProcess(vram.createProcess(temp.getPID(), null));
 
                 itr.remove();
             }
         }
     }
 
+    //for testing
     public PCB findByName(String name){
         for (PCB e: data){
             if (e.getName().equals(name)) return e;
