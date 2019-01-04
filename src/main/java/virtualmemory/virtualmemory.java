@@ -106,6 +106,7 @@ public class virtualmemory {
     void printRamStatus(){
         System.out.println("#### Printing current RAM status ####");
         for(int i=0; i<16; i++){
+            Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + " ProcessID " + RamStatus[i].ProcessID);
             System.out.println("Frame ID: " + i + " PageID " + RamStatus[i].PageID + " ProcessID " + RamStatus[i].ProcessID);
         }
         System.out.println();
