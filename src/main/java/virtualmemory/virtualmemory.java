@@ -8,7 +8,6 @@ import memory.Memory;
 import utils.Utils;
 
 public class virtualmemory {
-    //Tymczasowa klasa, jak będę mial dokładniejsze info to po prostu wezmę klase z innego modułu (prawd, PCB)
     class Process{
         Integer processId;
         Vector<Byte> code;
@@ -226,7 +225,7 @@ public class virtualmemory {
         //Funkcja, która zabiera ofiarę z ramu do pliku stronicowania
         Utils.log("Taking out victimPage from frame: " + fID);
         Vector <Byte> page = null;
-        //page = getPageFromRAM(FrameID);
+        page = Memory.read(fID);
 
         Integer prID = RamStatus[fID].ProcessID;
         Integer pgID = RamStatus[fID].PageID;
