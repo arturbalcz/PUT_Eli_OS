@@ -70,7 +70,17 @@ public class Processor
         Utils.log("New running process: " + runningProcess.getSignature());
     }
 
-    /** removes process from queue */
+    /** makes process wait (removes process from queue) */
+    public void removeFromQueue(final PCB process)
+    {
+        readyProcessQueue.remove(process);
+        if(readyProcessQueue.isEmpty(process.getDynamicPriority()))
+            readySummary.set(process.getDynamicPriority(), false);
+
+        Utils.log("Process removed from ready queue: " + process.getSignature());
+    }
+
+    /** removes process from queue and PCBList */
     public void removeProcess(final PCB process)
     {
         process.setState(ProcessState.TERMINATED);
@@ -93,7 +103,7 @@ public class Processor
         if(modifier)
         {
             process.setDynamicPriority(process.getDynamicPriority()+3);
-            Utils.log("Process: " + process.getSignature() + "priority increased to: " + process.getDynamicPriority());
+            Utils.log("Process: " + process.getSignature() + " has modifier, priority increased to: " + process.getDynamicPriority());
         }
 
         int priority = process.getDynamicPriority();
@@ -102,7 +112,9 @@ public class Processor
 
         Utils.log("Process added: " + process.toString());
 
-        if((runningProcess!=null) && (process.getDynamicPriority() > runningProcess.getDynamicPriority())) {finishRunning();}
+//        if((runningProcess!=null) && (process.getDynamicPriority() > runningProcess.getDynamicPriority())) {
+//            finishRunning();
+//        }
     }
 
     /** finds if any process was waiting too long and sets higher priority */
