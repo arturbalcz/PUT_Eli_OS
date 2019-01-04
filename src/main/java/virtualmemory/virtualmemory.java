@@ -12,7 +12,12 @@ public class virtualmemory {
         Integer processId;
         Vector<Byte> code;
 }
-
+    public void createProcess(int pid, Vector<Byte> exec){
+        Process p = new Process();
+        p.processId = pid;
+        p.code = exec;
+        getProcess(p);
+    }
     //Funkcja otrzymująca proces od PCB
     void getProcess(Process p){
         processProcessing(p);
@@ -27,7 +32,7 @@ public class virtualmemory {
     static Map<Integer,  Vector<PageEntry>> PageTables;
 
     //funkcja sprzątająca po zakonczeniu procesu, wszystkie niezbedne wartośći ustawia na -1 i usuwa wpisy w PageFile i PageTable
-    void removeProcess(Integer pID){
+    public void removeProcess(Integer pID){
         Utils.log("removing Process " + pID);
         Queue <Integer> tmpQueue = victimQueue, beginQ = null;
         Integer frame, Qsize;
