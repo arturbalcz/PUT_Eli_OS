@@ -1,4 +1,4 @@
-package virtualmemory;
+﻿package virtualmemory;
 
 import java.util.Map;
 import java.util.Queue;
@@ -6,8 +6,15 @@ import java.util.Vector;
 import java.util.function.Function;
 import memory.Memory;
 import utils.Utils;
+import processess.PCB;
+import processess.PCBList;
 
 public class virtualmemory {
+    static Memory Ram;
+    virtualmemory(Memory ram){
+        this.Ram = ram;
+    }
+
     class Process{
         Integer processId;
         Vector<Byte> code;
@@ -73,7 +80,7 @@ public class virtualmemory {
         Utils.log("Process " + pID + " has been removed");
     }
     //Funkcje związane z wypisywaniem tego co jest gdziekolwiek, do pracy krokowej.
-    void printPageTable (Integer processID){
+   public void printPageTable (Integer processID){
         System.out.println("#### Printing page table, process ID: " + processID + " ####");
         for(int i=0; i<PageTables.get(processID).size(); i++){
             System.out.println("Page no."+ i + " " + PageTables.get(processID).get(i).frame + " " + PageTables.get(processID).get(i).valid);
@@ -81,7 +88,7 @@ public class virtualmemory {
         System.out.println();
     }
 
-    void printQueue(){
+   public void printQueue(){
         Queue<Integer> tmp = victimQueue;
         System.out.println("#### Printing victimQueue ####");
         for(int i=0; i<tmp.size(); i++){
@@ -90,7 +97,7 @@ public class virtualmemory {
         System.out.println();
     }
 
-    void printProcessPages(Integer processID){
+   public void printProcessPages(Integer processID){
         System.out.println("#### Printing process pages, process ID: " + processID + " ####");
         Vector<Vector<Byte>> pages = PageFile.get(processID);
         for(int i=0; i<pages.size(); i++){
@@ -101,14 +108,14 @@ public class virtualmemory {
         }
         System.out.println();
     }
-    void printPage(Integer processID, Integer pageID){
+    public void printPage(Integer processID, Integer pageID){
         System.out.println("#### Printing process page, process ID: " + processID + " pageID: " + pageID + " ####");
         for(int j=0; j<PageFile.get(processID).get(pageID).size(); j++){
             System.out.println(PageFile.get(processID).get(pageID).get(j));
         }
         System.out.println();
     }
-    void printRamStatus(){
+    public void printRamStatus(){
         System.out.println("#### Printing current RAM status ####");
         for(int i=0; i<16; i++){
             Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + " ProcessID " + RamStatus[i].ProcessID);
@@ -116,7 +123,7 @@ public class virtualmemory {
         }
         System.out.println();
     }
-    void printNextVictim(){
+    public void printNextVictim(){
         System.out.println("#### Printing next victim page ####");
         System.out.println(victimQueue.peek());
     }
@@ -129,7 +136,8 @@ public class virtualmemory {
     {
         boolean valid;
         Integer frame;
-        PageEntry(){
+        PageEntry()
+        {
             valid = false;
             frame = -1;
         }
@@ -139,7 +147,8 @@ public class virtualmemory {
     class WhatsInside{
         Integer ProcessID;
         Integer PageID;
-        WhatsInside(){
+        WhatsInside()
+        {
             this.PageID = -1;
             this.ProcessID = -1;
         }
@@ -230,8 +239,8 @@ public class virtualmemory {
     static void takePageOut(Integer fID){
         //Funkcja, która zabiera ofiarę z ramu do pliku stronicowania
         Utils.log("Taking out victimPage from frame: " + fID);
-        Vector <Byte> page = null;
-        page = Memory.read(fID);
+        Vector <Byte> page = new Vector<Byte>();
+        page = Ram.readFrame(fID);
 
         Integer prID = RamStatus[fID].ProcessID;
         Integer pgID = RamStatus[fID].PageID;
@@ -244,7 +253,7 @@ public class virtualmemory {
     static boolean putPageIn(Integer FrameID, Vector<Byte> Page){
         //Funkcja, która wprowadza stronicę do ramu z pliku stronicowania
         Utils.log("Putting page in frame: " + FrameID);
-        return Memory.write(Page, FrameID);
+        return Ram.write(Page, FrameID);
     }
 
     static void updatePageTables(Integer procID, Integer pageID, Integer frameID, boolean value){
@@ -275,9 +284,9 @@ public class virtualmemory {
         return victimQueue.poll();
     }
     // (wykorzystywane przez RAM) dostęp do tablicy stronic
+
     public static int getFrame(int processID, int page) {
-        boolean valid = PageTables.get(processID).get(page).valid;
-        if (!valid) {
+        if (PageTables.get(processID).get(page).valid == false) {
             demandPage(processID, page);
         }
         return PageTables.get(processID).get(page).frame;

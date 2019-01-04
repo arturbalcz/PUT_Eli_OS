@@ -1,4 +1,4 @@
-package memory;
+﻿package memory;
 
 import utils.Utils;
 import virtualmemory.virtualmemory;
@@ -7,7 +7,10 @@ import java.util.Vector;
 
 public class Memory {
     private static byte[] memory = new byte[256];
-
+    virtualmemory VM;
+    public void GetReference(virtualmemory vm){
+        VM = vm;
+    }
 
     // zapisz całą stronę w wybranej ramce
     public static boolean write(Vector<Byte> data, int frame) {
@@ -31,7 +34,7 @@ public class Memory {
         int offset = address & 0x0f;
 
         // sprawdzam wartość w PageTable danego procesu
-        int frame = virtualmemory.getFrame(processID, page);
+        int frame = VM.getFrame(processID, page);
 
         // wpisuję do pamięci
         memory[frame * 16 + offset] = data;
@@ -55,7 +58,7 @@ public class Memory {
 
 
     // odczytaj zawartość całej ramki
-    public static Vector<Byte> read(int frame) {
+    public static Vector<Byte> readFrame(int frame) {
         Utils.log(String.format("reading page from frame %d", frame));
 
         // czytam z pamięci
@@ -79,7 +82,7 @@ public class Memory {
         int offset = address & 0x0f;
 
         // sprawdzam wartość w PageTable danego procesu
-        int frame = virtualmemory.getFrame(processID, page);
+        int frame = VM.getFrame(processID, page);
 
         // czytam z pamięci
         Utils.log(String.format("reading byte from address %d", frame * 16 + offset));
@@ -88,7 +91,7 @@ public class Memory {
 
 
     // odczytaj bajt z podanej komórki pamięci
-    byte read(int i) {
+    public byte read(int i) {
         Utils.log(String.format("reading byte from address %d", i));
 
         try {
