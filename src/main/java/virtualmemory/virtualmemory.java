@@ -36,8 +36,7 @@ public class virtualmemory {
         putPageInRam(ProcessID, PageID);
     }
     //Mapa wszystkich Tablic Stron, int to ProcessID, a Vector to tablica stron
-    static Map<Integer,  Vector<PageEntry>> PageTables;
-
+    static Map<Integer,  Vector<PageEntry>>  PageTables;
     //funkcja sprzątająca po zakonczeniu procesu, wszystkie niezbedne wartośći ustawia na -1 i usuwa wpisy w PageFile i PageTable
     public void removeProcess(Integer pID){
         Utils.log("removing Process " + pID);
@@ -154,7 +153,7 @@ public class virtualmemory {
         }
     }
     //Pojedyncza tablica stron, vector pomocniczy w którym tymczasowo znajdują się stronu programu
-    Vector<PageEntry> pageTable = null;
+    Vector<PageEntry> pageTable = new Vector<>();
 
     //Plik wymiany
     //inicjalizacja mapy PageFile, Integer to PID, a vec-vec to 2 wymiarowy wektor z programem
@@ -171,7 +170,7 @@ public class virtualmemory {
     void processProcessing(Process proc){
         Utils.log("Got process " + proc.processId + " that will be added to pageFile and pageTable");
         Vector <Byte> Page;
-        Vector<Vector <Byte>> program = new Vector<Vector<Byte>>();
+        Vector<Vector <Byte>> program = new Vector<>();
         pageTable.clear();
         Integer progSize = proc.code.size();
         Integer AddedValue = 0, stepCounter=0;
@@ -239,7 +238,7 @@ public class virtualmemory {
     static void takePageOut(Integer fID){
         //Funkcja, która zabiera ofiarę z ramu do pliku stronicowania
         Utils.log("Taking out victimPage from frame: " + fID);
-        Vector <Byte> page = new Vector<Byte>();
+        Vector <Byte> page;
         page = Ram.readFrame(fID);
 
         Integer prID = RamStatus[fID].ProcessID;
