@@ -1,8 +1,6 @@
 package virtualmemory;
 
-import java.util.Map;
-import java.util.Queue;
-import java.util.Vector;
+import java.util.*;
 import java.util.function.Function;
 import memory.Memory;
 import utils.Utils;
@@ -13,12 +11,13 @@ public class virtualmemory {
     static Memory Ram;
     public virtualmemory(Memory ram){
         this.Ram = ram;
+        setRamStatus();
     }
 
     class Process{
         Integer processId;
         Vector<Byte> code;
-}
+    }
     public void createProcess(int pid, Vector<Byte> exec){
         Process p = new Process();
         p.processId = pid;
@@ -36,7 +35,7 @@ public class virtualmemory {
         putPageInRam(ProcessID, PageID);
     }
     //Mapa wszystkich Tablic Stron, int to ProcessID, a Vector to tablica stron
-    static Map<Integer,  Vector<PageEntry>>  PageTables;
+    static Map<Integer, Vector<PageEntry>>  PageTables = new HashMap<>();
     //funkcja sprzątająca po zakonczeniu procesu, wszystkie niezbedne wartośći ustawia na -1 i usuwa wpisy w PageFile i PageTable
     public void removeProcess(Integer pID){
         Utils.log("removing Process " + pID);
@@ -79,7 +78,7 @@ public class virtualmemory {
         Utils.log("Process " + pID + " has been removed");
     }
     //Funkcje związane z wypisywaniem tego co jest gdziekolwiek, do pracy krokowej.
-   public void printPageTable (Integer processID){
+    public void printPageTable (Integer processID){
         System.out.println("#### Printing page table, process ID: " + processID + " ####");
         for(int i=0; i<PageTables.get(processID).size(); i++){
             System.out.println("Page no."+ i + " " + PageTables.get(processID).get(i).frame + " " + PageTables.get(processID).get(i).valid);
@@ -87,7 +86,7 @@ public class virtualmemory {
         System.out.println();
     }
 
-   public void printQueue(){
+    public void printQueue(){
         Queue<Integer> tmp = victimQueue;
         System.out.println("#### Printing victimQueue ####");
         for(int i=0; i<tmp.size(); i++){
@@ -96,7 +95,7 @@ public class virtualmemory {
         System.out.println();
     }
 
-   public void printProcessPages(Integer processID){
+    public void printProcessPages(Integer processID){
         System.out.println("#### Printing process pages, process ID: " + processID + " ####");
         Vector<Vector<Byte>> pages = PageFile.get(processID);
         for(int i=0; i<pages.size(); i++){
@@ -130,7 +129,7 @@ public class virtualmemory {
     // $#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$##$#$#$#$#$#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$#$ //
 
     private
-    //Pojedynczy wpis w tablicy stronic
+            //Pojedynczy wpis w tablicy stronic
     class PageEntry
     {
         boolean valid;
@@ -157,19 +156,24 @@ public class virtualmemory {
 
     //Plik wymiany
     //inicjalizacja mapy PageFile, Integer to PID, a vec-vec to 2 wymiarowy wektor z programem
-    static Map<Integer, Vector<Vector <Byte>>> PageFile = null;
+    static Map<Integer, Vector<Vector <Byte>>> PageFile = new HashMap<>();
 
     //Queue - kolejka w której są zawarte informacje o kolejnych stronach, które zostały umieszczone w ramie
     //Element przydatny przy wymianie stronic na żądanie metodą FIFO
-    static Queue <Integer> victimQueue;
+    static Queue <Integer> victimQueue = new LinkedList<>();
 
     //Tablica o rozmiarze 16 pozwalająca na kontrolowanie tego co jest w ramie
     static WhatsInside[] RamStatus = new WhatsInside[16];
+    void setRamStatus(){
+        for(int i=0; i<16; i++){
+            RamStatus[i] = new WhatsInside();
+        }
+    }
 
     //Funkcja dzieląca program na stronice, tworząca tablice stronic i umieszczająca je w odpowiednich wektorach
     void processProcessing(Process proc){
         Utils.log("Got process " + proc.processId + " that will be added to pageFile and pageTable");
-        Vector <Byte> Page;
+        Vector <Byte> Page = new Vector<>();
         Vector<Vector <Byte>> program = new Vector<>(new Vector<>());
         pageTable.clear();
         Integer progSize = proc.code.size();
@@ -177,13 +181,16 @@ public class virtualmemory {
         PageEntry tmpPE;
         for(int i = 0; stepCounter<progSize; i++)
         {
-            Page = null;
+            Page.clear();
             for(Integer j=0; j<16; j++)
             {
+                if(stepCounter<progSize){
                 tmpPE = new PageEntry();
+                System.out.print(proc.code.get(j + AddedValue));
                 Page.add(j, proc.code.get(j + AddedValue));
                 pageTable.add(j+AddedValue, tmpPE);
                 stepCounter++;
+                }
             }
             program.add(i, Page);
             AddedValue+=16;
@@ -277,6 +284,7 @@ public class virtualmemory {
     }
     void putInfoToPageTable(Integer pID, Vector <PageEntry> pT){
         Utils.log("Putting info into PageTable, processID: " + pID);
+        System.out.print("Putting info into PageTable, processID: " + pID);
         PageTables.put(pID, pT);
     }
     static Integer findVictim(){
