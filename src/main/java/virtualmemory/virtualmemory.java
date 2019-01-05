@@ -170,7 +170,7 @@ public class virtualmemory {
     void processProcessing(Process proc){
         Utils.log("Got process " + proc.processId + " that will be added to pageFile and pageTable");
         Vector <Byte> Page;
-        Vector<Vector <Byte>> program = new Vector<>();
+        Vector<Vector <Byte>> program = new Vector<>(new Vector<>());
         pageTable.clear();
         Integer progSize = proc.code.size();
         Integer AddedValue = 0, stepCounter=0;
