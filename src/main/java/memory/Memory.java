@@ -1,4 +1,4 @@
-﻿package memory;
+package memory;
 
 import utils.Utils;
 import virtualmemory.virtualmemory;
@@ -28,7 +28,7 @@ public class Memory {
 
 
     // zapisz pojedynczy bajt zgodnie z tablicą stronic danego procesu
-    void write(byte data, int processID, byte address) {
+    public void write(byte data, int processID, byte address) {
         // translacja adresu
         int page = (address & 0xf0) >>> 4;
         int offset = address & 0x0f;
@@ -76,7 +76,7 @@ public class Memory {
     }
 
     // odczytaj bajt spod adresu zgodnego z tablicą stronic danego procesu
-    byte read(int processID, byte address) {
+    public byte read(int processID, byte address) {
         // translacja adresu
         int page = address & 0xf0;
         int offset = address & 0x0f;
