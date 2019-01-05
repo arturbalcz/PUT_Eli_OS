@@ -2,6 +2,7 @@ package processess;
 
 import assembler.Assembler;
 import assembler.CPUState;
+import memory.Memory;
 import utils.Utils;
 
 /**
@@ -44,12 +45,16 @@ public class PCB implements Comparable<PCB> {
     private int dynamicPriority;
     private int readyTime;
     private int executedOrders;
+    private final int codeLength;
 
     private CPUState cpuState;
 
 
     // temporary ram, see constructor
-    private final byte[] code;
+   // private final byte[] code;
+    Memory ram;
+
+
     //virtalmemmory vram; TODO: unncoment
 
     /**
@@ -58,9 +63,9 @@ public class PCB implements Comparable<PCB> {
      * @param PID unique process id
      * @param name name of the process
      * @param priority process base priority
-     * @param exec temporary ram
+     * //@param exec temporary ram
      */
-    PCB(int PID, String name, int priority, byte[] exec) {
+    PCB(int PID, String name, int priority, Memory ram, byte PC, int codeLength) {
         this.PID = PID;
         this.name = name;
 
@@ -76,15 +81,17 @@ public class PCB implements Comparable<PCB> {
         this.dynamicPriority = priority;
         this.cpuState = Assembler.getFreshCPU();
         this.readyTime=0;
+        this.codeLength = codeLength;
 
-        //this.vram = vram; TODO: unncoment
+        this.ram = ram;
+        //this.vm = vm; TODO: unncoment
 
         // TODO: ram
 
 
         // temporary ram solution for testing assembler
-        this.code = exec;
-        this.PC = (byte) (exec[0] + 1); // sets PC after allocated values ('LETs')
+        //this.code = exec;
+        //this.PC = (byte) (exec[0] + 1); // sets PC after allocated values ('LETs')
 
 
         this.state = ProcessState.READY;
@@ -202,14 +209,18 @@ public class PCB implements Comparable<PCB> {
         Utils.log(toString());
         Assembler.execute(this);
 
-        return PC < code.length;
+        return PC < codeLength;
     }
 
     public byte getByteAt(final byte address) {
-        return this.code[address];
+
+        return ram.read(this.getPID(), address);
+        //return this.code[address];
     }
     public void writeByteAt(final byte address, final byte value) {
-        this.code[address] = value;
+
+        ram.write(value, this.getPID(), address);
+        //this.code[address] = value;
     }
 
     public CPUState getCpuState() {

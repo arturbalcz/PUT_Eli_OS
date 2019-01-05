@@ -1,4 +1,4 @@
-﻿package virtualmemory;
+package virtualmemory;
 
 import java.util.Map;
 import java.util.Queue;
@@ -11,7 +11,7 @@ import processess.PCBList;
 
 public class virtualmemory {
     static Memory Ram;
-    virtualmemory(Memory ram){
+    public virtualmemory(Memory ram){
         this.Ram = ram;
     }
 
