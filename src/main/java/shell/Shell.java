@@ -5,10 +5,13 @@ import filesystem.Directory;
 import filesystem.Disk;
 import utils.Utils;
 
-
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Queue;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
@@ -84,7 +87,9 @@ public class Shell {
         HelpingTable.put("dp", "Kill or stop a running process or application.\n");
         CommandTable.put("update", Commands::update);
         HelpingTable.put("update", "Updates code of initial programs.\n");
-
+		CommandTable.put("lck", Commands::lck);
+		HelpingTable.put("update", "empty");
+        
         //Creating thread with input from console
         new Thread(() -> {
             Scanner sc = new Scanner(System.in);

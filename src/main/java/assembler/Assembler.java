@@ -5,6 +5,7 @@ import filesystem.Files;
 import processess.PCB;
 import processess.PCBList;
 import shell.Shell;
+import synchronization.Lock;
 import utils.Utils;
 
 import java.util.ArrayList;
@@ -634,9 +635,14 @@ public class Assembler {
      * @param content content to write in new file
      */
     static void flc(final byte[] name, final byte[] content) {
-        StringBuilder nameBuilder = new StringBuilder();
+        final StringBuilder nameBuilder = new StringBuilder();
         for(final byte c : name) nameBuilder.append((char) c);
-        Directories.getCurrentDir().getFiles().createFile(nameBuilder.toString(), content);
+        final String filename = nameBuilder.toString();
+
+        if (Directories.getCurrentDir().getFiles().fileExists(filename))
+            Directories.getCurrentDir().getFiles().deleteFile(filename);
+
+        Directories.getCurrentDir().getFiles().createFile(filename, content);
     }
 
     /**
@@ -649,11 +655,46 @@ public class Assembler {
         Directories.getCurrentDir().getFiles().getFile(nameBuilder.toString());
     }
 
+    static void fcp(final byte[] sourceName, final byte[] targetName) {
+        final String target = new String(targetName);
+
+        if (Directories.getCurrentDir().getFiles().fileExists(target))
+            Directories.getCurrentDir().getFiles().deleteFile(target);
+
+        Directories.getCurrentDir().getFiles().createFile(
+                target,
+                Directories.getCurrentDir().getFiles().getFile(new String(sourceName))
+        );
+    }
+
+    static void frm(final byte[] filename) {
+        Directories.getCurrentDir().getFiles().deleteFile(new String(filename));
+    }
+
+    static void fed(final byte[] filename, final byte[] newContent) {
+        final String name = new String(filename);
+        final Files currentFile = Directories.getCurrentDir().getFiles();
+        final String currentContent = new String(currentFile.getFileClean(name));
+        Directories.getCurrentDir().getFiles().deleteFile(name);
+        currentFile.createFile(name, (currentContent + new String(newContent)).getBytes());
+    }
+
     // processes
 
     static void cp(final byte[] filename, final byte[] name, final byte priority) {
         final byte[] exe = Directories.getCurrentDir().getFiles().getFileClean(new String(filename));
         PCBList.list.newProcess(new String(name), (int) priority, exe);
+    }
+
+    // synchronization
+
+    static void lock(final byte[] filename, final PCB pcb) {
+        final boolean locked = Lock.lockFile(new String(filename), pcb);
+        if (!locked) PCBList.list.makeProcessWait(pcb);
+    }
+
+    static void unlock(final byte[] filename, final PCB pcb) {
+        Lock.unlockFile(new String(filename));
     }
 
     /**

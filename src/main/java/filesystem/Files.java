@@ -1,6 +1,7 @@
 package filesystem;
 
 import shell.Shell;
+import utils.Utils;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -12,7 +13,6 @@ public class Files {
     public boolean fileExists(String name) {
         for (File e : allFiles) {
             if (e.getName().equals(name)) {
-                Shell.println("Name taken");
                 return true;
             }
         }
@@ -28,10 +28,12 @@ public class Files {
      */
     public void createFile(String name, byte[] content) {
         if (fileExists(name)) {
-            Shell.println("File already exists");
+            Utils.log("File " + name + " already exists");
+            Shell.println("File " + name + " already exists");
             return;
         }
         if (name.equals("")) {
+            Utils.log("No file name given");
             Shell.println("No file name given");
             return;
         }
@@ -39,7 +41,7 @@ public class Files {
         newF.setIndexBlock(Disk.addContent(content, 10));
         newF.setSize(content.length);
         allFiles.add(newF);
-
+        Utils.log("New file: " + Directories.getCurrentDir().getName() + "\\" + name);
     }
 
     /***
@@ -49,11 +51,13 @@ public class Files {
      * @return byte[] of corresponding files data
      */
     public byte[] getFile(String name) {
+        Utils.log("Getting file: " + name);
         for (File e : allFiles) {
             if (e.getName().equals(name)) {
                 return Disk.getBlockByIndex(e.getIndexBlock());
             }
         }
+        Utils.log("No such file");
         Shell.println("No such file");
         return Disk.invalid();
     }
@@ -81,6 +85,7 @@ public class Files {
             if (e.getName().equals(name)){
                 Disk.remove(e.getIndexBlock());
                 allFiles.remove(e);
+                Utils.log("removed file: " + Directories.getCurrentDir().getName() + "\\" + name);
                 return;
             }
         }

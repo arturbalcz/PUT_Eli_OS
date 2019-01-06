@@ -96,6 +96,16 @@ public class PCBList {
         processor.addReadyProcess(newProcess, false);
     }
 
+    public void makeProcessWait(final PCB process) {
+        process.setState(ProcessState.WAITING);
+        processor.removeFromQueue(process);
+    }
+
+    public void signal(final PCB process) {
+        process.setState(ProcessState.READY);
+        processor.addReadyProcess(process, true);
+    }
+
     /**
      * Deletes process and frees it's pid
      *
