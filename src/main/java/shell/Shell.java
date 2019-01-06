@@ -81,6 +81,8 @@ public class Shell {
         HelpingTable.put("lpq", "Displays all ready tasks.\n");
         CommandTable.put("lp", Commands::lp);
         HelpingTable.put("lp", "Displays all tasks.\n");
+        CommandTable.put("tasklist", Commands::tasklist);
+        HelpingTable.put("tasklist", "Displays all tasks.\n\nTAKSLIST [/S stateName]\n\n\t/S\tstateName\tSpecifies the state of displayed processes\n");
         CommandTable.put("rp", Commands::rp);
         HelpingTable.put("rp", "Displays all currently running tasks.\n");
         CommandTable.put("dp", Commands::dp);
@@ -88,7 +90,7 @@ public class Shell {
         CommandTable.put("update", Commands::update);
         HelpingTable.put("update", "Updates code of initial programs.\n");
 		CommandTable.put("lck", Commands::lck);
-		HelpingTable.put("update", "empty");
+		HelpingTable.put("lck", "empty");
         
         //Creating thread with input from console
         new Thread(() -> {

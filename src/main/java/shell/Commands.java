@@ -249,12 +249,64 @@ public interface Commands {
         else PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
     }
 
-    /**
-     * List all processes
-     */
+
     static void lp(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
         PCBList.list.print();
+    }
+
+    /**
+     * List all processes
+     */
+    static void tasklist(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        boolean isFilter = false;
+        String stateFilter = "";
+
+        if (args.size() > 3) { Shell.println(help); return; }
+        else if (args.size() == 3) {
+            if (args.get(1).toUpperCase().equals("/S")) {
+                isFilter = true;
+                stateFilter = args.get(2).toUpperCase();
+            } else {
+                Shell.println(help);
+                return;
+            }
+        }
+        else if (args.size() == 2) {
+            if (args.get(1).toUpperCase().equals("/S")) {
+                Shell.println("You need to specified name of state you want filter");
+            } else {
+                Shell.println(help);
+            }
+            return;
+        }
+
+        String alignFormat = "| %-15s | %4d | %-8s | %4d | %4d | %4d | %4d | %4d |";
+        String header = "|-----------------|------|----------|------|------|------|------|------|\n" +
+                        "| Name            |  PID | State    | Base |  Dyn |   PC |   RT |   EO |\n" +
+                        "|-----------------|------|----------|------|------|------|------|------|\n";
+
+        Shell.print(header);
+        for (PCB entry : PCBList.list.getData()) {
+            int pid = entry.getPID();
+            String state = entry.getProcessState().toString();
+            if (isFilter) {
+                if (!state.toUpperCase().equals(stateFilter)) {
+                    continue;
+                }
+            }
+            String name = entry.getName();
+            int basePriority = entry.getBasePriority();
+            int dynamicPriority = entry.getDynamicPriority();
+            int pc = entry.getPC();
+            int readyTime = entry.getReadyTime();
+            int executeOrders = entry.getExecutedOrders();
+            String res = String.format(alignFormat, name, pid, state, basePriority, dynamicPriority, pc, readyTime, executeOrders);
+            Shell.println(res);
+        }
+        Shell.println("|-----------------|------|----------|------|------|------|------|------|\n");
+
     }
 
     /**
@@ -476,6 +528,8 @@ public interface Commands {
     }
 
     static void lck(ArrayList<String> args) {
-        Lock.printLocks();
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() > 1) Shell.println(help);
+        else Lock.printLocks();
     }
 }
