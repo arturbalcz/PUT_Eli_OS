@@ -260,17 +260,43 @@ public interface Commands {
      */
     static void tasklist(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
-        boolean isFilter = false;
-        String stateFilter = "";
+        boolean isStateFiltered = false, isNameFiltered = false;
+        String stateFilter = "", nameFilter = "";
 
-        if (args.size() > 3) { Shell.println(help); return; }
-        else if (args.size() == 3) {
-            if (args.get(1).toUpperCase().equals("/S")) {
-                isFilter = true;
-                stateFilter = args.get(2).toUpperCase();
-            } else {
-                Shell.println(help);
+        if (args.size() > 5) { Shell.println(help); return; }
+        else if (args.size() == 5) {
+            if(args.get(1).toUpperCase().equals("/N")) {
+                isNameFiltered = true;
+                nameFilter = args.get(2).toUpperCase();
+                if (args.get(3).toUpperCase().equals("/S")) {
+                    isStateFiltered = true;
+                    stateFilter = args.get(4).toUpperCase();
+                }
+                else {
+                    //error of second argument
+                    Shell.println("Wrong arguments");
+                    return;
+                }
+            }
+            else {
+                //error of first argument
+                Shell.println("Wrong arguments");
                 return;
+            }
+        }
+        else if (args.size() == 3) {
+            switch (args.get(1).toUpperCase()) {
+                case "/N":
+                    isNameFiltered = true;
+                    nameFilter = args.get(2).toUpperCase();
+                    break;
+                case "/S":
+                    isStateFiltered = true;
+                    stateFilter = args.get(2).toUpperCase();
+                    break;
+                default:
+                    Shell.println(help);
+                    return;
             }
         }
         else if (args.size() == 2) {
@@ -289,14 +315,19 @@ public interface Commands {
 
         Shell.print(header);
         for (PCB entry : PCBList.list.getData()) {
+            String name = entry.getName();
+            if (isNameFiltered) {
+                if (!name.toUpperCase().equals(nameFilter)) {
+                    continue;
+                }
+            }
             int pid = entry.getPID();
             String state = entry.getProcessState().toString();
-            if (isFilter) {
+            if (isStateFiltered) {
                 if (!state.toUpperCase().equals(stateFilter)) {
                     continue;
                 }
             }
-            String name = entry.getName();
             int basePriority = entry.getBasePriority();
             int dynamicPriority = entry.getDynamicPriority();
             int pc = entry.getPC();
