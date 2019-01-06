@@ -82,7 +82,7 @@ public class Shell {
         CommandTable.put("lp", Commands::lp);
         HelpingTable.put("lp", "Displays all tasks.\n");
         CommandTable.put("tasklist", Commands::tasklist);
-        HelpingTable.put("tasklist", "Displays all tasks.\n\nTAKSLIST [/S stateName]\n\n\t/S\tstateName\tSpecifies the state of displayed processes\n");
+        HelpingTable.put("tasklist", "Displays tasks.\n\nTAKSLIST [/S stateName]\n\n\t/S\tstateName\tSpecifies the state of displayed processes\n");
         CommandTable.put("rp", Commands::rp);
         HelpingTable.put("rp", "Displays all currently running tasks.\n");
         CommandTable.put("dp", Commands::dp);
