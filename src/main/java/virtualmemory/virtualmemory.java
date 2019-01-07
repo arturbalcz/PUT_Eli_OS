@@ -221,6 +221,7 @@ public class virtualmemory {
                         updateRamStatus(procID, pageID, fID);
                         victimQueue.add(fID);
                         Utils.log("Page: " + pageID + " processID: " + procID + " had been put into RAM");
+                        break;
                     }
                 }
             }
