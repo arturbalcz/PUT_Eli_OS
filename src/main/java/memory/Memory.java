@@ -1,16 +1,20 @@
 package memory;
 
+import shell.Shell;
 import utils.Utils;
 import virtualmemory.virtualmemory;
-
 import java.util.Vector;
 
 public class Memory {
     private static byte[] memory = new byte[256];
     virtualmemory VM;
+
+
+    // połącz z pamięcią wirtualną
     public void GetReference(virtualmemory vm){
         VM = vm;
     }
+
 
     // zapisz całą stronę w wybranej ramce
     public static boolean write(Vector<Byte> data, int frame) {
@@ -108,12 +112,12 @@ public class Memory {
     // wyświetl surową zawartość pamięci
     void print() {
         for (int i = 0; i < 16; i++) {
-            System.out.printf("%n%d:", i);
+            Shell.print(String.format("%n%d:", i));
             for (int j = 0; j < 16; j++) {
-                System.out.printf(" %c", memory[i * 16 + j]);
+                Shell.print(String.format(" %c", memory[i * 16 + j]));
             }
         }
-        System.out.println();
+        Shell.println("");
 
         Utils.log("showing raw contents of RAM");
     }
