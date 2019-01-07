@@ -68,7 +68,7 @@ public class Memory {
         // czytam z pamięci
         Vector<Byte> tmp = new Vector<Byte>();
         try {
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < 16; i++) {
                 tmp.add(memory[frame * 16 + i]);
             }
         }

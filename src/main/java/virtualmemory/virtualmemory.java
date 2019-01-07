@@ -65,10 +65,10 @@ public class virtualmemory
                 }
                 Qsize = tmpQueue.size();
                 //Do kolejki poczatkowej przypisujemy pozostale elementy kolejki oprocz szukanej ramki
-                for(int a=0; a<Qsize; a++)
-                {
+//                for(int a=0; a<Qsize; a++)
+//                {
                     beginQ.addAll(tmpQueue);
-                }
+//                }
                 //czyszczenie kolejki tymczasowej
                 tmpQueue.removeAll(tmpQueue);
                 //zapisanie do tymczasowej kolejki kolejki zmodyfikowanej, bez szukanej ramki
@@ -81,9 +81,9 @@ public class virtualmemory
             }
         }
         //czyszczenie kolejki glownej
-        victimQueue.removeAll(victimQueue);
+//        victimQueue.removeAll(victimQueue);
         //aktualizacja zawartosci kolejki glownej
-        victimQueue.addAll(tmpQueue);
+//        victimQueue.addAll(tmpQueue);
         PageFile.remove(pID);
         PageTables.remove(pID);
         Utils.log("Process " + pID + " has been removed" +"%n");
@@ -226,7 +226,7 @@ public class virtualmemory
             for (int j = 0; j < 16; j++)
             {
                 try {
-                    Shell.print(String.format("%d", proc.code.get(j + currentPageID * 16)));
+//                    Shell.print(String.format("%d", proc.code.get(j + currentPageID * 16)));
                     page.add(proc.code.get(j + currentPageID * 16));
                 }
                 catch (Exception ignored) {}
