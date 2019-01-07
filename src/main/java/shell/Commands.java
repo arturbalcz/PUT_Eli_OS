@@ -36,7 +36,7 @@ public interface Commands {
     static void logging(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
         if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
+            Utils.log("Commands.logging(): Wrong numbers of arguments");
             Shell.println(help);
         }
         else {
@@ -62,7 +62,7 @@ public interface Commands {
     static void stepping(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
         if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
+            Utils.log("Commands.stepping(): Wrong numbers of arguments");
             Shell.println(help);
         }
         else {
@@ -75,7 +75,7 @@ public interface Commands {
                     Utils.stepOff();
                     break;
                 default:
-                    Utils.log("Wrong argument");
+                    //Utils.log("Commands.stepping(): Wrong argument");
                     Shell.println(help);
                     break;
             }
@@ -116,7 +116,7 @@ public interface Commands {
                     Shell.println(Shell.HelpingTable.get(command));
                 }
                 catch (IndexOutOfBoundsException e) {
-                    Utils.log("help(): HelpingTable::IndexOutOfBoundsException::"+command, true);
+                    Utils.log("Commands.help(): HelpingTable::IndexOutOfBoundsException::"+command, true);
                     Shell.println("invalid number of arguments");
                 }
             }
@@ -124,15 +124,18 @@ public interface Commands {
         else {
             List<String> sortedKeys = new ArrayList<>(Shell.CommandTable.keySet());
             Collections.sort(sortedKeys);
+            int elementsOfHelp = 0;
             for (String command : sortedKeys) {
-                Shell.print(command.toUpperCase());
+                Shell.print(String.format("%-12s", command.toUpperCase()));
                 //if (command.length() < 4) Shell.print("\t\t");
-                Shell.print("\t");
+                //Shell.print("\t");
                 String commandHelp = Shell.HelpingTable.get(command);
                 int endIndex = commandHelp.indexOf('\n');
                 Shell.println(commandHelp.substring(0, endIndex));
+                elementsOfHelp++;
             }
             Shell.println("");
+            Utils.log("Commands.help(): elementsOfHelp="+elementsOfHelp);
         }
     }
 
@@ -149,14 +152,14 @@ public interface Commands {
         else if (args.size() == 2 && args.get(1).equals("t")) Utils.stepOff();
         else Utils.stepOn();
 
-        Utils.log("Exiting by user");
+        Utils.log("Commands.exit(): Exiting by user");
         Shell.exiting = true;
     }
 
     static void echo(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
         if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
+            Utils.log("Commands.echo(): Wrong numbers of arguments");
             Shell.println(help);
         }
         else {
@@ -169,7 +172,7 @@ public interface Commands {
                     Shell.echoOff();
                     break;
                 default:
-                    Utils.log("Wrong argument");
+                    //Utils.log("Wrong argument");
                     Shell.println(help);
                     break;
             }
@@ -182,31 +185,30 @@ public interface Commands {
      */
     static void test(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
-        Utils.step("step work is working" + args.get(1));
-        Utils.log("log is working" +  args.get(1));
+        Utils.step("Commands.test(): step work is working" + args.get(1));
+        Utils.log("Commands.test(): log is working" +  args.get(1));
         Shell.println("command is working " + args.get(1));
     }
 
     static boolean localExe(ArrayList<String> args) {
-        String arg = args.get(0);
-        Utils.log("localEXE(): input : "+arg);
-        String fileName = Directories.path(arg);
+        String inputFromInterpret = args.get(0);
+        Utils.log("Commands.localEXE(): inputFromInterpret="+inputFromInterpret);
+        String fileName = Directories.path(inputFromInterpret);
         if (!fileName.matches("\\w+\\.\\w+")){
-            Utils.log("localEXE(): no extension: " + fileName);
             fileName=fileName+".exe";
-            arg = arg + ".exe";
+            inputFromInterpret = inputFromInterpret + ".exe";
+            Utils.log("Commands.localEXE(): no extension; adding \".exe\"; inputFromInterpret=" + inputFromInterpret);
         }
-
         if (Directories.getTargetDir().getFiles().fileExists(fileName)) {
             String[] file = fileName.split("\\.");
-            Utils.log("localEXE(): file found, creating process \'"+file[0]+"\'");
+            Utils.log("Commands.localEXE(): file found, creating process \'"+file[0]+"\'");
             if (file[1].equals("exe")) {
                 ArrayList<String> arga = new ArrayList<>();
                 arga.add("cp");
-                arga.add(arg);
+                arga.add(inputFromInterpret);
                 arga.add(file[0]);
                 arga.add("7");
-                Utils.log(arga.toString());
+                Utils.log("Commands.localEXE(): arga="+arga.toString());
                 cp(arga);
                 return true;
             }
@@ -557,6 +559,8 @@ public interface Commands {
             Shell.println("Invalid index");
         }
     }
+
+    /* sync commands */
 
     static void lck(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));

@@ -90,7 +90,7 @@ public class Shell {
         CommandTable.put("update", Commands::update);
         HelpingTable.put("update", "Updates code of initial programs.\n");
 		CommandTable.put("lck", Commands::lck);
-		HelpingTable.put("lck", "empty");
+		HelpingTable.put("lck", "empty.\n");
         
         //Creating thread with input from console
         new Thread(() -> {
@@ -199,7 +199,7 @@ public class Shell {
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
 
         // printing arguments for debug
-        Utils.log("Interprete(): arguments = "+arguments.toString());
+        Utils.log("Shell.interprete(): arguments="+arguments.toString());
 
         if (Commands.localExe(arguments)) {
             empty = true;
@@ -219,7 +219,7 @@ public class Shell {
                 CommandTable.get(command).accept(arguments);
             }
             catch (IndexOutOfBoundsException e) {
-                Utils.log("Interprete(): CommandTable::IndexOutOfBoundsException::"+command+"::"+arguments, true);
+                Utils.log("Shell.interprete(): Shell.CommandTable::IndexOutOfBoundsException::"+command+"::"+arguments, true);
                 println("invalid number of arguments");
             }
         }
