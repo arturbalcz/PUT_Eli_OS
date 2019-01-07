@@ -5,7 +5,8 @@ import java.util.Stack;
 
 public class Directories {
 
-    static final String ROOT_NAME = "P:";
+    private static final String ROOT_NAME = "P:";
+    private static final String DIR_SEPARATOR_REGEX = "[\\\\/]";
 
     private static Directory dir = new Directory(ROOT_NAME);
     private static Directory rootDir = dir;
@@ -62,7 +63,7 @@ public class Directories {
     public static String path(String filePath) {
         targetHistory = (Stack<Directory>) history.clone();
         targetDir = new Directory(currentDir);
-        String[] path = filePath.split("[/]");
+        String[] path = filePath.split(DIR_SEPARATOR_REGEX);
         for (String e : path) {
             if (e == path[path.length - 1]) {
                 break;
@@ -79,8 +80,8 @@ public class Directories {
         sourceHistory = (Stack<Directory>) history.clone();
         sourceDir = new Directory(currentDir);
 
-        String[] tPath = targetPath.split("[/]");
-        String[] sPath = sourcePath.split("[/]");
+        String[] tPath = targetPath.split(DIR_SEPARATOR_REGEX);
+        String[] sPath = sourcePath.split(DIR_SEPARATOR_REGEX);
         for (String e : tPath) {
             if (e == tPath[tPath.length - 1]) {
                 break;
@@ -163,7 +164,6 @@ public class Directories {
             }
         }
     }
-
 
     public static void setDir(Directory dir) {
         Directories.dir = dir;

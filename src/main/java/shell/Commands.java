@@ -194,6 +194,7 @@ public interface Commands {
         String inputFromInterpret = args.get(0);
         Utils.log("Commands.localEXE(): inputFromInterpret="+inputFromInterpret);
         String fileName = Directories.path(inputFromInterpret);
+        Utils.log("Commands.localEXE(): fileName="+fileName);
         if (!fileName.matches("\\w+\\.\\w+")){
             fileName=fileName+".exe";
             inputFromInterpret = inputFromInterpret + ".exe";
