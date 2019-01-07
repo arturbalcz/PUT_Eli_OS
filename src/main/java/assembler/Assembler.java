@@ -145,7 +145,7 @@ public class Assembler {
      *
      * @param pcb {@link PCB} of process with instruction to execute
      */
-    public static void execute(PCB pcb) {
+    public static void execute(final PCB pcb) {
         byte address = pcb.getPC();
         Utils.log("executing instruction at " + address + " from " + pcb.name);
 
