@@ -1,6 +1,7 @@
 package filesystem;
 
 import shell.Shell;
+import utils.Utils;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -12,7 +13,7 @@ public class Files {
     public boolean fileExists(String name) {
         for (File e : allFiles) {
             if (e.getName().equals(name)) {
-                Shell.println("Name taken");
+                Utils.log("Name taken " + name);
                 return true;
             }
         }

@@ -204,6 +204,10 @@ public interface Commands {
             Shell.println(help);
         } else try {
             String[] name = Directories.path(args.get(2), args.get(1));
+            if( !Directories.getSourceDir().getFiles().fileExists(name[1]) ){
+                Shell.println("No source file named " + name[1]);
+                return;
+            }
             Directories.getTargetDir().getFiles().createFile(name[0], Directories.getSourceDir().getFiles().getFile(name[1]));
         } catch (IndexOutOfBoundsException e) {
             Shell.println("Cant copy file");
