@@ -7,13 +7,13 @@ import java.util.Vector;
 
 public class Memory {
     private static byte[] memory = new byte[256];
-    virtualmemory VM;
+//    virtualmemory VM;
 
 
     // połącz z pamięcią wirtualną
-    public void GetReference(virtualmemory vm){
-        VM = vm;
-    }
+//    public void GetReference(virtualmemory vm){
+//        VM = vm;
+//    }
 
 
     // zapisz całą stronę w wybranej ramce
@@ -38,7 +38,7 @@ public class Memory {
         int offset = address & 0x0f;
 
         // sprawdzam wartość w PageTable danego procesu
-        int frame = VM.getFrame(processID, page);
+        int frame = virtualmemory.getFrame(processID, page);
 
         // wpisuję do pamięci
         memory[frame * 16 + offset] = data;
@@ -82,11 +82,12 @@ public class Memory {
     // odczytaj bajt spod adresu zgodnego z tablicą stronic danego procesu
     public byte read(int processID, byte address) {
         // translacja adresu
-        int page = address & 0xf0;
+        int page = (address & 0xf0) >>> 4;
         int offset = address & 0x0f;
 
         // sprawdzam wartość w PageTable danego procesu
-        int frame = VM.getFrame(processID, page);
+        int frame;
+        frame = virtualmemory.getFrame(processID, page);
 
         // czytam z pamięci
         Utils.log(String.format("reading byte from address %d", frame * 16 + offset));

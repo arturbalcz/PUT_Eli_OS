@@ -53,7 +53,7 @@ public class PCBList {
 
         this.ram = new Memory();
         this.vm = new virtualmemory(ram);
-        ram.GetReference(vm);
+//        ram.GetReference(vm);
     }
 
     /**
@@ -78,7 +78,7 @@ public class PCBList {
         return temp;
     }
 
-    public static final int DUMMY_ID = -1;
+    public static final int DUMMY_ID = 0;
 
     public void addDummy(final byte[] dummyExec) {
         final byte PC = (byte) (dummyExec[0] + 1);

@@ -349,7 +349,7 @@ public class virtualmemory
 
     public static int getFrame(int processID, int page) 
     {
-        if (PageTables.get(processID).get(page).valid == false) 
+        if (!PageTables.get(processID).get(page).valid)
         {
             demandPage(processID, page);
         }
