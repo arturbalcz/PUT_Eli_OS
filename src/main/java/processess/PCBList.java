@@ -38,7 +38,7 @@ public class PCBList {
      * Reference to virtual memory manager
      */
     private Memory ram;
-    private virtualmemory vm;
+    public virtualmemory vm;
 
 
     public Processor processor = new Processor(this);

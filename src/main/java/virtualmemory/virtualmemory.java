@@ -6,7 +6,7 @@ import memory.Memory;
 import shell.Shell;
 import utils.Utils;
 
-public class virtualmemory 
+public class virtualmemory
 {
     static Memory Ram;
     public virtualmemory(Memory ram)
@@ -45,7 +45,7 @@ public class virtualmemory
     public void removeProcess(int pID)
     {
         Utils.log("removing Process " + pID);
-        Queue<Integer> tmpQueue = victimQueue, beginQ = null;
+        Queue<Integer> tmpQueue = victimQueue, beginQ = new LinkedList<>();
         int frame, Qsize;
         for(int i = 0; i<16; i++)
         {
@@ -89,19 +89,22 @@ public class virtualmemory
         Utils.log("Process " + pID + " has been removed");
     }
     //Funkcje związane z wypisywaniem tego co jest gdziekolwiek, do pracy krokowej.
-    public void printPageTable (int processID)
+    public static void printPageTable (int processID)
     {
+        if(processExists(processID))
+        {
         System.out.println("#### Printing page table, process ID: " + processID + " ####");
         for(int i=0; i<PageTables.get(processID).size(); i++)
         {
             System.out.println("Page no."+ i + " " + PageTables.get(processID).get(i).frame + " " + PageTables.get(processID).get(i).valid);
         }
         System.out.println();
+        } else Shell.println("Error: process with given ID doesn't exist.");
     }
 
-    public void printQueue()
+    public static void printQueue()
     {
-        Queue<Integer> tmp = victimQueue;
+        Queue<Integer> tmp = new LinkedList<>(victimQueue);
         System.out.println("#### Printing victimQueue ####");
         for(int i=0; i<tmp.size(); i++)
         {
@@ -110,8 +113,10 @@ public class virtualmemory
         System.out.println();
     }
 
-    public void printProcessPages(int processID)
+    public static void printProcessPages(int processID)
     {
+        if(processExists(processID))
+        {
         System.out.println("#### Printing process pages, process ID: " + processID + " ####");
         Vector<Vector<Byte>> pages = PageFile.get(processID);
         for(int i=0; i<pages.size(); i++)
@@ -123,32 +128,45 @@ public class virtualmemory
             }
         }
         System.out.println();
+        } else Shell.println("Error: process with given ID doesn't exist.");
     }
-    public void printPage(int processID, int pageID)
+    public static void printPage(int processID, int pageID)
     {
-        System.out.println("#### Printing process page, process ID: " + processID + " pageID: " + pageID + " ####");
-        for(int j=0; j<PageFile.get(processID).get(pageID).size(); j++)
+        if(processExists(processID))
         {
-            System.out.println(PageFile.get(processID).get(pageID).get(j));
-        }
-        System.out.println();
+            if(pageExists(processID, pageID))
+            {
+            System.out.println("#### Printing process page, process ID: " + processID + "\t pageID: " + pageID + " ####");
+            for(int j=0; j<PageFile.get(processID).get(pageID).size(); j++)
+                {
+                 System.out.println(PageFile.get(processID).get(pageID).get(j));
+                }
+            System.out.println();
+            } else Shell.println("Error: page with given ID doesn't exist.");
+        } else Shell.println("Error: process with given ID doesn't exist.");
     }
-    public void printRamStatus()
+    public static void printRamStatus()
     {
         System.out.println("#### Printing current RAM status ####");
         for(int i=0; i<16; i++)
         {
-            Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + " ProcessID " + RamStatus[i].ProcessID);
-            System.out.println("Frame ID: " + i + " PageID " + RamStatus[i].PageID + " ProcessID " + RamStatus[i].ProcessID);
+            Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID);
+            System.out.println("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID);
         }
         System.out.println();
     }
-    public void printNextVictim()
+    public static void printNextVictim()
     {
         System.out.println("#### Printing next victim page ####");
         System.out.println(victimQueue.peek());
     }
+    static boolean processExists(int procID){
+        return PageFile.containsValue(procID);
+    }
 
+    static boolean pageExists(int procID, int pageID){
+        return PageTables.get(procID).contains(pageID);
+    }
     // $#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$##$#$#$#$#$#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$#$ //
 
     private
@@ -337,4 +355,6 @@ public class virtualmemory
         }
         return PageTables.get(processID).get(page).frame;
     }
+
+
 }
