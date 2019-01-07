@@ -177,7 +177,7 @@ public class virtualmemory
         }
     }
     //Pojedyncza tablica stron, vector pomocniczy w którym tymczasowo znajdują się stronu programu
-    Vector<PageEntry> pageTable = new Vector<>();
+//    Vector<PageEntry> pageTable = new Vector<>();
 
     //Plik wymiany
     //inicjalizacja mapy PageFile, Integer to PID, a vec-vec to 2 wymiarowy wektor z programem
@@ -201,27 +201,28 @@ public class virtualmemory
     void processProcessing(Process proc)
     {
         Utils.log("Got process " + proc.processId + " that will be added to pageFile and pageTable");
-        Vector <Byte> Page = new Vector<>();
+        Vector <Byte> page = new Vector<>();
         Vector<Vector <Byte>> program = new Vector<>(new Vector<>());
-        pageTable.clear();
+//        pageTable.clear();
+        Vector<PageEntry> pageTable = new Vector<>();
         Integer progSize = proc.code.size();
         Integer AddedValue = 0, stepCounter=0;
         PageEntry tmpPE;
         for(int i = 0; stepCounter<progSize; i++)
         {
-            Page.clear();
+//            page.clear();
             for(Integer j=0; j<16; j++)
             {
                 if(stepCounter<progSize)
                 {
                 tmpPE = new PageEntry();
                 System.out.print(proc.code.get(j + AddedValue));
-                Page.add(j, proc.code.get(j + AddedValue));
-                pageTable.add(j+AddedValue, tmpPE);
+                page.add(j, proc.code.get(j + AddedValue));
+                pageTable.add(tmpPE);
                 stepCounter++;
                 }
             }
-            program.add(i, Page);
+            program.add(page);
             AddedValue+=16;
         }
         putInfoToPageTable(proc.processId, pageTable);
