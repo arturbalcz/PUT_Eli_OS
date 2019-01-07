@@ -66,7 +66,7 @@ public class PCBList {
         int temp = -1;
         while (!notIn){
             notIn = true;
-            temp = generator.nextInt(101) + 800;
+            temp = generator.nextInt(850) + 101;
             for (int e: usedPids){
                 if (e == temp) {
                     notIn = false;
@@ -81,7 +81,8 @@ public class PCBList {
     public static final int DUMMY_ID = -1;
 
     public void addDummy(final byte[] dummyExec) {
-        final PCB dummy = new PCB(DUMMY_ID, "DUMMY", 0, ram, (byte)0, dummyExec.length);
+        final byte PC = (byte) (dummyExec[0] + 1);
+        final PCB dummy = new PCB(DUMMY_ID, "DUMMY", 0, ram, PC, dummyExec.length);
         vm.createProcess(DUMMY_ID, toObjects(dummyExec));
         data.add(dummy);
         processor.addReadyProcess(dummy, false);
@@ -95,7 +96,7 @@ public class PCBList {
      */
     public void newProcess(final String name, final int priority, final byte[] exec){
         final int id = pidGen();
-        byte PC = (byte) (exec[0] + 1);
+        final byte PC = (byte) (exec[0] + 1);
         final PCB newProcess = new PCB(id, name, priority, ram, PC, exec.length);
         vm.createProcess(id, toObjects(exec));
         data.add(newProcess);

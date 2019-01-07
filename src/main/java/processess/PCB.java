@@ -82,6 +82,7 @@ public class PCB implements Comparable<PCB> {
         this.cpuState = Assembler.getFreshCPU();
         this.readyTime=0;
         this.codeLength = codeLength;
+        this.PC = PC;
 
         this.ram = ram;
         //this.vm = vm; TODO: unncoment
