@@ -1,12 +1,13 @@
 package shell;
 
 import assembler.Assembler;
-import filesystem.Files;
 import filesystem.Directories;
 import filesystem.Directory;
+import filesystem.Files;
 import os.OS;
 import processess.PCB;
 import processess.PCBList;
+import synchronization.Lock;
 import utils.Utils;
 
 import java.time.LocalDateTime;
@@ -406,5 +407,8 @@ public interface Commands {
             Shell.println("Invalid index");
         }
     }
-		
+
+    static void lck(ArrayList<String> args) {
+        Lock.printLocks();
+    }
 }

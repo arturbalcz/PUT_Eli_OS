@@ -5,10 +5,13 @@ import filesystem.Directory;
 import filesystem.Disk;
 import utils.Utils;
 
-
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Queue;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
@@ -58,6 +61,7 @@ public class Shell {
         CommandTable.put("rp", Commands::rp);
         CommandTable.put("dp", Commands::dp);
         CommandTable.put("update", Commands::update);
+        CommandTable.put("lck", Commands::lck);
 
         //Creating thread with input from console
         new Thread(() -> {
