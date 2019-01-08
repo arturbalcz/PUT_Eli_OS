@@ -2,7 +2,6 @@ import os.OS;
 import utils.Utils;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 
 /**
  * Entry point of system
@@ -36,9 +35,7 @@ public class AppStart {
                 System.in.read();
                 new ProcessBuilder("cmd", "/c", "color 07").inheritIO().start().waitFor();
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            } catch (InterruptedException e1) {
+            } catch (IOException | InterruptedException e1) {
                 e1.printStackTrace();
             }
         }

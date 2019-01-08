@@ -22,11 +22,6 @@ import java.util.*;
  */
 public interface Commands {
 
-    /** updates code of initial programs */
-    static void update(ArrayList<String> args) {
-        OS.updateInitialFiles();
-    }
-
     /* shell commands */
 
     /**
@@ -273,11 +268,13 @@ public interface Commands {
      * Used for testing shell.
      * @param args parameters list to handle by command
      */
-    static void test(ArrayList<String> args) {
+    static void test(ArrayList<String> args){
         String help = Shell.HelpingTable.get(args.get(0));
+        if (args.get(1).equals("/?")) { Shell.println(help); return; }
         Utils.step("Commands.test(): step work is working" + args.get(1));
         Utils.log("Commands.test(): log is working" +  args.get(1));
         Shell.println("command is working " + args.get(1));
+
     }
 
     /**
@@ -332,6 +329,14 @@ public interface Commands {
             if (exec == null) Shell.println("compilation failed");
             else Directories.getCurrentDir().getFiles().createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec); //error, non-static method in static context
         }
+    }
+
+    /**
+     * updates code of initial programs
+     * @param args parameters list to handle by command
+     */
+    static void update(ArrayList<String> args) {
+        OS.updateInitialFiles();
     }
 
     /* processes commands */
@@ -453,11 +458,12 @@ public interface Commands {
      */
     static void dir(ArrayList<String> args) {
         String help = Shell.HelpingTable.get(args.get(0));
-	    //String help = "DIR - print directory content \n";
         if (args.size() != 1) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else {
+            String path = Directories.getCurrentDir().getName();
+            Shell.println("\n Directory of "+path+"\n");
             Vector<Directory> dirs = Directories.getCurrentDir().getDirectories();
             if (dirs != null) {
                 for (Directory e : dirs) {
@@ -467,6 +473,7 @@ public interface Commands {
                 }
                 Directories.getCurrentDir().getFiles().showFiles();
             }
+            Shell.println("");
         }
     }
 
