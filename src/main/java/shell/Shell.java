@@ -62,6 +62,7 @@ public class Shell {
         CommandTable.put("dp", Commands::dp);
         CommandTable.put("update", Commands::update);
         CommandTable.put("lck", Commands::lck);
+        CommandTable.put("vm", Commands::vm);
 
         //Creating thread with input from console
         new Thread(() -> {

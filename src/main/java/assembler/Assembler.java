@@ -149,7 +149,8 @@ public class Assembler {
         byte address = pcb.getPC();
         Utils.log("executing instruction at " + address + " from " + pcb.name);
 
-        Instruction instruction = Instruction.getByCode(pcb.getByteAt(address++));
+        final byte code = pcb.getByteAt(address++);
+        Instruction instruction = Instruction.getByCode(code);
 
         List<Byte> argsList = new ArrayList<>();
         if(instruction.argsNumber > 0) {
