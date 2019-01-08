@@ -4,29 +4,33 @@ import assembler.Assembler;
 import filesystem.Directories;
 import filesystem.Directory;
 import filesystem.Files;
+import os.OS;
 import processess.PCB;
+import processess.PCBList;
+import synchronization.Lock;
 import utils.Utils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.Scanner;
 import java.util.Vector;
 
 /**
  * Stores implementation of every shell command with dependencies on external modules
  * <p>Every method should consume exactly one argument {@code ArrayList<String> args}.
  * For using your command checkout {@link Shell#CommandTable}</p>
- *
  * @see Shell
  */
 public interface Commands {
 
+    /** updates code of initial programs */
+    static void update(ArrayList<String> args) {
+        OS.updateInitialFiles();
+    }
+
     /**
      * Turns logging on or off
-     *
      * @param args "on" or "off"
      */
     static void logging(ArrayList<String> args) {
@@ -35,7 +39,8 @@ public interface Commands {
         if(args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
-        } else {
+        }
+        else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
                 case "/ON":
@@ -90,7 +95,7 @@ public interface Commands {
             Shell.println(help);
             return;
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SS");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         String times = formatter.format(LocalDateTime.now());
         Utils.log("Printing time for user.");
         Shell.println(times);
@@ -114,12 +119,39 @@ public interface Commands {
      */
     static void exit(ArrayList<String> args) {
         String help = "Quits the system.\n";
-        if (args.size() == 2 && args.get(1).equals("/?")) {
+        if (args.size() > 2) {
             Shell.println(help);
             return;
         }
+        else if (args.size() == 2 && args.get(1).equals("t")) Utils.stepOff();
+        else Utils.stepOn();
+
         Utils.log("Exiting by user");
         Shell.exiting = true;
+    }
+
+    static void echo(ArrayList<String> args) {
+        String help = "Turns printing on or off\n\n" +
+                "ECHO [/ON][/OFF]\n";
+        if(args.size() != 2) {
+            Utils.log("Wrong numbers of arguments");
+            Shell.println(help);
+        }
+        else {
+            String param = args.get(1);
+            switch (param.toUpperCase()) {
+                case "/ON":
+                    Shell.echoOn();
+                    break;
+                case "/OFF":
+                    Shell.echoOff();
+                    break;
+                default:
+                    Utils.log("Wrong argument");
+                    Shell.println(help);
+                    break;
+            }
+        }
     }
 
     /**
@@ -132,31 +164,94 @@ public interface Commands {
         Shell.println("command is working " + args.get(1));
     }
 
-    static void file(ArrayList<String> args) {
+    /**
+     * Compiles given program
+     * @param args asm program to compile
+     */
+    static void com(ArrayList<String> args) {
+        String help = "Compiles given program\n\n" +
+                "COM filename\n";
+        if (args.size() == 1) Shell.println("no program file specified");
+        if (args.get(1).equals("/?")) Shell.println(help);
+        else {
+            final String fileName = args.get(1);
+            final byte[] code = Directories.getCurrentDir().getFiles().getFileClean(fileName); //error, non-static method in static context
 
+            Assembler assembler = new Assembler();
+            final byte[] exec = assembler.compile(code);
+            if (exec == null) Shell.println("compilation failed");
+            else Directories.getCurrentDir().getFiles().createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec); //error, non-static method in static context
+        }
+    }
+
+    /**
+     * Creates process with given program, name and priority
+     * @param args name of .exe file
+     */
+    static void cp(ArrayList<String> args) {
+        if (args.size() != 4) Shell.println("invalid number of arguments");
+
+        final byte[] exec = Directories.getCurrentDir().getFiles().getFileClean(args.get(1)); //error, non-static method in static context
+        if (exec[0] == -1) Shell.println("Program does not exist");
+        else PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
+    }
+
+    /**
+     * List all processes
+     */
+    static void lp(ArrayList<String> args) {
+        PCBList.list.print();
+    }
+
+    /**
+     * List ready processes
+     */
+    static void lpq(ArrayList<String> args) {
+        PCBList.list.processor.printQueue();
+    }
+
+    /**
+     * Prints running process
+     */
+    static void rp(ArrayList<String> args) {
+        Shell.println(PCBList.list.processor.getRunningProcess().toString());
+    }
+
+    /**
+     * Deletes selected process
+     */
+    static void dp(ArrayList<String> args) {
+        final int processId = Integer.parseInt(args.get(1));
+        final PCB process = PCBList.list.findByPID(processId);
+        if (process != null) PCBList.list.processor.removeProcess(process);
+        else Shell.println("process does not exist");
+    }
+
+	/* filesystem commands */
+	
+	static void file(ArrayList<String> args) {
         String help = "FILE - create and modify files \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else {
             String name = Directories.path(args.get(1));
-            Scanner scan = new Scanner(System.in);
+            //Scanner scan = new Scanner(System.in);
+
             Shell.println("Enter content, --- to finish");
             Shell.print(": ");
-            String input = scan.nextLine();
+            String input = Shell.read();
             String result = "";
             while (!input.equals("---")) {
                 Shell.print(": ");
                 result += input + "\n";
-                input = scan.nextLine();
+                input = Shell.read();
             }
             result = result.substring(0, result.length() - 1); //get rid of last newline char
             Directories.getTargetDir().getFiles().createFile(name, result.getBytes());
         }
 
     }
-
-
 
     static void more(ArrayList<String> args) {
         String help = "MORE - print file content \n";
@@ -213,57 +308,8 @@ public interface Commands {
             Shell.println("Cant copy file");
         }
     }
-
-    /**
-     * Compiles given program
-     *
-     * @param args asm program to compile
-     */
-    static void com(ArrayList<String> args) {
-        String help = "Compiles given program\n\n" +
-                "COM filename\n";
-        if (args.size() == 1) Shell.println("no program file specified");
-        if (args.get(1).equals("/?")) Shell.println(help);
-        else {
-            final String fileName = Directories.path(args.get(1));
-            final byte[] code = Directories.getTargetDir().getFiles().getFileClean(fileName);
-
-            Assembler assembler = new Assembler();
-            final byte[] exec = assembler.compile(code);
-            if (exec == null) Shell.println("compilation failed");
-            else
-                Directories.getTargetDir().getFiles().createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec);
-        }
-    }
-
-    /**
-     * Creates process with given program, name and priority
-     * <p>IN DEVELOPMENT</p>
-     *
-     * @param args name of .exe file
-     */
-    static void cp(ArrayList<String> args) {
-        // TODO: implement proper process creation
-        String help = "Creates process with given program, name and priority\n\n" +
-                "CP filename\n";
-        if (args.size() != 2) Shell.println(help);
-        else if (args.get(1).equals("/?")) Shell.println(help);
-        else {
-            Utils.log("running program in dev environment");
-            final String fileName = Directories.path(args.get(1));
-            final byte[] exec = Directories.getTargetDir().getFiles().getFileClean(fileName);
-            if (exec[0] == -1) {
-                Shell.println("Program does not exist");
-                return;
-            }
-            Utils.log(Arrays.toString(exec));
-            PCB process = new PCB(1, "p1", 10, exec);
-            //noinspection StatementWithEmptyBody
-            while (process.execute()) ;
-        }
-    }
-
-    static void rm(ArrayList<String> args) {
+	
+	static void rm(ArrayList<String> args) {
         String help = "RM - remove file \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
@@ -348,14 +394,14 @@ public interface Commands {
             }
             Shell.println("Enter content, --- to finish");
             Shell.print(result);
-            Scanner scan = new Scanner(System.in);
+            //Scanner scan = new Scanner(System.in);
             Shell.print(": ");
-            String input = scan.nextLine();
+            String input = Shell.read();
             String modify = "";
             while (!input.equals("---")) {
                 Shell.print(": ");
                 modify += input + "\n";
-                input = scan.nextLine();
+                input = Shell.read();
             }
             modify = modify.substring(0, modify.length() - 1); //get rid of last newline char
 
@@ -365,4 +411,52 @@ public interface Commands {
             Shell.println("Invalid index");
         }
     }
+
+    static void lck(ArrayList<String> args) {
+        Lock.printLocks();
+    }
+
+    /**
+     * Rzeczy do drukowania poszczególnych elementów w virtualmemory
+     * @param args
+     */
+    static void vm(ArrayList<String> args) {
+        String help = "Prints content of virtual memory containers\n\n" +
+                "pnv - print Next Victim\n" +
+                "prs - print Ram Status\n"+
+                "pq  - print Queue\n" +
+                "ppt [processID] - print PageTable\n" +
+                "ppp [processID] - print Process Pages\n" +
+                "pp  [processID] [pageID] - print Page\n";
+            String param = args.get(1);
+            try {
+                switch (param) {
+                    case "pnv":
+                        virtualmemory.virtualmemory.printNextVictim();
+                        break;
+                    case "prs":
+                        virtualmemory.virtualmemory.printRamStatus();
+                        break;
+                    case "pq":
+                        virtualmemory.virtualmemory.printQueue();
+                        break;
+                    case "ppt":
+                        virtualmemory.virtualmemory.printPageTable(Integer.parseInt(args.get(2)));
+                        break;
+                    case "ppp":
+                        virtualmemory.virtualmemory.printProcessPages(Integer.parseInt(args.get(2)));
+                        break;
+                    case "pp":
+                        virtualmemory.virtualmemory.printPage(Integer.parseInt(args.get(2)), Integer.parseInt(args.get(3)));
+                        break;
+                    default:
+                        Utils.log("Wrong argument");
+                        Shell.println(help);
+                        break;
+                }
+            } catch(NullPointerException e){
+                Shell.println("ERROR: " + e.getMessage());
+            }
+    }
 }
+
