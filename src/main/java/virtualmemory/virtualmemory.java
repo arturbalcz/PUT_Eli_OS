@@ -96,7 +96,9 @@ public class virtualmemory
         Utils.log("Process " + pID + " has been removed");
     }
 
-    /**Methods used for printing containers in shell*/
+    /**
+     * Methods used for printing containers in shell
+     * */
     public static void printPageTable (int processID)
     {
         if(processExists(processID))
