@@ -190,13 +190,7 @@ public class Shell {
     public static boolean interpret( ) throws IOException {
         //check if current line is empty and ready for new interpreting session
         if (empty) {
-            String history = "";
-	        for (Directory e: Directories.getHistory()){
-	            history += e.getName() + "\\";
-	        }
-	        String dirName = Directories.getCurrentDir().getName();
-	        if (dirName.charAt(dirName.length()-1) == ':') dirName += "\\";
-        	print(history + dirName + ">");
+        	print(Directories.getPath() + ">");
             empty = false;
         }
 

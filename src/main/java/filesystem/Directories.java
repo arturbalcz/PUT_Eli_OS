@@ -100,6 +100,16 @@ public class Directories {
         return pathName;
     }
 
+    public static String getPath() {
+        String history = "";
+        for (Directory e: Directories.getHistory()){
+            history += e.getName() + "\\";
+        }
+        String dirName = Directories.getCurrentDir().getName();
+        if (dirName.charAt(dirName.length()-1) == ':') dirName += "\\";
+        return history + dirName;
+    }
+
     public static void setCurrentDir(String name) {
         if (name.equals("..")) {
             if (history.empty()) {
