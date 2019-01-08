@@ -27,24 +27,31 @@ public class virtualmemory
         p.code = exec;
         getProcess(p);
     }
-    /**Funkcja otrzymująca proces od PCB*/
+    /**Method that was given by PCB*/
     void getProcess(Process p)
     {
         processProcessing(p);
-        startProcessZero(p.processId);
-        Utils.log("got Process " + p.processId+"%n");
+        putPageInRam(p.processId, 0);
+        Utils.log("Got Process " + p.processId);
     }
-    //Funkcja wywoływana w momencie, gdy dana strona nie jest w ramie - wywolanie stronicowania na żądanie
+    /**Method used by RAM to get a specific page*/
+    public static int getFrame(int processID, int page)
+    {
+        if (!PageTables.get(processID).get(page).valid)
+        {
+            demandPage(processID, page);
+        }
+        return PageTables.get(processID).get(page).frame;
+    }
+    /**When page is missing in RAM, this method is used.*/
     static void demandPage(int ProcessID, int PageID)
     {
         putPageInRam(ProcessID, PageID);
     }
-    //Mapa wszystkich Tablic Stron, int to ProcessID, a Vector to tablica stron
-    static Map<Integer, Vector<PageEntry>>  PageTables = new HashMap<>();
-    //funkcja sprzątająca po zakonczeniu procesu, wszystkie niezbedne wartośći ustawia na -1 i usuwa wpisy w PageFile i PageTable
+   /**Method that removes process from all containers when it's done.*/
     public void removeProcess(int pID)
     {
-        Utils.log("removing Process " + pID);
+        Utils.log("Removing Process " + pID);
         Queue<Integer> tmpQueue = victimQueue, beginQ = new LinkedList<>();
         int frame, Qsize;
         for(int i = 0; i<16; i++)
@@ -52,53 +59,56 @@ public class virtualmemory
             if(RamStatus[i].ProcessID == pID)
             {
                 Qsize = tmpQueue.size();
-                //Updating queue
-                //szukamy w calej kolejce ramki, ktora zajmowal proces
+                /**Updating queue
+                 * We are looking in queue for frame that process was occupying
+                 */
+
                 for(int j=0; j<Qsize; j++)
                 {
                     frame = tmpQueue.poll();
                     if(frame != i)
                     {
-                        //Poczatek calej kolejki jest zapisywany do innej kolejki jezeli ramka jest rozna od szukanej
+                        /**If frame is different from the looking one it's added to the new "begin" queue*/
                         beginQ.add(frame);
                     } else break;
                 }
-                Qsize = tmpQueue.size();
-                //Do kolejki poczatkowej przypisujemy pozostale elementy kolejki oprocz szukanej ramki
-//                for(int a=0; a<Qsize; a++)
-//                {
-                    beginQ.addAll(tmpQueue);
-//                }
-                //czyszczenie kolejki tymczasowej
+                /**When the frame is found, the rest of records form queue is added to the tmp queue with the begging of the previous*/
+                beginQ.addAll(tmpQueue);
+
+                /**Removing all records from tmpQueue to prevent putting trash into the main Queue*/
                 tmpQueue.removeAll(tmpQueue);
-                //zapisanie do tymczasowej kolejki kolejki zmodyfikowanej, bez szukanej ramki
+                /**Saving the queue without found frame-to-remove to the cleaned queue*/
                 tmpQueue.addAll(beginQ);
-                //czyszczenie kolejki z poczatkiem kolejki tymczasowej
+                /**Removing all records from the begin Queue*/
                 beginQ.removeAll(beginQ);
                 RamStatus[i].ProcessID = -1;
                 RamStatus[i].PageID = -1;
-                Utils.log("Victim queue updated, removed: pID:" + pID + " from queue position: " + i +"%n");
+                Utils.log("Victim queue updated, removed: pID:" + pID + " from queue position: " + i);
             }
         }
         //czyszczenie kolejki glownej
-//        victimQueue.removeAll(victimQueue);
+        //victimQueue.removeAll(victimQueue);
         //aktualizacja zawartosci kolejki glownej
-//        victimQueue.addAll(tmpQueue);
+        //victimQueue.addAll(tmpQueue);
+        /**Removing all records from PageFile and PageTables maps*/
         PageFile.remove(pID);
         PageTables.remove(pID);
-        Utils.log("Process " + pID + " has been removed" +"%n");
+        Utils.log("Process " + pID + " has been removed");
     }
-    //Funkcje związane z wypisywaniem tego co jest gdziekolwiek, do pracy krokowej.
+
+    /**
+     * Methods used for printing containers in shell
+     * */
     public static void printPageTable (int processID)
     {
         if(processExists(processID))
         {
-       Shell.println("#### Printing page table, process ID: " + processID + " ####" + "%n");
+       Shell.println("#### Printing page table, process ID: " + processID + " ####");
         for(int i=0; i<PageTables.get(processID).size(); i++)
         {
-            Shell.println("Page no."+ i + " " + PageTables.get(processID).get(i).frame + " " + PageTables.get(processID).get(i).valid +"%n");
+            Shell.println("Page no."+ i + " " + PageTables.get(processID).get(i).frame + " " + PageTables.get(processID).get(i).valid);
         }
-        } else Shell.println("Error: process with given ID doesn't exist."+"%n");
+        } else Shell.println("Error: process with given ID doesn't exist.");
     }
 
     public static void printQueue()
@@ -109,7 +119,7 @@ public class virtualmemory
         {
             Shell.print(tmp.poll() + " ");
         }
-        Shell.println("%n");
+        Shell.println("\n");
     }
 
     public static void printProcessPages(int processID)
@@ -120,14 +130,14 @@ public class virtualmemory
         Vector<Vector<Byte>> pages = PageFile.get(processID);
         for(int i=0; i<pages.size(); i++)
         {
-            Shell.println("Page no."+i+"%n");
+            Shell.println("Page no."+i+"\n");
             for(int j=0; j<pages.get(i).size(); j++)
             {
                 Shell.println(String.format("%d", pages.get(i).get(j)));
             }
         }
-        Shell.println("%n");
-        } else Shell.println("Error: process with given ID doesn't exist."+"%n");
+        Shell.println("\n");
+        } else Shell.println("Error: process with given ID doesn't exist.");
     }
     public static void printPage(int processID, int pageID)
     {
@@ -148,7 +158,7 @@ public class virtualmemory
         Shell.println("#### Printing current RAM status ####");
         for(int i=0; i<16; i++)
         {
-            Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID+"%n");
+            Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID);
             Shell.println("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID);
         }
     }
@@ -164,10 +174,9 @@ public class virtualmemory
     static boolean pageExists(int procID, int pageID){
         return PageTables.get(procID).contains(pageID);
     }
-    // $#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$##$#$#$#$#$#$##$#$#$##$#$#$#$#$#$#$#$#$#$#$#$#$#$#$ //
 
     private
-    //Pojedynczy wpis w tablicy stronic
+    /**Single record in PageTable*/
     class PageEntry
     {
         boolean valid;
@@ -179,7 +188,7 @@ public class virtualmemory
         }
     }
 
-    //klasa pomocnicza aby sie orientowac co jest w ramie
+    /**Class that helps program to get info about what's inside of RAM*/
     class WhatsInside
     {
         int ProcessID;
@@ -190,18 +199,19 @@ public class virtualmemory
             this.ProcessID = -1;
         }
     }
-    //Pojedyncza tablica stron, vector pomocniczy w którym tymczasowo znajdują się stronu programu
-//    Vector<PageEntry> pageTable = new Vector<>();
 
-    //Plik wymiany
-    //inicjalizacja mapy PageFile, Integer to PID, a vec-vec to 2 wymiarowy wektor z programem
+    /**Initialisation of PageFile.
+     * Integer is processID
+     * 2-dimensional vector contains program code*/
     static Map<Integer, Vector<Vector<Byte>>> PageFile = new HashMap<>();
 
-    //Queue - kolejka w której są zawarte informacje o kolejnych stronach, które zostały umieszczone w ramie
-    //Element przydatny przy wymianie stronic na żądanie metodą FIFO
+    /**Map that contains all page tables that are: in use/RAM/not removed*/
+    static Map<Integer, Vector<PageEntry>>  PageTables = new HashMap<>();
+
+    /**Queue that contains the next victim to remove when RAM is full*/
     static Queue<Integer> victimQueue = new LinkedList<>();
 
-    //Tablica o rozmiarze 16 pozwalająca na kontrolowanie tego co jest w ramie
+   /**An array that contains information of what's in RAM atm*/
     static WhatsInside[] RamStatus = new WhatsInside[16];
     void setRamStatus()
     {
@@ -211,10 +221,10 @@ public class virtualmemory
         }
     }
 
-    //Funkcja dzieląca program na stronice, tworząca tablice stronic i umieszczająca je w odpowiednich wektorach
+    /**Method that is processing process. It prepares the process to use it, put in PageFile, create PageTable and send it to RAM*/
     void processProcessing(Process proc)
     {
-        Utils.log("Got process " + proc.processId + " that will be added to pageFile and pageTable %n");
+        Utils.log("Got process " + proc.processId + " that will be added to pageFile and pageTable");
         Vector<Vector<Byte>> program = new Vector<>(new Vector<>());
         Vector<PageEntry> pageTable = new Vector<>();
         int maxPageID = proc.code.size() / 16;
@@ -226,29 +236,24 @@ public class virtualmemory
             for (int j = 0; j < 16; j++)
             {
                 try {
-//                    Shell.print(String.format("%d", proc.code.get(j + currentPageID * 16)));
                     page.add(proc.code.get(j + currentPageID * 16));
                 }
                 catch (Exception ignored) {}
             }
-
             program.add(page);
         }
         putInfoToPageTable(proc.processId, pageTable);
-        Utils.log("Added process info: " + proc.processId + " to pageTable %n");
+        Utils.log("Added process info: " + proc.processId + " to pageTable");
         putProcessToPageFile (proc.processId, program);
-        Utils.log("Added process: " + proc.processId + " to pageFile %n");
+        Utils.log("Added process: " + proc.processId + " to pageFile");
     }
 
-    void startProcessZero(int procID)
-    {
-        putPageInRam(procID, 0);
-    }
-
+    /**Method that puts certain page in RAM*/
     static void putPageInRam(int procID, int pageID)
     {
         Vector <Byte> Page = PageFile.get(procID).get(pageID);
-        Utils.log("Putting page: " + pageID + " processID: " + procID + " to RAM %n");
+        Utils.log("Putting page: " + pageID + " processID: " + procID + " to RAM");
+        /**Checking if RAM is full*/
         if(victimQueue.size()<16)
         {
             for(int fID = 0; fID < 16; fID++)
@@ -257,82 +262,84 @@ public class virtualmemory
                 {
                     if(putPageIn(fID, Page))
                     {
-                        //If sent correctly modify all tables connected with status and pages
-                        //Updating pageTable and ram status
+                        /**If sent correctly modify all tables connected with status and pages
+                         * Updating pageTable and ramStatus*/
                         updatePageTables(procID, pageID, fID, true);
                         updateRamStatus(procID, pageID, fID);
                         victimQueue.add(fID);
-                        Utils.log("Page: " + pageID + " processID: " + procID + " had been put into RAM %n");
+                        Utils.log("Page: " + pageID + " processID: " + procID + " had been put into RAM ");
                         break;
                     }
                 }
             }
         }
-        //That means ram is full, need to kill some victims
+        /**That means ram is full, there is need to kill the victim*/
         else
         {
-            Utils.log("RAM is full, searching for victim...%n");
+            Utils.log("RAM is full, searching for victim...");
             int fID = findVictim();
             takePageOut(fID);
             if(putPageIn(fID, Page))
             {
-                //If sent correctly modify all tables connected with status and pages
-                //Updating pageTable and ram status
+                /**If sent correctly modify all tables connected with status and pages
+                 * Updating pageTable and ramStatus*/
                 updatePageTables(procID, pageID, fID, true);
                 updateRamStatus(procID, pageID, fID);
                 victimQueue.add(fID);
-                Utils.log("Page: " + pageID + " processID: " + procID + " had been put into RAM%n");
+                Utils.log("Page: " + pageID + " processID: " + procID + " had been put into RAM");
             }
         }
     }
 
+    /**Method that removes certain page from RAM*/
     static void takePageOut(int fID)
     {
-        //Funkcja, która zabiera ofiarę z ramu do pliku stronicowania
         Vector <Byte> page;
         page = Ram.readFrame(fID);
         int prID = RamStatus[fID].ProcessID;
         int pgID = RamStatus[fID].PageID;
-        Utils.log("Taking out victimPage from frame: " + fID+"%n");
+        Utils.log("Taking out victimPage from frame: " + fID);
         putPageInPageFile(pgID, prID, page);
         updatePageTables(prID, pgID, -1, false);
         updateRamStatus(-1, -1, fID);
     }
 
+    /**Method that puts certain page from pageFile into RAM*/
     static boolean putPageIn(int FrameID, Vector<Byte> Page)
     {
-        //Funkcja, która wprowadza stronicę do ramu z pliku stronicowania
-        Utils.log("Putting page in frame: " + FrameID +"%n");
+        Utils.log("Putting page in frame: " + FrameID);
         return Ram.write(Page, FrameID);
     }
 
+    /**Methods that update PageTables and RamStatus with specific changes*/
     static void updatePageTables(int procID, int pageID, int frameID, boolean value)
     {
-        Utils.log("Updating page table with: pageID: " + pageID +" frameID "+ frameID +"%n");
+        Utils.log("Updating page table with: pageID: " + pageID +" frameID "+ frameID);
         PageTables.get(procID).get(pageID).frame = frameID;
         PageTables.get(procID).get(pageID).valid = value;
     }
     static void updateRamStatus(int procID, int pageID, int fID)
     {
-        Utils.log("Updating RAMstatus with: processID: "+ procID +" pageID: " + pageID +" frameID "+ fID+"%n");
+        Utils.log("Updating RAMstatus with: processID: "+ procID +" pageID: " + pageID +" frameID "+ fID);
         RamStatus[fID].ProcessID = procID;
         RamStatus[fID].PageID = pageID;
     }
+
     void putProcessToPageFile(int pID, Vector<Vector<Byte>> pr)
     {
-        Utils.log("Putting process in PageFile, processID: " + pID+"%n");
+        Utils.log("Putting process in PageFile, processID: " + pID);
         PageFile.put(pID, pr);
     }
     static void putPageInPageFile(int pageID, int procID, Vector<Byte> page)
     {
-        Utils.log("Putting page in PageFile, processID: " + procID + " pageID: "+pageID+"%n");
+        Utils.log("Putting page in PageFile, processID: " + procID + " pageID: "+pageID);
         Vector<Vector<Byte>> tmp =  PageFile.get(procID);
         tmp.set(pageID, page);
         PageFile.put(procID, tmp);
     }
     void putInfoToPageTable(int pID, Vector<PageEntry> pT)
     {
-        Utils.log("Putting info into PageTable, processID: " + pID+"%n");
+        Utils.log("Putting info into PageTable, processID: " + pID);
         //Shell.println("Putting info into PageTable, processID: " + pID);
         PageTables.put(pID, pT);
     }
@@ -340,16 +347,4 @@ public class virtualmemory
     {
         return victimQueue.poll();
     }
-    // (wykorzystywane przez RAM) dostęp do tablicy stronic
-
-    public static int getFrame(int processID, int page) 
-    {
-        if (!PageTables.get(processID).get(page).valid)
-        {
-            demandPage(processID, page);
-        }
-        return PageTables.get(processID).get(page).frame;
-    }
-
-
 }
