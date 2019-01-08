@@ -117,7 +117,7 @@ public class Directories {
                 return;
             }
             currentDir = history.pop();
-        } else if (name.equals(ROOT_NAME)){
+        } else if (name.toLowerCase().equals(ROOT_NAME.toLowerCase())){
             history = new Stack<>();
             currentDir = rootDir;
 
@@ -139,7 +139,7 @@ public class Directories {
                 return;
             }
             targetDir = targetHistory.pop();
-        } else if (name.equals(ROOT_NAME)){
+        } else if (name.equals(ROOT_NAME.toLowerCase())){
             targetHistory = new Stack<>();
             targetDir = rootDir;
 
@@ -161,7 +161,7 @@ public class Directories {
                 return;
             }
             sourceDir = sourceHistory.pop();
-        } else if(name.equals(ROOT_NAME)){
+        } else if(name.equals(ROOT_NAME.toLowerCase())){
             sourceHistory = new Stack<>();
             sourceDir = rootDir;
         } else {
