@@ -55,8 +55,8 @@ public class Shell {
         HelpingTable.put("disk", "Displays the raw contents of a local disk.\n");
         CommandTable.put("file", Commands::file);
         HelpingTable.put("file", "Create and modify file.\n");
-        CommandTable.put("del", Commands::rm);
-        HelpingTable.put("del", "Deletes one or more files.\n");
+        CommandTable.put("rm", Commands::rm);
+        HelpingTable.put("rm", "Deletes one or more files.\n");
         CommandTable.put("rmdir", Commands::rmdir);
         HelpingTable.put("rmdir", "Removes a directory.\n");
         CommandTable.put("more", Commands::more);
@@ -91,6 +91,8 @@ public class Shell {
         HelpingTable.put("update", "Updates code of initial programs.\n");
 		CommandTable.put("lck", Commands::lck);
 		HelpingTable.put("lck", "empty.\n");
+		CommandTable.put("vm", Commands::vm);
+		HelpingTable.put("vm", "empty.\n");
         
         //Creating thread with input from console
         new Thread(() -> {

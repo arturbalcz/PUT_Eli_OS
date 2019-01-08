@@ -568,4 +568,48 @@ public interface Commands {
         if (args.size() > 1) Shell.println(help);
         else Lock.printLocks();
     }
+
+    /**
+     * Rzeczy do drukowania poszczególnych elementów w virtualmemory
+     * @param args
+     */
+    static void vm(ArrayList<String> args) {
+        String help = "Prints content of virtual memory containers\n\n" +
+                "pnv - print Next Victim\n" +
+                "prs - print Ram Status\n"+
+                "pq  - print Queue\n" +
+                "ppt [processID] - print PageTable\n" +
+                "ppp [processID] - print Process Pages\n" +
+                "pp  [processID] [pageID] - print Page\n";
+            String param = args.get(1);
+            try {
+                switch (param) {
+                    case "pnv":
+                        virtualmemory.virtualmemory.printNextVictim();
+                        break;
+                    case "prs":
+                        virtualmemory.virtualmemory.printRamStatus();
+                        break;
+                    case "pq":
+                        virtualmemory.virtualmemory.printQueue();
+                        break;
+                    case "ppt":
+                        virtualmemory.virtualmemory.printPageTable(Integer.parseInt(args.get(2)));
+                        break;
+                    case "ppp":
+                        virtualmemory.virtualmemory.printProcessPages(Integer.parseInt(args.get(2)));
+                        break;
+                    case "pp":
+                        virtualmemory.virtualmemory.printPage(Integer.parseInt(args.get(2)), Integer.parseInt(args.get(3)));
+                        break;
+                    default:
+                        Utils.log("Wrong argument");
+                        Shell.println(help);
+                        break;
+                }
+            } catch(NullPointerException e){
+                Shell.println("ERROR: " + e.getMessage());
+            }
+    }
 }
+

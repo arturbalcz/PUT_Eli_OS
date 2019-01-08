@@ -1,12 +1,19 @@
 package memory;
 
+import shell.Shell;
 import utils.Utils;
 import virtualmemory.virtualmemory;
-
 import java.util.Vector;
 
 public class Memory {
     private static byte[] memory = new byte[256];
+//    virtualmemory VM;
+
+
+    // połącz z pamięcią wirtualną
+//    public void GetReference(virtualmemory vm){
+//        VM = vm;
+//    }
 
 
     // zapisz całą stronę w wybranej ramce
@@ -15,7 +22,7 @@ public class Memory {
             return false;
         }
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < data.size(); i++) {
             memory[frame * 16 + i] = data.get(i);
         }
 
@@ -25,7 +32,7 @@ public class Memory {
 
 
     // zapisz pojedynczy bajt zgodnie z tablicą stronic danego procesu
-    void write(byte data, int processID, byte address) {
+    public void write(byte data, int processID, byte address) {
         // translacja adresu
         int page = (address & 0xf0) >>> 4;
         int offset = address & 0x0f;
@@ -55,13 +62,13 @@ public class Memory {
 
 
     // odczytaj zawartość całej ramki
-    public static Vector<Byte> read(int frame) {
+    public static Vector<Byte> readFrame(int frame) {
         Utils.log(String.format("reading page from frame %d", frame));
 
         // czytam z pamięci
         Vector<Byte> tmp = new Vector<Byte>();
         try {
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < 16; i++) {
                 tmp.add(memory[frame * 16 + i]);
             }
         }
@@ -73,13 +80,14 @@ public class Memory {
     }
 
     // odczytaj bajt spod adresu zgodnego z tablicą stronic danego procesu
-    byte read(int processID, byte address) {
+    public byte read(int processID, byte address) {
         // translacja adresu
-        int page = address & 0xf0;
+        int page = (address & 0xf0) >>> 4;
         int offset = address & 0x0f;
 
         // sprawdzam wartość w PageTable danego procesu
-        int frame = virtualmemory.getFrame(processID, page);
+        int frame;
+        frame = virtualmemory.getFrame(processID, page);
 
         // czytam z pamięci
         Utils.log(String.format("reading byte from address %d", frame * 16 + offset));
@@ -88,7 +96,7 @@ public class Memory {
 
 
     // odczytaj bajt z podanej komórki pamięci
-    byte read(int i) {
+    public byte read(int i) {
         Utils.log(String.format("reading byte from address %d", i));
 
         try {
@@ -105,12 +113,12 @@ public class Memory {
     // wyświetl surową zawartość pamięci
     void print() {
         for (int i = 0; i < 16; i++) {
-            System.out.printf("%n%d:", i);
+            Shell.print(String.format("%n%d:", i));
             for (int j = 0; j < 16; j++) {
-                System.out.printf(" %c", memory[i * 16 + j]);
+                Shell.print(String.format(" %c", memory[i * 16 + j]));
             }
         }
-        System.out.println();
+        Shell.println("");
 
         Utils.log("showing raw contents of RAM");
     }
