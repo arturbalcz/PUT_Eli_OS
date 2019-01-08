@@ -1,6 +1,7 @@
 package filesystem;
 
 import shell.Shell;
+import utils.Utils;
 
 import java.util.Vector;
 
@@ -32,8 +33,23 @@ public class Directory {
         return dirs;
     }
 
+    public boolean directoryExists(String name) {
+        for (Directory e : dirs) {
+            if (e.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addDirectory(String name){
+        if(directoryExists(name)){
+            Shell.println("Directory " + name + " already exists");
+            Utils.log("Directory " + name + " already exists");
+            return;
+        }
         dirs.add(new Directory(name));
+
     }
 
     public Files getFiles() {
