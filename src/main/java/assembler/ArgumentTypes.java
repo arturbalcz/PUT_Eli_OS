@@ -24,7 +24,7 @@ public enum ArgumentTypes {
         return types;
     }
 
-    static boolean validateArg(final String arg, ArgumentTypes[] types) {
+    static boolean validateArg(final String arg, final ArgumentTypes[] types, final int lets) {
         boolean valid = false;
 
         for(ArgumentTypes i : types) {
@@ -36,7 +36,8 @@ public enum ArgumentTypes {
                     if(ArgumentTypes.isRegistry(arg)) valid = true;
                     break;
                 case MEMORY:
-                    if(ArgumentTypes.isMemory(arg)) valid = true;
+                    if(ArgumentTypes.isMemory(arg))
+                        if (Integer.parseInt(arg.substring(1, arg.length()-1), 16) <= lets) valid = true;
                     break;
                 case VALUE:
                     if(ArgumentTypes.isValue(arg)) valid = true;
