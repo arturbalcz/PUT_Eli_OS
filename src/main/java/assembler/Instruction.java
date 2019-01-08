@@ -417,7 +417,7 @@ abstract class Instruction {
      * @param assembler assembler witch compiles given instruction
      * @throws Exception when validation error occurs
      */
-    static void validate(final String line, Assembler assembler) throws Exception {
+    static void validate(final String line, final Assembler assembler, final int lets) throws Exception {
         List<String> pieces = Instruction.getPieces(line);
 
         final boolean hasLabel = pieces.get(0).endsWith(":");
@@ -442,7 +442,7 @@ abstract class Instruction {
             if(instruction.getArgTypes()[i-1].length == 1 && instruction.getArgTypes()[i-1][0] == ArgumentTypes.LABEL) {
                 if(!assembler.hasLabel(pieces.get(i))) throw new Exception("Label not declared: " + pieces.get(i));
             }
-            else if(!ArgumentTypes.validateArg(pieces.get(i), instruction.getArgTypes()[i-1]))
+            else if(!ArgumentTypes.validateArg(pieces.get(i), instruction.getArgTypes()[i-1], lets))
                 throw new Exception("Invalid " + i + ". argument: " + pieces.get(i) + " for " + instruction.name);
         }
     }
