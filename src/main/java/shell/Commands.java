@@ -607,7 +607,7 @@ public interface Commands {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else try {
-            Directories.getCurrentDir().tree(0);
+            Directories.getCurrentDir().new_tree("", true, true);
         } catch (IndexOutOfBoundsException e) {
             Shell.println("Invalid index");
         }
