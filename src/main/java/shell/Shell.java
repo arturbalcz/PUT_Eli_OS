@@ -82,7 +82,7 @@ public class Shell {
         CommandTable.put("lp", Commands::lp);
         HelpingTable.put("lp", "Displays all tasks.\n");
         CommandTable.put("tasklist", Commands::tasklist);
-        HelpingTable.put("tasklist", "Displays tasks.\n\nTAKSLIST [/N name][/S stateName]\n\n\t/N\tname\t\tSpecifies the name of displayed processes\n\t/S\tstateName\tSpecifies the state of displayed processes\n");
+        HelpingTable.put("tasklist", "Displays a list of currently running processes.\n\nTAKSLIST [/N name][/S stateName]\n\n\t/N\tname\t\tSpecifies the name of displayed processes\n\t/S\tstateName\tSpecifies the state of displayed processes\n");
         CommandTable.put("rp", Commands::rp);
         HelpingTable.put("rp", "Displays all currently running tasks.\n");
         CommandTable.put("dp", Commands::dp);
@@ -90,9 +90,9 @@ public class Shell {
         CommandTable.put("update", Commands::update);
         HelpingTable.put("update", "Updates code of initial programs.\n");
 		CommandTable.put("lck", Commands::lck);
-		HelpingTable.put("lck", "empty.\n");
+		HelpingTable.put("lck", "Prints locks.\n");
 		CommandTable.put("vm", Commands::vm);
-		HelpingTable.put("vm", "empty.\n");
+		HelpingTable.put("vm", "Prints content of virtual memory containers.\n\npnv - print Next Victim\nprs - print Ram Status\npq  - print Queue\nppt [processID] - print PageTable\nppp [processID] - print Process Pages\npp  [processID] [pageID] - print Page\n");
         
         //Creating thread with input from console
         new Thread(() -> {
@@ -121,7 +121,14 @@ public class Shell {
         }).start();
     }
 
+    /**
+     * Turns printing on
+     */
     public static void echoOn() { echo = true; }
+
+    /**
+     * Turns printing off
+     */
     public static void echoOff() { echo = false; }
 
     /**
@@ -141,7 +148,7 @@ public class Shell {
     }
 
     /**
-     * Tries to get from console whole line inserted by user
+     * Tries once to get from console whole line inserted by user.
      * @return input from user
      */
     private static String readOnce() throws IOException {
@@ -161,6 +168,10 @@ public class Shell {
         return mes;
     }
 
+    /**
+     * Tries to get from console whole line inserted by user until finally get it.
+     * @return input from user
+     */
     public static String read() {
         String result = "";
         while(result.isEmpty()) {
