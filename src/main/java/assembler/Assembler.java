@@ -102,7 +102,7 @@ public class Assembler {
                 if(!ArgumentTypes.isValue(line[1])) throw new Exception("static storage must be allocated with hex value");
             }
 
-            for (; i < commands.length; i++) Instruction.validate(commands[i], this);
+            for (; i < commands.length; i++) Instruction.validate(commands[i], this, i);
         } catch (Exception e) {
             System.out.println(e.getMessage() + " at line " + (i+1));
             Utils.log("not valid");
@@ -145,11 +145,12 @@ public class Assembler {
      *
      * @param pcb {@link PCB} of process with instruction to execute
      */
-    public static void execute(PCB pcb) {
+    public static void execute(final PCB pcb) {
         byte address = pcb.getPC();
         Utils.log("executing instruction at " + address + " from " + pcb.name);
 
-        Instruction instruction = Instruction.getByCode(pcb.getByteAt(address++));
+        final byte code = pcb.getByteAt(address++);
+        Instruction instruction = Instruction.getByCode(code);
 
         List<Byte> argsList = new ArrayList<>();
         if(instruction.argsNumber > 0) {

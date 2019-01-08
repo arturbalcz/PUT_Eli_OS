@@ -68,7 +68,7 @@ public class Utils {
     public static void loggingOn() { Utils.logging = true; }
 
     /**
-     * Turns logging on
+     * Turns logging off
      */
     public static void loggingOff() { Utils.logging = false; }
 
@@ -78,7 +78,7 @@ public class Utils {
     public static void stepOn() { Utils.stepping = true; }
 
     /**
-     * Turns step work on
+     * Turns step work off
      */
     public static void stepOff() { Utils.stepping = false; }
 
