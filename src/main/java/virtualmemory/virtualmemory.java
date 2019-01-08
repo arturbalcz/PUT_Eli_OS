@@ -104,9 +104,10 @@ public class virtualmemory
         if(processExists(processID))
         {
        Shell.println("#### Printing page table, process ID: " + processID + " ####");
+            Shell.println("Page\tframe\tvalid");
         for(int i=0; i<PageTables.get(processID).size(); i++)
         {
-            Shell.println("Page no."+ i + " " + PageTables.get(processID).get(i).frame + " " + PageTables.get(processID).get(i).valid);
+            Shell.println(i + "   \t" + PageTables.get(processID).get(i).frame + "   \t" + PageTables.get(processID).get(i).valid);
         }
         } else Shell.println("Error: process with given ID doesn't exist.");
     }
@@ -119,7 +120,7 @@ public class virtualmemory
         {
             Shell.print(tmp.poll() + " ");
         }
-        Shell.println("\n");
+        Shell.println("");
     }
 
     public static void printProcessPages(int processID)
@@ -130,10 +131,10 @@ public class virtualmemory
         Vector<Vector<Byte>> pages = PageFile.get(processID);
         for(int i=0; i<pages.size(); i++)
         {
-            Shell.println("Page no."+i+"\n");
+            Shell.println("Page no."+i);
             for(int j=0; j<pages.get(i).size(); j++)
             {
-                Shell.println(String.format("%d", pages.get(i).get(j)));
+                Shell.print(String.format("%d", pages.get(i).get(j))+"\t");
             }
         }
         Shell.println("\n");
@@ -148,8 +149,9 @@ public class virtualmemory
             Shell.println("#### Printing process page, process ID: " + processID + "\t pageID: " + pageID + " ####");
             for(int j=0; j<PageFile.get(processID).get(pageID).size(); j++)
                 {
-                 Shell.println(String.format("%d",PageFile.get(processID).get(pageID).get(j)));
+                 Shell.print(String.format("%d",PageFile.get(processID).get(pageID).get(j))+"\t");
                 }
+            Shell.println("");
             } else Shell.println("Error: page with given ID doesn't exist.");
         } else Shell.println("Error: process with given ID doesn't exist.");
     }
@@ -164,15 +166,21 @@ public class virtualmemory
     }
     public static void printNextVictim()
     {
-        Shell.println("#### Printing next victim page ####");
+        Shell.println("#### Printing next victim frame ####");
         Shell.println(String.format("%d",victimQueue.peek()));
     }
     static boolean processExists(int procID){
-        return PageFile.containsValue(procID);
+        return PageFile.containsKey(procID);
     }
 
     static boolean pageExists(int procID, int pageID){
-        return PageTables.get(procID).contains(pageID);
+
+        try{
+            PageTables.get(procID).get(pageID);
+            System.out.println(PageTables.get(procID).get(pageID));
+            return true;
+        }  catch (Exception ignored) {}
+        return false;
     }
 
     private
