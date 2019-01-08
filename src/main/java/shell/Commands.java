@@ -12,35 +12,30 @@ import utils.Utils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Stores implementation of every shell command with dependencies on external modules
  * <p>Every method should consume exactly one argument {@code ArrayList<String> args}.
  * For using your command checkout {@link Shell#CommandTable}</p>
+ *
  * @see Shell
  */
 public interface Commands {
 
-    /** updates code of initial programs */
-    static void update(ArrayList<String> args) {
-        OS.updateInitialFiles();
-    }
+    /* shell commands */
 
     /**
-     * Turns logging on or off
-     * @param args "on" or "off"
+     * Turns logging on or off.
+     *
+     * @param args parameters list to handle by command
      */
     static void logging(ArrayList<String> args) {
-        String help = "Turns logging on or off\n\n" +
-                "LOG [/ON][/OFF]\n";
-        if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() != 2) {
+            Utils.log("Commands.logging(): Wrong numbers of arguments");
             Shell.println(help);
-        }
-        else {
+        } else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
                 case "/ON":
@@ -50,7 +45,6 @@ public interface Commands {
                     Utils.loggingOff();
                     break;
                 default:
-                    Utils.log("Wrong argument");
                     Shell.println(help);
                     break;
             }
@@ -58,17 +52,16 @@ public interface Commands {
     }
 
     /**
-     * Turns step work on or off
-     * @param args "on" or "off"
+     * Turns step work on or off.
+     *
+     * @param args parameters list to handle by command
      */
     static void stepping(ArrayList<String> args) {
-        String help = "Turns step work on or off\n\n" +
-                "STEP [/ON][/OFF]\n";
-        if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() != 2) {
+            Utils.log("Commands.stepping(): Wrong numbers of arguments");
             Shell.println(help);
-        }
-        else {
+        } else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
                 case "/ON":
@@ -78,7 +71,7 @@ public interface Commands {
                     Utils.stepOff();
                     break;
                 default:
-                    Utils.log("Wrong argument");
+                    //Utils.log("Commands.stepping(): Wrong argument");
                     Shell.println(help);
                     break;
             }
@@ -86,11 +79,12 @@ public interface Commands {
     }
 
     /**
-     * Prints time to user console
-     * @param args no effect
+     * Prints time to user console.
+     *
+     * @param args parameters list to handle by command
      */
     static void time(ArrayList<String> args) {
-        String help = "Prints time to user console\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if (args.size() == 2 && args.get(1).equals("/?")) {
             Shell.println(help);
             return;
@@ -102,42 +96,72 @@ public interface Commands {
     }
 
     /**
-     * Prints all available commends
-     * @param args no effect
+     * Prints all available commends or help for specified command.
+     *
+     * @param args parameters list to handle by command
      */
     static void help(ArrayList<String> args) {
-        Set<String> keys = Shell.CommandTable.keySet();
-        Utils.log("Printing help for user.");
-        for (String command : keys) {
-            Shell.println(command.toUpperCase());
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() > 2) Shell.println(help);
+        else if (args.size() == 2) {
+            String command = args.get(1);
+            if (Shell.CommandTable.get(command) == null) {
+                //if not found
+                Shell.println("This command is not supported by the help utility.  Try \"" + command + " /?\".");
+            } else {
+                try {
+                    Shell.println(Shell.HelpingTable.get(command));
+                } catch (IndexOutOfBoundsException e) {
+                    Utils.log("Commands.help(): HelpingTable::IndexOutOfBoundsException::" + command, true);
+                    Shell.println("invalid number of arguments");
+                }
+            }
+        } else {
+            List<String> sortedKeys = new ArrayList<>(Shell.CommandTable.keySet());
+            Collections.sort(sortedKeys);
+            int elementsOfHelp = 0;
+            for (String command : sortedKeys) {
+                Shell.print(String.format("%-12s", command.toUpperCase()));
+                //if (command.length() < 4) Shell.print("\t\t");
+                //Shell.print("\t");
+                String commandHelp = Shell.HelpingTable.get(command);
+                int endIndex = commandHelp.indexOf('\n');
+                Shell.println(commandHelp.substring(0, endIndex));
+                elementsOfHelp++;
+            }
+            Shell.println("");
+            Utils.log("Commands.help(): elementsOfHelp=" + elementsOfHelp);
         }
     }
 
     /**
-     * Exits from system
-     * @param args no effect
+     * Exits from system.
+     *
+     * @param args parameters list to handle by command
      */
     static void exit(ArrayList<String> args) {
-        String help = "Quits the system.\n";
-        if (args.size() > 2) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() > 2 || (args.size() == 2 && args.get(1).equals("help"))) {
             Shell.println(help);
             return;
-        }
-        else if (args.size() == 2 && args.get(1).equals("t")) Utils.stepOff();
+        } else if (args.size() == 2 && args.get(1).equals("t")) Utils.stepOff();
         else Utils.stepOn();
 
-        Utils.log("Exiting by user");
+        Utils.log("Commands.exit(): Exiting by user");
         Shell.exiting = true;
     }
 
+    /**
+     * Turns printing on or off.
+     *
+     * @param args parameters list to handle by command
+     */
     static void echo(ArrayList<String> args) {
-        String help = "Turns printing on or off\n\n" +
-                "ECHO [/ON][/OFF]\n";
-        if(args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() != 2) {
+            Utils.log("Commands.echo(): Wrong numbers of arguments");
             Shell.println(help);
-        }
-        else {
+        } else {
             String param = args.get(1);
             switch (param.toUpperCase()) {
                 case "/ON":
@@ -147,7 +171,7 @@ public interface Commands {
                     Shell.echoOff();
                     break;
                 default:
-                    Utils.log("Wrong argument");
+                    //Utils.log("Wrong argument");
                     Shell.println(help);
                     break;
             }
@@ -155,22 +179,149 @@ public interface Commands {
     }
 
     /**
-     * Used for testing shell
-     * @param args anything but {@code null}
+     * Displays a list of currently running processes.
+     *
+     * @param args parameters list to handle by command
      */
-    static void test(ArrayList<String> args) {
-        Utils.step("step work is working" + args.get(1));
-        Utils.log("log is working" +  args.get(1));
-        Shell.println("command is working " + args.get(1));
+    static void tasklist(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        boolean isStateFiltered = false, isNameFiltered = false;
+        String stateFilter = "", nameFilter = "";
+
+        if (args.size() > 5) {
+            Shell.println(help);
+            return;
+        } else if (args.size() == 5) {
+            if (args.get(1).toUpperCase().equals("/N")) {
+                isNameFiltered = true;
+                nameFilter = args.get(2).toUpperCase();
+                if (args.get(3).toUpperCase().equals("/S")) {
+                    isStateFiltered = true;
+                    stateFilter = args.get(4).toUpperCase();
+                } else {
+                    //error of second argument
+                    Shell.println("Wrong arguments");
+                    return;
+                }
+            } else {
+                //error of first argument
+                Shell.println("Wrong arguments");
+                return;
+            }
+        } else if (args.size() == 3) {
+            switch (args.get(1).toUpperCase()) {
+                case "/N":
+                    isNameFiltered = true;
+                    nameFilter = args.get(2).toUpperCase();
+                    break;
+                case "/S":
+                    isStateFiltered = true;
+                    stateFilter = args.get(2).toUpperCase();
+                    break;
+                default:
+                    Shell.println(help);
+                    return;
+            }
+        } else if (args.size() == 2) {
+            if (args.get(1).toUpperCase().equals("/S")) {
+                Shell.println("You need to specified name of state you want filter");
+            } else {
+                Shell.println(help);
+            }
+            return;
+        }
+
+        String alignFormat = "| %-15s | %4d | %-8s | %4d | %4d | %4d | %4d | %4d |";
+        String header = "|-----------------|------|----------|------|------|------|------|------|\n" +
+                "| Name            |  PID | State    | Base |  Dyn |   PC |   RT |   EO |\n" +
+                "|-----------------|------|----------|------|------|------|------|------|\n";
+
+        Shell.print(header);
+        for (PCB entry : PCBList.list.getData()) {
+            String name = entry.getName();
+            if (isNameFiltered) {
+                if (!name.toUpperCase().equals(nameFilter)) {
+                    continue;
+                }
+            }
+            int pid = entry.getPID();
+            String state = entry.getProcessState().toString();
+            if (isStateFiltered) {
+                if (!state.toUpperCase().equals(stateFilter)) {
+                    continue;
+                }
+            }
+            int basePriority = entry.getBasePriority();
+            int dynamicPriority = entry.getDynamicPriority();
+            int pc = entry.getPC();
+            int readyTime = entry.getReadyTime();
+            int executeOrders = entry.getExecutedOrders();
+            String res = String.format(alignFormat, name, pid, state, basePriority, dynamicPriority, pc, readyTime, executeOrders);
+            Shell.println(res);
+        }
+        Shell.println("|-----------------|------|----------|------|------|------|------|------|\n");
+
     }
 
     /**
-     * Compiles given program
-     * @param args asm program to compile
+     * Used for testing shell.
+     *
+     * @param args parameters list to handle by command
+     */
+    static void test(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.get(1).equals("/?")) {
+            Shell.println(help);
+            return;
+        }
+        Utils.step("Commands.test(): step work is working" + args.get(1));
+        Utils.log("Commands.test(): log is working" + args.get(1));
+        Shell.println("command is working " + args.get(1));
+
+    }
+
+    /**
+     * Checks if current user input isn't local executable file.
+     *
+     * @param args parameters list to handle by command
+     * @return true if the file was found and started
+     */
+    static boolean localExe(ArrayList<String> args) {
+        String inputFromInterpret = args.get(0);
+        Utils.log("Commands.localEXE(): inputFromInterpret=" + inputFromInterpret);
+        String fileName = Directories.path(inputFromInterpret);
+        Utils.log("Commands.localEXE(): fileName=" + fileName);
+        if (!fileName.matches("\\w+\\.\\w+")) {
+            fileName = fileName + ".exe";
+            inputFromInterpret = inputFromInterpret + ".exe";
+            Utils.log("Commands.localEXE(): no extension; adding \".exe\"; inputFromInterpret=" + inputFromInterpret);
+        }
+        if (Directories.getTargetDir().getFiles().fileExists(fileName)) {
+            String[] file = fileName.split("\\.");
+            Utils.log("Commands.localEXE(): file found, creating process \'" + file[0] + "\'");
+            if (file[1].equals("exe")) {
+                ArrayList<String> arga = new ArrayList<>();
+                arga.add("cp");
+                arga.add(inputFromInterpret);
+                arga.add(file[0]);
+                arga.add("7");
+                Utils.log("Commands.localEXE(): arga=" + arga.toString());
+                cp(arga);
+                return true;
+            } else return false;
+        }
+        return false;
+    }
+
+    /* assembler commands */
+
+    /**
+     * Compiles given program.
+     *
+     * @param args parameters list to handle by command
      */
     static void com(ArrayList<String> args) {
-        String help = "Compiles given program\n\n" +
-                "COM filename\n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if (args.size() == 1) Shell.println("no program file specified");
         if (args.get(1).equals("/?")) Shell.println(help);
         else {
@@ -180,57 +331,92 @@ public interface Commands {
             Assembler assembler = new Assembler();
             final byte[] exec = assembler.compile(code);
             if (exec == null) Shell.println("compilation failed");
-            else Directories.getCurrentDir().getFiles().createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec); //error, non-static method in static context
+            else
+                Directories.getCurrentDir().getFiles().createFile(fileName.substring(0, fileName.indexOf(".")) + ".exe", exec); //error, non-static method in static context
         }
     }
 
     /**
-     * Creates process with given program, name and priority
-     * @param args name of .exe file
+     * updates code of initial programs
+     *
+     * @param args parameters list to handle by command
+     */
+    static void update(ArrayList<String> args) {
+        OS.updateInitialFiles();
+    }
+
+    /* processes commands */
+
+    /**
+     * Creates process with given program, name and priority.
+     *
+     * @param args parameters list to handle by command
      */
     static void cp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+
         if (args.size() != 4) Shell.println("invalid number of arguments");
 
-        final byte[] exec = Directories.getCurrentDir().getFiles().getFileClean(args.get(1)); //error, non-static method in static context
+        String fileName = Directories.path(args.get(1));
+        final byte[] exec = Directories.getTargetDir().getFiles().getFileClean(fileName);
         if (exec[0] == -1) Shell.println("Program does not exist");
         else PCBList.list.newProcess(args.get(2), Integer.parseInt(args.get(3)), exec);
     }
 
     /**
-     * List all processes
+     * List all processes.
+     *
+     * @param args parameters list to handle by command
      */
     static void lp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         PCBList.list.print();
     }
 
+
     /**
-     * List ready processes
+     * List ready processes.
+     *
+     * @param args parameters list to handle by command
      */
     static void lpq(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         PCBList.list.processor.printQueue();
     }
 
     /**
-     * Prints running process
+     * Prints running process.
+     *
+     * @param args parameters list to handle by command
      */
     static void rp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         Shell.println(PCBList.list.processor.getRunningProcess().toString());
     }
 
     /**
-     * Deletes selected process
+     * Deletes selected process.
+     *
+     * @param args parameters list to handle by command
      */
     static void dp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
         final int processId = Integer.parseInt(args.get(1));
         final PCB process = PCBList.list.findByPID(processId);
         if (process != null) PCBList.list.processor.removeProcess(process);
         else Shell.println("process does not exist");
     }
 
-	/* filesystem commands */
-	
-	static void file(ArrayList<String> args) {
-        String help = "FILE - create and modify files \n";
+    /* filesystem commands */
+
+    /**
+     * Create and modify file.
+     *
+     * @param args parameters list to handle by command
+     */
+    static void file(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        //String help = "FILE - create and modify files \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -253,8 +439,14 @@ public interface Commands {
 
     }
 
+    /**
+     * Displays the contents of a text file.
+     *
+     * @param args parameters list to handle by command
+     */
     static void more(ArrayList<String> args) {
-        String help = "MORE - print file content \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+        //String help = "MORE - print file content \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -273,33 +465,47 @@ public interface Commands {
         }
     }
 
+    /**
+     * Displays a list of files and subdirectories in a directory.
+     *
+     * @param args parameters list to handle by command
+     */
     static void dir(ArrayList<String> args) {
-        String help = "DIR - print directory content \n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if (args.size() != 1) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else {
+            String path = Directories.getPath();
+            Shell.println("\n Directory of " + path + "\n");
             Vector<Directory> dirs = Directories.getCurrentDir().getDirectories();
             if (dirs != null) {
                 for (Directory e : dirs) {
                     if (e != null) {
-                        Shell.println("<dir>\t" + e.getName());
+                        Shell.println("<DIR>\t\t" + e.getName());
                     }
                 }
                 Directories.getCurrentDir().getFiles().showFiles();
             }
+            Shell.println("");
         }
     }
 
+    /**
+     * Copies one files to another location.
+     *
+     * @param args parameters list to handle by command
+     */
     static void copy(ArrayList<String> args) {
-        String help = "COPY - copies file \n" +
-                "   COPY [source] [target]";
+        String help = Shell.HelpingTable.get(args.get(0));
+//        String help = "COPY - copies file \n" +
+//                "   COPY [source] [target]";
         if (args.size() != 3) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
         } else try {
             String[] name = Directories.path(args.get(2), args.get(1));
-            if( !Directories.getSourceDir().getFiles().fileExists(name[1]) ){
+            if (!Directories.getSourceDir().getFiles().fileExists(name[1])) {
                 Shell.println("No source file named " + name[1]);
                 return;
             }
@@ -308,9 +514,15 @@ public interface Commands {
             Shell.println("Cant copy file");
         }
     }
-	
-	static void rm(ArrayList<String> args) {
-        String help = "RM - remove file \n";
+
+    /**
+     * Deletes one or more files.
+     *
+     * @param args parameters list to handle by command
+     */
+    static void rm(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        //String help = "RM - remove file \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -322,8 +534,14 @@ public interface Commands {
         }
     }
 
+    /**
+     * Removes a directory.
+     *
+     * @param args parameters list to handle by command
+     */
     static void rmdir(ArrayList<String> args) {
-        String help = "RM - remove file \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+        //String help = "RM - remove file \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -335,8 +553,14 @@ public interface Commands {
         }
     }
 
+    /**
+     * Creates a directory.
+     *
+     * @param args parameters list to handle by command
+     */
     static void mkdir(ArrayList<String> args) {
-        String help = "MKDIR - creates a directory \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+        //String help = "MKDIR - creates a directory \n";
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -348,23 +572,37 @@ public interface Commands {
         }
     }
 
+    /**
+     * Displays the name of or changes the current directory.
+     *
+     * @param args parameters list to handle by command
+     */
     static void cd(ArrayList<String> args) {
-        String help = "CD - changes current directory \n";
-        if (args.size() != 2) {
-            Utils.log("Wrong numbers of arguments");
-            Shell.println(help);
-        } else try {
-            String[] path = args.get(1).split("[/]");
-            for (String e : path) {
-                Directories.setCurrentDir(e);
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() < 2) {
+            String path = Directories.getPath();
+            Shell.println(path + "\n");
+        } else {
+            if (args.get(1).equals("/?")) Shell.println(help);
+            else try {
+                String[] path = args.get(1).split("[\\\\/]");
+                for (String e : path) {
+                    Directories.setCurrentDir(e);
+                }
+            } catch (IndexOutOfBoundsException e) {
+                Shell.println("Invalid index");
             }
-        } catch (IndexOutOfBoundsException e) {
-            Shell.println("Invalid index");
         }
     }
 
+    /**
+     * Graphically displays the directory structure of a drive or path.
+     *
+     * @param args parameters list to handle by command
+     */
     static void tree(ArrayList<String> args) {
-        String help = "TREE - displays all directories \n";
+        String help = Shell.HelpingTable.get(args.get(0));
+        //String help = "TREE - displays all directories \n";
         if (args.size() != 1) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -375,8 +613,13 @@ public interface Commands {
         }
     }
 
+    /**
+     * Opens editor with given file.
+     *
+     * @param args parameters list to handle by command
+     */
     static void edit(ArrayList<String> args) {
-        String help = "EDIT - append content to file \n";
+        String help = Shell.HelpingTable.get(args.get(0));
         if (args.size() != 2) {
             Utils.log("Wrong numbers of arguments");
             Shell.println(help);
@@ -412,51 +655,58 @@ public interface Commands {
         }
     }
 
-    static void lck(ArrayList<String> args) {
-        Lock.printLocks();
-    }
+    /* sync commands */
 
     /**
-     * Rzeczy do drukowania poszczególnych elementów w virtualmemory
-     * @param args
+     * Prints locks.
+     *
+     * @param args parameters list to handle by command
+     */
+    static void lck(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() > 1) Shell.println(help);
+        else Lock.printLocks();
+    }
+
+    /* vm commands */
+
+    /**
+     * Prints content of virtual memory containers.
+     *
+     * @param args parameters list to handle by command
      */
     static void vm(ArrayList<String> args) {
-        String help = "Prints content of virtual memory containers\n\n" +
-                "pnv - print Next Victim\n" +
-                "prs - print Ram Status\n"+
-                "pq  - print Queue\n" +
-                "ppt [processID] - print PageTable\n" +
-                "ppp [processID] - print Process Pages\n" +
-                "pp  [processID] [pageID] - print Page\n";
-            String param = args.get(1);
-            try {
-                switch (param) {
-                    case "pnv":
-                        virtualmemory.virtualmemory.printNextVictim();
-                        break;
-                    case "prs":
-                        virtualmemory.virtualmemory.printRamStatus();
-                        break;
-                    case "pq":
-                        virtualmemory.virtualmemory.printQueue();
-                        break;
-                    case "ppt":
-                        virtualmemory.virtualmemory.printPageTable(Integer.parseInt(args.get(2)));
-                        break;
-                    case "ppp":
-                        virtualmemory.virtualmemory.printProcessPages(Integer.parseInt(args.get(2)));
-                        break;
-                    case "pp":
-                        virtualmemory.virtualmemory.printPage(Integer.parseInt(args.get(2)), Integer.parseInt(args.get(3)));
-                        break;
-                    default:
-                        Utils.log("Wrong argument");
-                        Shell.println(help);
-                        break;
-                }
-            } catch(NullPointerException e){
-                Shell.println("ERROR: " + e.getMessage());
+        String help = Shell.HelpingTable.get(args.get(0));
+        String param = args.get(1);
+        try {
+            switch (param) {
+                case "pnv":
+                    virtualmemory.virtualmemory.printNextVictim();
+                    break;
+                case "prs":
+                    virtualmemory.virtualmemory.printRamStatus();
+                    break;
+                case "pq":
+                    virtualmemory.virtualmemory.printQueue();
+                    break;
+                case "ppt":
+                    virtualmemory.virtualmemory.printPageTable(Integer.parseInt(args.get(2)));
+                    break;
+                case "ppp":
+                    virtualmemory.virtualmemory.printProcessPages(Integer.parseInt(args.get(2)));
+                    break;
+                case "pp":
+                    virtualmemory.virtualmemory.printPage(Integer.parseInt(args.get(2)), Integer.parseInt(args.get(3)));
+                    break;
+                default:
+                    Utils.log("Wrong argument");
+                    Shell.println(help);
+                    break;
             }
+        } catch (NullPointerException e) {
+            Utils.log(e.getMessage(), true);
+            Shell.println("ERROR: " + e.getMessage());
+        }
     }
 }
 
