@@ -36,10 +36,10 @@ public class Lock {
     /** initilize locked which is open */
     private boolean locked;
 
-    /** kolejka uzywana do lock */
+    /**queue which is used to the locks */
     private List<processess.PCB> kolejka = new LinkedList<>();
 
-    //* kolejka uzywana do contitional
+    /** queue which is used to the condition variable */
     private List<processess.PCB> Conditional=new LinkedList<>();
 
     private final String name;
@@ -89,13 +89,13 @@ public class Lock {
     }
 
     // @param function wait stop the process which has to wait and the move it to the queed
-    void wait(PCB proces)
+    private void wait(PCB proces)
     {
         proces.setState(ProcessState.WAITING);
         Conditional.add(proces);
         locked=false;
     }
-    void signal()
+    private void signal()
     {
         if(!Conditional.isEmpty())
         {
