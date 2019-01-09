@@ -43,9 +43,9 @@ public class Memory {
     // wyświetl surową zawartość pamięci
     public static void print() {
         for (int i = 0; i < 16; i++) {
-            Shell.print(String.format("%n%d:", i));
+            Shell.print(String.format("%n%2d:", i));
             for (int j = 0; j < 16; j++) {
-                Shell.print(String.format(" %c", memory[i * 16 + j]));
+                Shell.print(String.format(" %2d", memory[i * 16 + j]));
             }
         }
         Shell.println("");
