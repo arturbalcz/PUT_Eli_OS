@@ -1,17 +1,12 @@
 package shell;
 
 import filesystem.Directories;
-import filesystem.Directory;
 import filesystem.Disk;
 import utils.Utils;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Queue;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
@@ -25,17 +20,16 @@ public class Shell {
 
     private static final int READ_TIMEOUT = 1000;
     private static final PrintStream standardOut = System.out;
-    private static Queue<String> threadedInput = new ConcurrentLinkedQueue<>();
     static boolean exiting = false;
-    private static boolean empty = true;
-    private static boolean echo = false;
-
     /**
      * Main map that stores all of connected commends and methods references
      * Method need to have ArrayList<String> as array of parameters from user
      */
     static HashMap<String, Consumer<ArrayList<String>>> CommandTable = new HashMap<>();
     static HashMap<String, String> HelpingTable = new HashMap<>();
+    private static Queue<String> threadedInput = new ConcurrentLinkedQueue<>();
+    private static boolean empty = true;
+    private static boolean echo = false;
 
     static {
         CommandTable.put("time", Commands::time);
@@ -94,6 +88,8 @@ public class Shell {
         HelpingTable.put("lck", "Prints locks.\n");
         CommandTable.put("vm", Commands::vm);
         HelpingTable.put("vm", "Prints content of virtual memory containers.\n\npnv - print Next Victim\nprs - print Ram Status\npq  - print Queue\nppt [processID] - print PageTable\nppp [processID] - print Process Pages\npp  [processID] [pageID] - print Page\n");
+        CommandTable.put("memory", Commands::memory);
+        HelpingTable.put("memory", "Prints raw content of RAM.\n");
 
         //Creating thread with input from console
         new Thread(() -> {
@@ -194,7 +190,6 @@ public class Shell {
 
     /**
      * Interprets user input and run method found in {@link #CommandTable}
-     *
      * @return condition to close system
      */
     public static boolean interpret() throws IOException {

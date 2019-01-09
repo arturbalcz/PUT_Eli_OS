@@ -4,15 +4,20 @@ import assembler.Assembler;
 import filesystem.Directories;
 import filesystem.Directory;
 import filesystem.Files;
+import memory.Memory;
 import os.OS;
 import processess.PCB;
 import processess.PCBList;
 import synchronization.Lock;
 import utils.Utils;
+import virtualmemory.virtualmemory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * Stores implementation of every shell command with dependencies on external modules
@@ -24,6 +29,12 @@ import java.util.*;
 public interface Commands {
 
     /* shell commands */
+
+    static boolean printHelp(ArrayList<String> args) {
+        String help = Shell.HelpingTable.get(args.get(0));
+        if (args.size() == 2 && args.get(1).equals("/?")) { Shell.println(help); return true; }
+        else return false;
+    }
 
     /**
      * Turns logging on or off.
@@ -663,16 +674,14 @@ public interface Commands {
      * @param args parameters list to handle by command
      */
     static void lck(ArrayList<String> args) {
-        String help = Shell.HelpingTable.get(args.get(0));
-        if (args.size() > 1) Shell.println(help);
-        else Lock.printLocks();
+        if(printHelp(args)) return;
+        Lock.printLocks();
     }
 
-    /* vm commands */
+    /* vm and memory commands */
 
     /**
      * Prints content of virtual memory containers.
-     *
      * @param args parameters list to handle by command
      */
     static void vm(ArrayList<String> args) {
@@ -681,22 +690,22 @@ public interface Commands {
         try {
             switch (param) {
                 case "pnv":
-                    virtualmemory.virtualmemory.printNextVictim();
+                    virtualmemory.printNextVictim();
                     break;
                 case "prs":
-                    virtualmemory.virtualmemory.printRamStatus();
+                    virtualmemory.printRamStatus();
                     break;
                 case "pq":
-                    virtualmemory.virtualmemory.printQueue();
+                    virtualmemory.printQueue();
                     break;
                 case "ppt":
-                    virtualmemory.virtualmemory.printPageTable(Integer.parseInt(args.get(2)));
+                    virtualmemory.printPageTable(Integer.parseInt(args.get(2)));
                     break;
                 case "ppp":
-                    virtualmemory.virtualmemory.printProcessPages(Integer.parseInt(args.get(2)));
+                    virtualmemory.printProcessPages(Integer.parseInt(args.get(2)));
                     break;
                 case "pp":
-                    virtualmemory.virtualmemory.printPage(Integer.parseInt(args.get(2)), Integer.parseInt(args.get(3)));
+                    virtualmemory.printPage(Integer.parseInt(args.get(2)), Integer.parseInt(args.get(3)));
                     break;
                 default:
                     Utils.log("Wrong argument");
@@ -706,6 +715,17 @@ public interface Commands {
         } catch (NullPointerException e) {
             Utils.log(e.getMessage(), true);
             Shell.println("ERROR: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Prints raw content of RAM
+     * @param args parameters list to handle by command
+     */
+    static void memory(ArrayList<String> args) {
+        if (!printHelp(args))
+        {
+            Memory.print();
         }
     }
 }
