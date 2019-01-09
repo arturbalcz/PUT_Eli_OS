@@ -78,4 +78,20 @@ public class Directory {
         }
     }
 
+    public void new_tree(String prefix, boolean isTail, boolean isRoot) {
+        String currentDir = prefix + (isRoot ? "" : (isTail ? "└───" : "├───")) + name;
+        String prefixed = prefix + (isRoot ? "" : (isTail ? "    " : "│   "));
+
+
+        Shell.println(currentDir);
+
+        for (int i = 0; i < dirs.size() - 1; i++) {
+            dirs.get(i).new_tree(prefixed, false, false);
+        }
+        if (dirs.size() > 0) {
+            dirs.get(dirs.size() - 1)
+                    .new_tree(prefixed, true, false);
+        }
+    }
+
 }

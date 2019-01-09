@@ -1,47 +1,42 @@
 package shell;
 
 import filesystem.Directories;
-import filesystem.Directory;
 import filesystem.Disk;
 import utils.Utils;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Queue;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 
 /**
- *  Shares methods to communicate with user.
- *  Stores all commends and connected methods in map.
- *  All methods need to have one parameter - list of parameters from user.
+ * Shares methods to communicate with user.
+ * Stores all commends and connected methods in map.
+ * All methods need to have one parameter - list of parameters from user.
  */
 public class Shell {
 
     private static final int READ_TIMEOUT = 1000;
     private static final PrintStream standardOut = System.out;
-    private static Queue<String> threadedInput = new ConcurrentLinkedQueue<>();
     static boolean exiting = false;
-    private static boolean empty = true;
-    private static boolean echo = false;
-
     /**
      * Main map that stores all of connected commends and methods references
      * Method need to have ArrayList<String> as array of parameters from user
      */
     static HashMap<String, Consumer<ArrayList<String>>> CommandTable = new HashMap<>();
     static HashMap<String, String> HelpingTable = new HashMap<>();
+    private static Queue<String> threadedInput = new ConcurrentLinkedQueue<>();
+    private static boolean empty = true;
+    private static boolean echo = false;
+
     static {
-        CommandTable.put("time", Commands::time );
+        CommandTable.put("time", Commands::time);
         HelpingTable.put("time", "Displays the system time.\n");
-        CommandTable.put("help", Commands::help );
+        CommandTable.put("help", Commands::help);
         HelpingTable.put("help", "Provides help information for PUT Elita OS commands.\n\nHELP [command]\n\n\tcommand - displays help information on that command.\n");
-        CommandTable.put("exit", Commands::exit );
+        CommandTable.put("exit", Commands::exit);
         HelpingTable.put("exit", "Quits the system.\n\nEXIT [t]\n\n\tt - if set, quits the system without confirm in step log\n");
         CommandTable.put("log", Commands::logging);
         HelpingTable.put("log", "Turns logging on or off.\n\nLOG [/ON | /OFF]\n");
@@ -89,25 +84,25 @@ public class Shell {
         HelpingTable.put("dp", "Kill or stop a running process or application.\n");
         CommandTable.put("update", Commands::update);
         HelpingTable.put("update", "Updates code of initial programs.\n");
-		CommandTable.put("lck", Commands::lck);
-		HelpingTable.put("lck", "Prints locks.\n");
-		CommandTable.put("vm", Commands::vm);
-		HelpingTable.put("vm", "Prints content of virtual memory containers.\n\npnv - print Next Victim\nprs - print Ram Status\npq  - print Queue\nppt [processID] - print PageTable\nppp [processID] - print Process Pages\npp  [processID] [pageID] - print Page\n");
-        
+        CommandTable.put("lck", Commands::lck);
+        HelpingTable.put("lck", "Prints locks.\n");
+        CommandTable.put("vm", Commands::vm);
+        HelpingTable.put("vm", "Prints content of virtual memory containers.\n\npnv - print Next Victim\nprs - print Ram Status\npq  - print Queue\nppt [processID] - print PageTable\nppp [processID] - print Process Pages\npp  [processID] [pageID] - print Page\n");
+        CommandTable.put("memory", Commands::memory);
+        HelpingTable.put("memory", "Prints raw content of RAM.\n");
+
         //Creating thread with input from console
         new Thread(() -> {
             Scanner sc = new Scanner(System.in);
             String a;
-            while (true)
-            {
+            while (true) {
                 a = sc.nextLine();
 
                 try {
                     if (threadedInput.size() > 0) {
                         // Queue is full
                         Thread.sleep(READ_TIMEOUT);
-                    }
-                    else  {
+                    } else {
                         threadedInput.add(a);
                         if (a.equals("exit")) break;
                     }
@@ -124,15 +119,20 @@ public class Shell {
     /**
      * Turns printing on
      */
-    public static void echoOn() { echo = true; }
+    public static void echoOn() {
+        echo = true;
+    }
 
     /**
      * Turns printing off
      */
-    public static void echoOff() { echo = false; }
+    public static void echoOff() {
+        echo = false;
+    }
 
     /**
      * Prints parameter to the console with new line
+     *
      * @param msg message to print for user
      */
     public static void println(String msg) {
@@ -141,6 +141,7 @@ public class Shell {
 
     /**
      * Prints parameter to the console without new line
+     *
      * @param msg message to print for user
      */
     public static void print(String msg) {
@@ -149,6 +150,7 @@ public class Shell {
 
     /**
      * Tries once to get from console whole line inserted by user.
+     *
      * @return input from user
      */
     private static String readOnce() throws IOException {
@@ -164,17 +166,20 @@ public class Shell {
                 e.printStackTrace();
             }
         } while ((System.currentTimeMillis() - startTime) < READ_TIMEOUT && mes == null);
-        if (mes == null) {throw new IOException(); }
+        if (mes == null) {
+            throw new IOException();
+        }
         return mes;
     }
 
     /**
      * Tries to get from console whole line inserted by user until finally get it.
+     *
      * @return input from user
      */
     public static String read() {
         String result = "";
-        while(result.isEmpty()) {
+        while (result.isEmpty()) {
             try {
                 result = readOnce();
             } catch (IOException ignored) {
@@ -187,10 +192,10 @@ public class Shell {
      * Interprets user input and run method found in {@link #CommandTable}
      * @return condition to close system
      */
-    public static boolean interpret( ) throws IOException {
+    public static boolean interpret() throws IOException {
         //check if current line is empty and ready for new interpreting session
         if (empty) {
-        	print(Directories.getPath() + ">");
+            print(Directories.getPath() + ">");
             empty = false;
         }
 
@@ -206,27 +211,23 @@ public class Shell {
         ArrayList<String> arguments = new ArrayList<>(Arrays.asList(input.split("\\s")));
 
         // printing arguments for debug
-        Utils.log("Shell.interprete(): arguments="+arguments.toString());
-
-        if (Commands.localExe(arguments)) {
-            empty = true;
-            return exiting;
-        }
+        Utils.log("Shell.interprete(): arguments=" + arguments.toString());
 
         //finding command in CommandTable
         String command = arguments.get(0);
         if (CommandTable.get(command) == null) {
             //if not found
-            standardOut.println("\'" + command + "\' " +
+            if (Commands.localExe(arguments)) {
+                empty = true;
+                return exiting;
+            } else println("\'" + command + "\' " +
                     "is not recognized as an internal or external command,\n" +
                     "operable program or batch file.");
-        }
-        else {
+        } else {
             try {
                 CommandTable.get(command).accept(arguments);
-            }
-            catch (IndexOutOfBoundsException e) {
-                Utils.log("Shell.interprete(): Shell.CommandTable::IndexOutOfBoundsException::"+command+"::"+arguments, true);
+            } catch (IndexOutOfBoundsException e) {
+                Utils.log("Shell.interprete(): Shell.CommandTable::IndexOutOfBoundsException::" + command + "::" + arguments, true);
                 println("invalid number of arguments");
             }
         }
@@ -235,5 +236,4 @@ public class Shell {
         empty = true;
         return exiting;
     }
-
 }
