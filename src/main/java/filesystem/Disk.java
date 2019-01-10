@@ -170,14 +170,14 @@ public abstract class Disk {
      * Shows disk content in a formatted table
      */
     private static void show() {
-        System.out.print("    ");
+        System.out.print("     ");
         for (int i = 0; i <= BLOCK_SIZE / 10; i++) {
-            System.out.print(i + "                   ");
+            System.out.print(i + "                             ");
         }
         System.out.println();
-        System.out.print("    ");
+        System.out.print("     ");
         for (int i = 0; i < BLOCK_SIZE; i++) {
-            System.out.print(i % 10 + " ");
+            System.out.print(String.format("%2s", i % 10 + "  "));
         }
         System.out.print(" \t\ttaken");
         System.out.println();
@@ -185,24 +185,27 @@ public abstract class Disk {
             System.out.print((i < 10 ? " " + i : i) + "  ");
             boolean iBlock = false;
             for (byte y : getBlock(i)) {
-                char temp = (char) y;
+                String temp = "";
+                temp += (char) y;
                 if (iBlock) {
-                    System.out.print((y == EMPTY_CELL ? "_" : (int) temp) + " ");
+                    System.out.print(String.format("%2s", (y == EMPTY_CELL ? "_" : (int) y)) + " ");
                     continue;
                 }
-                if (Character.isSpaceChar(temp)) {
-                    temp = ' ';
-                } else if (temp == '\n') {
-                    temp = '⏎';
-                } else if (temp == '\t') {
-                    temp = '⇥';
+                if (Character.isSpaceChar(temp.charAt(0))) {
+                    temp = " ";
+                } else if (temp.charAt(0) == '\n') {
+                    temp = "\\n";
+                } else if (temp.charAt(0) == '\t') {
+                    temp = "\\t";
                 } else if (y == -2) {
-                    temp = '!';
+                    temp = "!";
                     iBlock = true;
+                } else if (y < 32){
+                    temp = "?";
                 }
-                System.out.print((y == EMPTY_CELL ? "_" : temp) + " ");
+                System.out.print(String.format("%2s", (y == EMPTY_CELL ? "_" : temp)) + " ");
             }
-            System.out.println(" \t\t" + blockTaken[i]);
+            System.out.println(String.format("\t%2d\t%s", i ,blockTaken[i]));
         }
         System.out.println();
     }
