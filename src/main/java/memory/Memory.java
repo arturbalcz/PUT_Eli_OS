@@ -45,7 +45,7 @@ public class Memory {
         for (int i = 0; i < 16; i++) {
             Shell.print(String.format("%n%2d:", i));
             for (int j = 0; j < 16; j++) {
-                Shell.print(String.format(" %2d", memory[i * 16 + j]));
+                Shell.print(String.format(" %3d", memory[i * 16 + j]));
             }
         }
         Shell.println("");
