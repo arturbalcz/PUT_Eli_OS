@@ -36,8 +36,11 @@ public class Lock {
     /** initilize locked which is open */
     private boolean locked;
 
-    /** kolejka uzywana do lock */
+    /**queue which is used to the locks */
     private List<processess.PCB> kolejka = new LinkedList<>();
+
+    /** queue which is used to the condition variable */
+    private List<processess.PCB> Conditional=new LinkedList<>();
 
     private final String name;
 
@@ -55,6 +58,10 @@ public class Lock {
             PCBList.list.makeProcessWait(process);
             return false;
         } else {
+            if(filesystem.Directories.getCurrentDir().getFiles().fileExists(name))
+            {
+                wait(process);
+            }
             Utils.log(process.name+" has taken the lock " + name);
             locked = true;
             return true;
@@ -65,7 +72,10 @@ public class Lock {
     private boolean unlock() {
         this.locked = false;
         Utils.log("Lock " + name + " has been released");
-
+        if(Conditional.size()!=0)
+        {
+            signal();
+        }
         if (kolejka.isEmpty()) {
             Utils.log("No more processes waiting for it");
             return false;
@@ -75,6 +85,29 @@ public class Lock {
             lock(process);
             PCBList.list.signal(process);
             return true;
+        }
+    }
+
+    // @param function wait stop the process which has to wait and the move it to the queed
+    private void wait(PCB proces)
+    {
+        proces.setState(ProcessState.WAITING);
+        Conditional.add(proces);
+        locked=false;
+    }
+    private void signal()
+    {
+        if(!Conditional.isEmpty())
+        {
+            PCB pcb=Conditional.get(0);
+            pcb.setState(ProcessState.READY);
+            //cos nie dziala
+            // processor.AddReadyProcess(pcb,0);
+            Conditional.remove(0);
+            locked=false;
+        }
+        {
+            locked=false;
         }
     }
 }
