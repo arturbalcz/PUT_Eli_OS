@@ -94,7 +94,7 @@ public class Processor
             readySummary.set(process.getDynamicPriority(), false);
 
         Utils.log("Process removed: " + process.getSignature());
-        Shell.println("Process removed: " + process.getSignature());
+//        Shell.println("Process removed: " + process.getSignature());
     }
 
     /** adds process to the queue */
