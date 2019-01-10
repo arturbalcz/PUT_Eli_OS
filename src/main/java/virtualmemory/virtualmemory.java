@@ -116,7 +116,8 @@ public class virtualmemory
     {
         Queue<Integer> tmp = new LinkedList<>(victimQueue);
         Shell.println("#### Printing victimQueue ####");
-        for(int i=0; i<tmp.size(); i++)
+        int siz = tmp.size();
+        for(int i=0; i<siz; i++)
         {
             Shell.print(tmp.poll() + " ");
         }
@@ -136,8 +137,9 @@ public class virtualmemory
             {
                 Shell.print(String.format("%d", pages.get(i).get(j))+"\t");
             }
+            Shell.println("");
         }
-        Shell.println("\n");
+            Shell.println("");
         } else Shell.println("Error: process with given ID doesn't exist.");
     }
     public static void printPage(int processID, int pageID)
@@ -160,7 +162,7 @@ public class virtualmemory
         Shell.println("#### Printing current RAM status ####");
         for(int i=0; i<16; i++)
         {
-            Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID);
+            //Utils.log("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID);
             Shell.println("Frame ID: " + i + " PageID " + RamStatus[i].PageID + "\t ProcessID " + RamStatus[i].ProcessID);
         }
     }
@@ -177,7 +179,7 @@ public class virtualmemory
 
         try{
             PageTables.get(procID).get(pageID);
-            System.out.println(PageTables.get(procID).get(pageID));
+            //System.out.println(PageTables.get(procID).get(pageID));
             return true;
         }  catch (Exception ignored) {}
         return false;
