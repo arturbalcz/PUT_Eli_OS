@@ -16,6 +16,7 @@ public class AppStart {
         }
         catch(Exception e){
             try {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                 new ProcessBuilder("cmd", "/c", "color 17").inheritIO().start().waitFor();
                 for (int i = 0; i < 20; i++) {
                     System.out.println();
